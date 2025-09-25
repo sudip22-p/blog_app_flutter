@@ -1,6 +1,11 @@
+import 'package:blog_app/bloc/auth/auth_bloc.dart';
+import 'package:blog_app/screens/auth_gate.dart';
+import 'package:blog_app/screens/home.dart';
 import 'package:blog_app/screens/login.dart';
+import 'package:blog_app/screens/signup.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -14,12 +19,21 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Firebase Auth',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+    return BlocProvider(
+      create: (context) => AuthBloc(),
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Flutter Firebase Auth',
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        ),
+        routes: {
+          "/login": (context) => Login(),
+          "/home": (context) => Home(),
+          "/signup": (context) => SignUp(),
+        },
+        home: AuthGate(),
       ),
-      home: LoginPage(),
     );
   }
 }
