@@ -122,4 +122,18 @@ class AuthService {
       throw 'Failed to send verification email.';
     }
   }
+
+  // Delete current user account (minimal implementation)
+  Future<void> deleteAccount() async {
+    try {
+      await _auth.currentUser?.delete();
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'requires-recent-login') {
+        throw 'Please sign in again before deleting your account.';
+      }
+      throw 'Failed to delete account. Please try again.';
+    } catch (e) {
+      throw 'Failed to delete account. Please try again.';
+    }
+  }
 }

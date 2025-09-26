@@ -21,6 +21,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       _onAuthSendEmailVerificationRequested,
     );
     on<AuthSendPasswordResetRequested>(_onAuthSendPasswordResetRequested);
+    on<AuthDeleteAccountRequested>(_onAuthDeleteAccountRequested);
   }
 
   Future<void> _onAuthSignInRequested(
@@ -142,6 +143,20 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           message: 'Password reset email sent successfully!',
         ),
       );
+    } catch (e) {
+      emit(AuthError(message: e.toString()));
+    }
+  }
+
+  Future<void> _onAuthDeleteAccountRequested(
+    AuthDeleteAccountRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthLoading());
+
+    try {
+      await _authService.deleteAccount();
+      emit(const AuthAccountDeleted(message: 'Account deleted successfully.'));
     } catch (e) {
       emit(AuthError(message: e.toString()));
     }

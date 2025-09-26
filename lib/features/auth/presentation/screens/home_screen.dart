@@ -203,70 +203,177 @@ class ProfileDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Profile Information'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.email, color: Colors.blue),
-              const SizedBox(width: 8),
-              Expanded(child: Text(user?.email ?? 'No email')),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              const Icon(Icons.verified, color: Colors.green),
-              const SizedBox(width: 8),
-              Text(
-                user?.emailVerified == true
-                    ? 'Email Verified'
-                    : 'Email Not Verified',
+    return BlocListener<AuthBloc, AuthState>(
+      listener: (context, state) {
+        if (state is AuthAccountDeleted) {
+          Navigator.pop(dialogContext);
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(state.message)));
+        }
+      },
+      child: AlertDialog(
+        title: const Text('Profile'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.email, color: Colors.blue),
+                const SizedBox(width: 8),
+                Expanded(child: Text(user?.email ?? 'No email')),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Icon(
+                  user?.emailVerified == true ? Icons.verified : Icons.warning,
+                  color: user?.emailVerified == true
+                      ? Colors.green
+                      : Colors.orange,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  user?.emailVerified == true
+                      ? 'Email Verified'
+                      : 'Email Not Verified',
+                ),
+              ],
+            ),
+            if (user?.emailVerified == false) ...[
+              const SizedBox(height: 12),
+              BlocListener<AuthBloc, AuthState>(
+                listener: (context, state) {
+                  if (state is AuthEmailVerificationSent) {
+                    Navigator.pop(dialogContext);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(state.message),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  }
+                },
+                child: TextButton.icon(
+                  onPressed: () {
+                    context.read<AuthBloc>().add(
+                      AuthSendEmailVerificationRequested(),
+                    );
+                  },
+                  icon: const Icon(Icons.email),
+                  label: const Text('Resend Verification'),
+                ),
               ),
             ],
-          ),
-          if (user?.emailVerified == false) ...[
-            const SizedBox(height: 12),
-            BlocListener<AuthBloc, AuthState>(
-              listener: (context, state) {
-                if (state is AuthEmailVerificationSent) {
-                  Navigator.pop(dialogContext);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(state.message),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
-                } else if (state is AuthError) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(state.message),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
-              },
-              child: TextButton(
-                onPressed: () {
-                  context.read<AuthBloc>().add(
-                    AuthSendEmailVerificationRequested(),
-                  );
-                },
-                child: const Text('Send Verification Email'),
+            const SizedBox(height: 20),
+            const Divider(),
+            // Delete Account (Danger Zone)
+            Row(
+              children: [
+                const Icon(Icons.warning, color: Colors.red),
+                const SizedBox(width: 8),
+                const Text(
+                  'Danger Zone',
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: TextButton.icon(
+                onPressed: () => _showDeleteAccountDialog(context),
+                icon: const Icon(Icons.delete_forever, color: Colors.red),
+                label: const Text(
+                  'Delete Account',
+                  style: TextStyle(color: Colors.red),
+                ),
+                style: TextButton.styleFrom(
+                  side: const BorderSide(color: Colors.red),
+                ),
               ),
             ),
           ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Close'),
+          ),
         ],
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(dialogContext),
-          child: const Text('Close'),
+    );
+  }
+
+  void _showDeleteAccountDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Account'),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.warning, color: Colors.red, size: 48),
+            SizedBox(height: 16),
+            Text(
+              'Are you sure you want to delete your account?',
+              style: TextStyle(fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 8),
+            Text(
+              'This action cannot be undone. All your data will be permanently deleted.',
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
-      ],
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          BlocConsumer<AuthBloc, AuthState>(
+            listener: (context, state) {
+              if (state is AuthError) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.message),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+            builder: (context, state) {
+              return ElevatedButton(
+                onPressed: state is AuthLoading
+                    ? null
+                    : () {
+                        Navigator.pop(context); // Close delete dialog
+                        context.read<AuthBloc>().add(
+                          AuthDeleteAccountRequested(),
+                        );
+                      },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                ),
+                child: state is AuthLoading
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('Delete Forever'),
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 }

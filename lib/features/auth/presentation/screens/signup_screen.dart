@@ -70,6 +70,64 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return null;
   }
 
+  void _showEmailVerificationDialog(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('Account Created!'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.check_circle, color: Colors.green, size: 64),
+            const SizedBox(height: 16),
+            Text(message),
+            const SizedBox(height: 16),
+            const Text(
+              'Would you like to send a verification email to your account?',
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context); // Close dialog
+              Navigator.pop(context); // Go back to login
+            },
+            child: const Text('Skip'),
+          ),
+          BlocConsumer<AuthBloc, AuthState>(
+            listener: (context, state) {
+              if (state is AuthEmailVerificationSent) {
+                Navigator.pop(context); // Close dialog
+                Navigator.pop(context); // Go back to login
+              }
+            },
+            builder: (context, state) {
+              return ElevatedButton(
+                onPressed: state is AuthLoading
+                    ? null
+                    : () {
+                        context.read<AuthBloc>().add(
+                          AuthSendEmailVerificationRequested(),
+                        );
+                      },
+                child: state is AuthLoading
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('Send Verification'),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -77,13 +135,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthSignUpSuccess) {
+            // Show success message and ask about email verification
+            _showEmailVerificationDialog(context, state.message);
+          } else if (state is AuthEmailVerificationSent) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
-                backgroundColor: Theme.of(context).colorScheme.secondary,
+                backgroundColor: Colors.green,
               ),
             );
-            Navigator.pop(context);
           } else if (state is AuthError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(

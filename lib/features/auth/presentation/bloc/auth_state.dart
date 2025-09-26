@@ -1,6 +1,5 @@
 part of "auth_bloc.dart";
 
-
 abstract class AuthState extends Equatable {
   const AuthState();
 
@@ -54,6 +53,15 @@ class AuthEmailVerificationSent extends AuthState {
   final String message;
 
   const AuthEmailVerificationSent({required this.message});
+
+  @override
+  List<Object?> get props => [message];
+}
+
+class AuthAccountDeleted extends AuthState {
+  final String message;
+
+  const AuthAccountDeleted({required this.message});
 
   @override
   List<Object?> get props => [message];
