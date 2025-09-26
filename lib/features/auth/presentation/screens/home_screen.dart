@@ -1,4 +1,6 @@
 import 'package:blog_app/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:blog_app/core/core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -15,12 +17,45 @@ class HomeScreen extends StatelessWidget {
           appBar: AppBar(
             title: const Text('Blog App'),
             actions: [
+              const ThemeSwitcher(),
               PopupMenuButton<String>(
                 onSelected: (value) async {
                   if (value == 'profile') {
-                    _showProfileDialog(context);
+                    showDialog(
+                      context: context,
+                      builder: (dialogContext) =>
+                          BlocBuilder<AuthBloc, AuthState>(
+                            builder: (context, state) {
+                              final user = (state is AuthAuthenticated)
+                                  ? state.user
+                                  : null;
+
+                              return ProfileDialog(
+                                user: user,
+                                dialogContext: dialogContext,
+                              );
+                            },
+                          ),
+                    );
                   } else if (value == 'logout') {
-                    _showLogoutDialog(context);
+                    showDialog(
+                      context: context,
+                      builder: (dialogContext) =>
+                          BlocListener<AuthBloc, AuthState>(
+                            listener: (context, state) {
+                              if (state is AuthError) {
+                                Navigator.pop(dialogContext);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(state.message),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                              }
+                            },
+                            child: LogOutDialog(dialogContext: dialogContext),
+                          ),
+                    );
                   }
                 },
                 itemBuilder: (context) => [
@@ -128,117 +163,110 @@ class HomeScreen extends StatelessWidget {
       },
     );
   }
+}
 
-  void _showProfileDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (dialogContext) => BlocBuilder<AuthBloc, AuthState>(
-        builder: (context, state) {
-          final user = (state is AuthAuthenticated) ? state.user : null;
+class LogOutDialog extends StatelessWidget {
+  const LogOutDialog({super.key, required this.dialogContext});
+  final BuildContext dialogContext;
 
-          return AlertDialog(
-            title: const Text('Profile Information'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Icon(Icons.email, color: Colors.blue),
-                    const SizedBox(width: 8),
-                    Expanded(child: Text(user?.email ?? 'No email')),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    const Icon(Icons.verified, color: Colors.green),
-                    const SizedBox(width: 8),
-                    Text(
-                      user?.emailVerified == true
-                          ? 'Email Verified'
-                          : 'Email Not Verified',
-                    ),
-                  ],
-                ),
-                if (user?.emailVerified == false) ...[
-                  const SizedBox(height: 12),
-                  BlocListener<AuthBloc, AuthState>(
-                    listener: (context, state) {
-                      if (state is AuthEmailVerificationSent) {
-                        Navigator.pop(dialogContext);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(state.message),
-                            backgroundColor: Colors.green,
-                          ),
-                        );
-                      } else if (state is AuthError) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(state.message),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
-                      }
-                    },
-                    child: TextButton(
-                      onPressed: () {
-                        context.read<AuthBloc>().add(
-                          AuthSendEmailVerificationRequested(),
-                        );
-                      },
-                      child: const Text('Send Verification Email'),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(dialogContext),
-                child: const Text('Close'),
-              ),
-            ],
-          );
-        },
-      ),
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Sign Out'),
+      content: const Text('Are you sure you want to sign out?'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(dialogContext),
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () {
+            context.read<AuthBloc>().add(AuthSignOutRequested());
+            Navigator.pop(dialogContext);
+          },
+          child: const Text('Sign Out'),
+        ),
+      ],
     );
   }
+}
 
-  void _showLogoutDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (dialogContext) => BlocListener<AuthBloc, AuthState>(
-        listener: (context, state) {
-          if (state is AuthError) {
-            Navigator.pop(dialogContext);
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: Colors.red,
+class ProfileDialog extends StatelessWidget {
+  const ProfileDialog({
+    super.key,
+    required this.user,
+    required this.dialogContext,
+  });
+
+  final User? user;
+  final BuildContext dialogContext;
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Profile Information'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.email, color: Colors.blue),
+              const SizedBox(width: 8),
+              Expanded(child: Text(user?.email ?? 'No email')),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              const Icon(Icons.verified, color: Colors.green),
+              const SizedBox(width: 8),
+              Text(
+                user?.emailVerified == true
+                    ? 'Email Verified'
+                    : 'Email Not Verified',
               ),
-            );
-          }
-        },
-        child: AlertDialog(
-          title: const Text('Sign Out'),
-          content: const Text('Are you sure you want to sign out?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                context.read<AuthBloc>().add(AuthSignOutRequested());
-                Navigator.pop(dialogContext);
+            ],
+          ),
+          if (user?.emailVerified == false) ...[
+            const SizedBox(height: 12),
+            BlocListener<AuthBloc, AuthState>(
+              listener: (context, state) {
+                if (state is AuthEmailVerificationSent) {
+                  Navigator.pop(dialogContext);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(state.message),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                } else if (state is AuthError) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(state.message),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
               },
-              child: const Text('Sign Out'),
+              child: TextButton(
+                onPressed: () {
+                  context.read<AuthBloc>().add(
+                    AuthSendEmailVerificationRequested(),
+                  );
+                },
+                child: const Text('Send Verification Email'),
+              ),
             ),
           ],
-        ),
+        ],
       ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(dialogContext),
+          child: const Text('Close'),
+        ),
+      ],
     );
   }
 }
