@@ -1,5 +1,7 @@
 import 'package:blog_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:blog_app/core/core.dart';
+import 'package:blog_app/features/blogs/presentation/widgets/bottom_nav_bar.dart';
+import 'package:blog_app/features/blogs/presentation/widgets/blogs_home.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,11 +13,12 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
-        final user = (state is AuthAuthenticated) ? state.user : null;
-
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Blog App'),
+            title: Text(
+              'Blog App',
+              style: TextStyle(color: Theme.of(context).colorScheme.primary),
+            ),
             actions: [
               const ThemeSwitcher(),
               PopupMenuButton<String>(
@@ -48,7 +51,9 @@ class HomeScreen extends StatelessWidget {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     content: Text(state.message),
-                                    backgroundColor: Colors.red,
+                                    backgroundColor: Theme.of(
+                                      context,
+                                    ).colorScheme.error,
                                   ),
                                 );
                               }
@@ -87,78 +92,10 @@ class HomeScreen extends StatelessWidget {
               ),
             ],
             automaticallyImplyLeading: false,
+            centerTitle: false,
           ),
-          body: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CircleAvatar(
-                  radius: 50,
-                  backgroundColor: Colors.blue.withValues(alpha: 0.1),
-                  child: Text(
-                    user?.email != null && user!.email!.isNotEmpty
-                        ? user.email!.substring(0, 1).toUpperCase()
-                        : 'U',
-                    style: const TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  'Welcome back!',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  user?.email ?? 'User',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyLarge?.copyWith(color: Colors.grey[600]),
-                ),
-                const SizedBox(height: 32),
-                Card(
-                  margin: const EdgeInsets.all(24),
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      children: [
-                        const Icon(Icons.article, size: 64, color: Colors.blue),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Your Blog Dashboard',
-                          style: Theme.of(context).textTheme.titleLarge,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Start creating amazing content and share your thoughts with the world!',
-                          style: Theme.of(context).textTheme.bodyMedium,
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 16),
-                        ElevatedButton.icon(
-                          onPressed: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  'Blog creation feature coming soon!',
-                                ),
-                              ),
-                            );
-                          },
-                          icon: const Icon(Icons.add),
-                          label: const Text('Create New Post'),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          body: BlogsHome(),
+          bottomNavigationBar: BottomNavBar(selection: 0),
         );
       },
     );
@@ -173,7 +110,7 @@ class LogOutDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: const Text('Sign Out'),
-      content: const Text('Are you sure you want to sign out?'),
+      content: Text('Are you sure you want to sign out?'),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(dialogContext),
@@ -184,7 +121,10 @@ class LogOutDialog extends StatelessWidget {
             context.read<AuthBloc>().add(AuthSignOutRequested());
             Navigator.pop(dialogContext);
           },
-          child: const Text('Sign Out'),
+          child: Text(
+            'Sign Out',
+            style: TextStyle(color: Theme.of(context).colorScheme.error),
+          ),
         ),
       ],
     );
@@ -287,7 +227,10 @@ class ProfileDialog extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: TextButton.icon(
-                onPressed: () => _showDeleteAccountDialog(context),
+                onPressed: () => showDialog(
+                  context: context,
+                  builder: (context) => DeleteAccountDialog(),
+                ),
                 icon: const Icon(Icons.delete_forever, color: Colors.red),
                 label: const Text(
                   'Delete Account',
@@ -309,71 +252,73 @@ class ProfileDialog extends StatelessWidget {
       ),
     );
   }
+}
 
-  void _showDeleteAccountDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Account'),
-        content: const Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.warning, color: Colors.red, size: 48),
-            SizedBox(height: 16),
-            Text(
-              'Are you sure you want to delete your account?',
-              style: TextStyle(fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 8),
-            Text(
-              'This action cannot be undone. All your data will be permanently deleted.',
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+class DeleteAccountDialog extends StatelessWidget {
+  const DeleteAccountDialog({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Delete Account'),
+      content: const Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.warning, color: Colors.red, size: 48),
+          SizedBox(height: 16),
+          Text(
+            'Are you sure you want to delete your account?',
+            style: TextStyle(fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
           ),
-          BlocConsumer<AuthBloc, AuthState>(
-            listener: (context, state) {
-              if (state is AuthError) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(state.message),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-              }
-            },
-            builder: (context, state) {
-              return ElevatedButton(
-                onPressed: state is AuthLoading
-                    ? null
-                    : () {
-                        Navigator.pop(context); // Close delete dialog
-                        context.read<AuthBloc>().add(
-                          AuthDeleteAccountRequested(),
-                        );
-                      },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  foregroundColor: Colors.white,
-                ),
-                child: state is AuthLoading
-                    ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Text('Delete Forever'),
-              );
-            },
+          SizedBox(height: 8),
+          Text(
+            'This action cannot be undone. All your data will be permanently deleted.',
+            textAlign: TextAlign.center,
           ),
         ],
       ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        BlocConsumer<AuthBloc, AuthState>(
+          listener: (context, state) {
+            if (state is AuthError) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.message),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          },
+          builder: (context, state) {
+            return ElevatedButton(
+              onPressed: state is AuthLoading
+                  ? null
+                  : () {
+                      Navigator.pop(context); // Close delete dialog
+                      context.read<AuthBloc>().add(
+                        AuthDeleteAccountRequested(),
+                      );
+                    },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+              ),
+              child: state is AuthLoading
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text('Delete Forever'),
+            );
+          },
+        ),
+      ],
     );
   }
 }
