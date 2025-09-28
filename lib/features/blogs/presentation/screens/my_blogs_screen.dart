@@ -1,8 +1,9 @@
 import 'package:blog_app/features/blogs/data/demo_blogs.dart';
 import 'package:blog_app/features/blogs/data/models/blog.dart';
+import 'package:blog_app/features/blogs/presentation/screens/blog_preview_screen.dart';
 import 'package:blog_app/features/blogs/presentation/widgets/bottom_nav_bar.dart';
-import 'package:blog_app/features/blogs/presentation/widgets/empty_state_widget.dart';
-import 'package:blog_app/features/blogs/presentation/widgets/my_blog_card.dart';
+import 'package:blog_app/features/blogs/presentation/widgets/empty_state.dart';
+import 'package:blog_app/features/blogs/presentation/widgets/blog_card.dart';
 import 'package:flutter/material.dart';
 
 class MyBlogsScreen extends StatefulWidget {
@@ -58,8 +59,9 @@ class _MyBlogsScreenState extends State<MyBlogsScreen> {
   }
 
   void _previewBlog(Blog blog) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Opening preview for "${blog.title}"...')),
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => BlogPreviewScreen(blog: blog)),
     );
   }
 
@@ -74,7 +76,11 @@ class _MyBlogsScreenState extends State<MyBlogsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Blogs'),
+        centerTitle: false,
+        title: Text(
+          'My Blogs',
+          style: TextStyle(color: Theme.of(context).colorScheme.primary),
+        ),
         actions: [
           IconButton(
             onPressed: () {
@@ -93,7 +99,7 @@ class _MyBlogsScreenState extends State<MyBlogsScreen> {
         ],
       ),
       body: myBlogsList.isEmpty
-          ? EmptyStateWidget(
+          ? EmptyState(
               icon: Icons.edit_note_outlined,
               title: 'Start Your Writing Journey!',
               message:
@@ -136,26 +142,19 @@ class _MyBlogsScreenState extends State<MyBlogsScreen> {
                     itemCount: myBlogsList.length,
                     itemBuilder: (context, index) {
                       final blog = myBlogsList[index];
-                      return MyBlogCard(
+                      return BlogCard(
                         blog: blog,
+                        showFavoriteButton: false,
+                        showActions: true,
                         onEdit: () => _editBlog(blog),
                         onDelete: () => _deleteBlog(blog),
-                        onPreview: () => _previewBlog(blog),
+                        onTap: () => _previewBlog(blog),
                       );
                     },
                   ),
                 ),
               ],
             ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Opening blog creation...')),
-          );
-        },
-        icon: const Icon(Icons.create),
-        label: const Text('Write Blog'),
-      ),
 
       bottomNavigationBar: BottomNavBar(selection: 3),
     );

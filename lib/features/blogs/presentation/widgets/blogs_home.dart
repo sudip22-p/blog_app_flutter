@@ -1,7 +1,8 @@
 import 'package:blog_app/features/blogs/data/demo_blogs.dart';
 import 'package:blog_app/features/blogs/data/models/blog.dart';
+import 'package:blog_app/features/blogs/presentation/screens/blog_preview_screen.dart';
 import 'package:blog_app/features/blogs/presentation/widgets/blog_card.dart';
-import 'package:blog_app/features/blogs/presentation/widgets/empty_state_widget.dart';
+import 'package:blog_app/features/blogs/presentation/widgets/empty_state.dart';
 import 'package:flutter/material.dart';
 
 class BlogsHome extends StatefulWidget {
@@ -38,32 +39,32 @@ class _BlogsHomeState extends State<BlogsHome> {
   }
 
   void _openBlog(Blog blog) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Opening "${blog.title}"...'),
-        behavior: SnackBarBehavior.floating,
-      ),
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => BlogPreviewScreen(blog: blog)),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     if (demoBlogs.isEmpty) {
-      return EmptyStateWidget(
+      return EmptyState(
         icon: Icons.article_outlined,
-        title: 'Welcome to Your Blog Universe!',
+        title: 'Welcome to Blog App !',
         message:
             'Start creating amazing content and share your thoughts with the world.',
         buttonText: 'Create Your First Post',
         onButtonPressed: () {
-          _showSnackBar('Blog creation feature coming soon!', Colors.blue);
+          _showSnackBar(
+            'Blog creation feature coming soon!',
+            Theme.of(context).colorScheme.primary,
+          );
         },
       );
     }
 
     return Column(
       children: [
-        // Header
         Padding(
           padding: const EdgeInsets.all(16),
           child: Row(

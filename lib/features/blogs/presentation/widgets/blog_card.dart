@@ -1,4 +1,5 @@
 import 'package:blog_app/features/blogs/data/models/blog.dart';
+import 'package:blog_app/features/blogs/presentation/screens/blog_preview_screen.dart';
 import 'package:flutter/material.dart';
 
 class BlogCard extends StatelessWidget {
@@ -6,6 +7,10 @@ class BlogCard extends StatelessWidget {
   final bool isFavorite;
   final VoidCallback? onFavoriteToggle;
   final VoidCallback? onTap;
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
+  final bool showActions;
+  final bool showFavoriteButton;
 
   const BlogCard({
     super.key,
@@ -13,98 +18,116 @@ class BlogCard extends StatelessWidget {
     this.isFavorite = false,
     this.onFavoriteToggle,
     this.onTap,
+    this.onEdit,
+    this.onDelete,
+    this.showActions = false,
+    this.showFavoriteButton = true,
   });
-
-  String _formatTimeAgo(DateTime dateTime) {
-    final now = DateTime.now();
-    final difference = now.difference(dateTime);
-
-    if (difference.inDays > 0) {
-      return '${difference.inDays} day${difference.inDays == 1 ? '' : 's'} ago';
-    } else if (difference.inHours > 0) {
-      return '${difference.inHours} hour${difference.inHours == 1 ? '' : 's'} ago';
-    } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes} minute${difference.inMinutes == 1 ? '' : 's'} ago';
-    } else {
-      return 'Just now';
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Card(
+    return Container(
       margin: const EdgeInsets.only(bottom: 16),
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Cover Image
-          if (blog.coverImageUrl != null) _buildCoverImage(theme),
-
-          // Content
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Tags
-                if (blog.tags.isNotEmpty) _buildTags(theme),
-
-                const SizedBox(height: 8),
-
-                // Title
-                Text(
-                  blog.title,
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-
-                const SizedBox(height: 8),
-
-                // Content preview
-                Text(
-                  blog.content,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                ),
-
-                const SizedBox(height: 16),
-
-                // Author and actions
-                _buildAuthorRow(theme),
-              ],
-            ),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(alpha: 0.1),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: theme.shadowColor.withValues(alpha: 0.08),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: onTap ?? () => _navigateToBlogPreview(context),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _CoverImageSection(
+                blog: blog,
+                isFavorite: isFavorite,
+                onFavoriteToggle: onFavoriteToggle,
+                showFavoriteButton: showFavoriteButton,
+                theme: theme,
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _TagsSection(tags: blog.tags, theme: theme),
+                    if (blog.tags.isNotEmpty) const SizedBox(height: 8),
+                    _BlogTitle(title: blog.title, theme: theme),
+                    const SizedBox(height: 6),
+                    _BlogContent(content: blog.content, theme: theme),
+                    const SizedBox(height: 12),
+                    _AuthorSection(blog: blog, theme: theme),
+                    const SizedBox(height: 12),
+                    _BlogStats(blog: blog, theme: theme),
+                    if (showActions) ...[
+                      const SizedBox(height: 12),
+                      _ActionButtons(
+                        onEdit: onEdit,
+                        onDelete: onDelete,
+                        theme: theme,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
 
-  Widget _buildCoverImage(ThemeData theme) {
-    return Container(
-      height: 200,
+  void _navigateToBlogPreview(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => BlogPreviewScreen(blog: blog)),
+    );
+  }
+}
+
+class _CoverImageSection extends StatelessWidget {
+  final Blog blog;
+  final bool isFavorite;
+  final VoidCallback? onFavoriteToggle;
+  final bool showFavoriteButton;
+  final ThemeData theme;
+
+  const _CoverImageSection({
+    required this.blog,
+    required this.isFavorite,
+    required this.onFavoriteToggle,
+    required this.showFavoriteButton,
+    required this.theme,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (blog.coverImageUrl == null) return const SizedBox.shrink();
+
+    return SizedBox(
+      height: 160,
       width: double.infinity,
-      decoration: const BoxDecoration(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(12),
-          topRight: Radius.circular(12),
-        ),
-      ),
       child: Stack(
         children: [
           ClipRRect(
             borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(12),
-              topRight: Radius.circular(12),
+              topLeft: Radius.circular(16),
+              topRight: Radius.circular(16),
             ),
             child: Image.network(
               blog.coverImageUrl!,
@@ -116,31 +139,61 @@ class BlogCard extends StatelessWidget {
                   color: theme.colorScheme.surfaceContainerHighest,
                   child: Center(
                     child: Icon(
-                      Icons.article,
+                      Icons.article_outlined,
                       size: 48,
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
                 );
               },
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) return child;
+                return Container(
+                  color: theme.colorScheme.surfaceContainerHighest,
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      value: loadingProgress.expectedTotalBytes != null
+                          ? loadingProgress.cumulativeBytesLoaded /
+                                loadingProgress.expectedTotalBytes!
+                          : null,
+                      strokeWidth: 2,
+                    ),
+                  ),
+                );
+              },
             ),
           ),
-
-          // Favorite button
-          if (onFavoriteToggle != null)
+          // Favorite button overlay
+          if (showFavoriteButton && onFavoriteToggle != null)
             Positioned(
               top: 8,
               right: 8,
-              child: CircleAvatar(
-                backgroundColor: Colors.white,
-                radius: 20,
-                child: IconButton(
-                  onPressed: onFavoriteToggle,
-                  icon: Icon(
-                    isFavorite ? Icons.favorite : Icons.favorite_border,
-                    color: isFavorite ? Colors.red : Colors.grey,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.9),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: onFavoriteToggle,
+                    borderRadius: BorderRadius.circular(20),
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      child: Icon(
+                        isFavorite ? Icons.favorite : Icons.favorite_border,
+                        color: isFavorite ? Colors.red : Colors.grey.shade600,
+                        size: 20,
+                      ),
+                    ),
                   ),
-                  iconSize: 20,
                 ),
               ),
             ),
@@ -148,34 +201,118 @@ class BlogCard extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildTags(ThemeData theme) {
+class _TagsSection extends StatelessWidget {
+  final List<String> tags;
+  final ThemeData theme;
+
+  const _TagsSection({required this.tags, required this.theme});
+
+  @override
+  Widget build(BuildContext context) {
+    if (tags.isEmpty) return const SizedBox.shrink();
+
     return Wrap(
-      spacing: 8,
+      spacing: 6,
       runSpacing: 4,
-      children: blog.tags.take(3).map((tag) {
-        return Chip(
-          label: Text(tag, style: theme.textTheme.labelSmall),
-          backgroundColor: theme.colorScheme.primaryContainer,
-          side: BorderSide.none,
-          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      children: tags.take(3).map((tag) {
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.primaryContainer.withValues(alpha: 0.7),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Text(
+            tag,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: theme.colorScheme.onPrimaryContainer,
+              fontWeight: FontWeight.w600,
+              fontSize: 10,
+            ),
+          ),
         );
       }).toList(),
     );
   }
+}
 
-  Widget _buildAuthorRow(ThemeData theme) {
+class _BlogTitle extends StatelessWidget {
+  final String title;
+  final ThemeData theme;
+
+  const _BlogTitle({required this.title, required this.theme});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      title,
+      style: theme.textTheme.titleLarge?.copyWith(
+        fontWeight: FontWeight.w700,
+        height: 1.3,
+        letterSpacing: -0.3,
+      ),
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+    );
+  }
+}
+
+class _BlogContent extends StatelessWidget {
+  final String content;
+  final ThemeData theme;
+
+  const _BlogContent({required this.content, required this.theme});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      content,
+      style: theme.textTheme.bodyMedium?.copyWith(
+        color: theme.colorScheme.onSurfaceVariant,
+        height: 1.4,
+        fontSize: 14,
+      ),
+      maxLines: 3,
+      overflow: TextOverflow.ellipsis,
+    );
+  }
+}
+
+class _AuthorSection extends StatelessWidget {
+  final Blog blog;
+  final ThemeData theme;
+
+  const _AuthorSection({required this.blog, required this.theme});
+
+  @override
+  Widget build(BuildContext context) {
     return Row(
       children: [
-        CircleAvatar(
-          radius: 16,
-          backgroundColor: theme.colorScheme.primaryContainer,
-          child: Text(
-            blog.authorName[0].toUpperCase(),
-            style: TextStyle(
-              color: theme.colorScheme.onPrimaryContainer,
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
+        Container(
+          width: 32,
+          height: 32,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                theme.colorScheme.primaryContainer,
+                theme.colorScheme.primaryContainer.withValues(alpha: 0.7),
+              ],
+            ),
+            shape: BoxShape.circle,
+          ),
+          child: Center(
+            child: Text(
+              blog.authorName.isNotEmpty
+                  ? blog.authorName[0].toUpperCase()
+                  : 'A',
+              style: theme.textTheme.labelMedium?.copyWith(
+                color: theme.colorScheme.onPrimaryContainer,
+                fontWeight: FontWeight.w700,
+                fontSize: 12,
+              ),
             ),
           ),
         ),
@@ -192,15 +329,165 @@ class BlogCard extends StatelessWidget {
               ),
               Text(
                 _formatTimeAgo(blog.createdAt),
-                style: theme.textTheme.labelSmall?.copyWith(
+                style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
+                  fontSize: 11,
                 ),
               ),
             ],
           ),
         ),
-        if (onTap != null)
-          TextButton(onPressed: onTap, child: const Text('Read')),
+      ],
+    );
+  }
+
+  String _formatTimeAgo(DateTime dateTime) {
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+
+    if (difference.inDays > 0) {
+      return '${difference.inDays}d ago';
+    } else if (difference.inHours > 0) {
+      return '${difference.inHours}h ago';
+    } else if (difference.inMinutes > 0) {
+      return '${difference.inMinutes}m ago';
+    } else {
+      return 'Just now';
+    }
+  }
+}
+
+class _BlogStats extends StatelessWidget {
+  final Blog blog;
+  final ThemeData theme;
+
+  const _BlogStats({required this.blog, required this.theme});
+
+  @override
+  Widget build(BuildContext context) {
+    final likeCount = (blog.id.hashCode % 50) + 5;
+    final viewCount = (blog.id.hashCode % 1000) + 100;
+    final commentCount = (blog.id.hashCode % 20) + 2;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: theme.colorScheme.outline.withValues(alpha: 0.1),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          _StatItem(
+            icon: Icons.favorite_rounded,
+            count: likeCount,
+            color: Colors.red.shade400,
+            theme: theme,
+          ),
+          _StatItem(
+            icon: Icons.visibility_rounded,
+            count: viewCount,
+            color: theme.colorScheme.primary,
+            theme: theme,
+          ),
+          _StatItem(
+            icon: Icons.chat_bubble_rounded,
+            count: commentCount,
+            color: theme.colorScheme.onSurfaceVariant,
+            theme: theme,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StatItem extends StatelessWidget {
+  final IconData icon;
+  final int count;
+  final Color color;
+  final ThemeData theme;
+
+  const _StatItem({
+    required this.icon,
+    required this.count,
+    required this.color,
+    required this.theme,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 16, color: color),
+        const SizedBox(width: 4),
+        Text(
+          _formatCount(count),
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurface,
+            fontWeight: FontWeight.w600,
+            fontSize: 12,
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _formatCount(int count) {
+    if (count >= 1000) {
+      return '${(count / 1000).toStringAsFixed(1)}k';
+    }
+    return count.toString();
+  }
+}
+
+class _ActionButtons extends StatelessWidget {
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
+  final ThemeData theme;
+
+  const _ActionButtons({
+    required this.onEdit,
+    required this.onDelete,
+    required this.theme,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        if (onEdit != null)
+          Expanded(
+            child: OutlinedButton.icon(
+              onPressed: onEdit,
+              icon: Icon(Icons.edit_rounded, size: 16),
+              label: Text('Edit'),
+              style: OutlinedButton.styleFrom(
+                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                minimumSize: Size.zero,
+              ),
+            ),
+          ),
+        if (onEdit != null && onDelete != null) const SizedBox(width: 8),
+        if (onDelete != null)
+          Expanded(
+            child: OutlinedButton.icon(
+              onPressed: onDelete,
+              icon: Icon(Icons.delete_outline_rounded, size: 16),
+              label: Text('Delete'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: theme.colorScheme.error,
+                side: BorderSide(color: theme.colorScheme.error),
+                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                minimumSize: Size.zero,
+              ),
+            ),
+          ),
       ],
     );
   }

@@ -1,5 +1,5 @@
 import "package:blog_app/features/auth/presentation/screens/home_screen.dart";
-import "package:blog_app/features/blogs/presentation/screens/add_blog.dart";
+import "package:blog_app/features/blogs/presentation/screens/explore_blogs_screen.dart";
 import "package:blog_app/features/blogs/presentation/screens/favourites_screen.dart";
 import "package:blog_app/features/blogs/presentation/screens/my_blogs_screen.dart";
 import "package:flutter/material.dart";
@@ -31,7 +31,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute<void>(
-            builder: (BuildContext context) => const FavouritesScreen(),
+            builder: (BuildContext context) => const ExploreBlogsScreen(),
           ),
         );
         return;
@@ -39,7 +39,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute<void>(
-            builder: (BuildContext context) => const AddBlog(),
+            builder: (BuildContext context) => const FavouritesScreen(),
           ),
         );
         return;
@@ -56,7 +56,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
 
   @override
   void initState() {
-    _selectedIndex = widget.selection;
+    _selectedIndex = widget.selection.clamp(0, 3); // Ensure valid range
     super.initState();
   }
 
@@ -83,12 +83,12 @@ class _BottomNavBarState extends State<BottomNavBar> {
           label: 'Home',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.favorite_outline),
-          label: 'Favourite',
+          icon: SizedBox(height: 24, width: 24, child: Icon(Icons.explore)),
+          label: 'Explore',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.add_box_outlined),
-          label: 'Add Blog',
+          icon: Icon(Icons.favorite_outline),
+          label: 'Favourite',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.my_library_books_outlined),

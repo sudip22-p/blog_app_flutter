@@ -58,9 +58,7 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
-      scaffoldBackgroundColor: lightBackground,
-
-      // App Bar theme
+      scaffoldBackgroundColor: lightBackground, // App Bar theme
       appBarTheme: AppBarTheme(
         backgroundColor: lightSurface,
         foregroundColor: lightOnSurface,
@@ -222,9 +220,7 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
-      scaffoldBackgroundColor: darkBackground,
-
-      // App Bar theme
+      scaffoldBackgroundColor: darkBackground, // App Bar theme
       appBarTheme: AppBarTheme(
         backgroundColor: darkSurface,
         foregroundColor: darkOnSurface,

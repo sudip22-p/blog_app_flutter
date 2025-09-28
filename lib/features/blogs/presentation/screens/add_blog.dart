@@ -1,5 +1,4 @@
 import 'package:blog_app/features/blogs/presentation/bloc/blog_bloc.dart';
-import 'package:blog_app/features/blogs/presentation/widgets/bottom_nav_bar.dart';
 import 'package:blog_app/features/blogs/presentation/widgets/form_widgets.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -80,16 +79,6 @@ class _AddBlogState extends State<AddBlog> {
     }
   }
 
-  void _saveAsDraft() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Blog saved as draft'),
-        backgroundColor: Colors.orange,
-      ),
-    );
-    _clearForm();
-  }
-
   void _clearForm() {
     _titleController.clear();
     _contentController.clear();
@@ -115,12 +104,6 @@ class _AddBlogState extends State<AddBlog> {
         title: const Text('Create New Blog'),
         centerTitle: true,
         elevation: 0,
-        actions: [
-          TextButton(
-            onPressed: _isLoading ? null : _saveAsDraft,
-            child: const Text('Save Draft'),
-          ),
-        ],
       ),
       body: Form(
         key: _formKey,
@@ -243,8 +226,6 @@ class _AddBlogState extends State<AddBlog> {
           ),
         ),
       ),
-
-      bottomNavigationBar: BottomNavBar(selection: 2),
     );
   }
 }

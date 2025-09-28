@@ -2,7 +2,7 @@ import 'package:blog_app/features/blogs/data/demo_blogs.dart';
 import 'package:blog_app/features/blogs/data/models/blog.dart';
 import 'package:blog_app/features/blogs/presentation/widgets/blog_card.dart';
 import 'package:blog_app/features/blogs/presentation/widgets/bottom_nav_bar.dart';
-import 'package:blog_app/features/blogs/presentation/widgets/empty_state_widget.dart';
+import 'package:blog_app/features/blogs/presentation/widgets/empty_state.dart';
 import 'package:flutter/material.dart';
 
 class FavouritesScreen extends StatefulWidget {
@@ -59,7 +59,11 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Favorites'),
+        centerTitle: false,
+        title: Text(
+          'My Favorites',
+          style: TextStyle(color: Theme.of(context).colorScheme.primary),
+        ),
         actions: [
           Chip(
             avatar: const Icon(Icons.favorite, size: 16),
@@ -70,7 +74,7 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
         ],
       ),
       body: favorites.isEmpty
-          ? EmptyStateWidget(
+          ? EmptyState(
               icon: Icons.favorite_border,
               title: 'No Favorites Yet!',
               message:
@@ -146,7 +150,7 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
               ],
             ),
 
-      bottomNavigationBar: BottomNavBar(selection: 1),
+      bottomNavigationBar: BottomNavBar(selection: 2),
     );
   }
 }
