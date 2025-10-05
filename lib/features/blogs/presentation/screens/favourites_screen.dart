@@ -150,7 +150,7 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
               ],
             ),
 
-      bottomNavigationBar: BottomNavBar(selection: 2),
+      bottomNavigationBar: const BottomNavBar(selection: 2),
     );
   }
 }

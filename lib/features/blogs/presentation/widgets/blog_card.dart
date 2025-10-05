@@ -465,10 +465,13 @@ class _ActionButtons extends StatelessWidget {
           Expanded(
             child: OutlinedButton.icon(
               onPressed: onEdit,
-              icon: Icon(Icons.edit_rounded, size: 16),
-              label: Text('Edit'),
+              icon: const Icon(Icons.edit_rounded, size: 16),
+              label: const Text('Edit'),
               style: OutlinedButton.styleFrom(
-                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 minimumSize: Size.zero,
               ),
             ),
@@ -478,12 +481,15 @@ class _ActionButtons extends StatelessWidget {
           Expanded(
             child: OutlinedButton.icon(
               onPressed: onDelete,
-              icon: Icon(Icons.delete_outline_rounded, size: 16),
-              label: Text('Delete'),
+              icon: const Icon(Icons.delete_outline_rounded, size: 16),
+              label: const Text('Delete'),
               style: OutlinedButton.styleFrom(
                 foregroundColor: theme.colorScheme.error,
                 side: BorderSide(color: theme.colorScheme.error),
-                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 minimumSize: Size.zero,
               ),
             ),

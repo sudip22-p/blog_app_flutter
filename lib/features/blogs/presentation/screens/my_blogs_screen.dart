@@ -156,7 +156,7 @@ class _MyBlogsScreenState extends State<MyBlogsScreen> {
               ],
             ),
 
-      bottomNavigationBar: BottomNavBar(selection: 3),
+      bottomNavigationBar: const BottomNavBar(selection: 3),
     );
   }
 }

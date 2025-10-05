@@ -74,10 +74,10 @@ class _BottomNavBarState extends State<BottomNavBar> {
         fontWeight: FontWeight.w400,
         fontSize: 12,
       ),
-      unselectedItemColor: Color(0xff7d869a),
+      unselectedItemColor: const Color(0xff7d869a),
       selectedItemColor: Theme.of(context).colorScheme.primary,
 
-      items: <BottomNavigationBarItem>[
+      items: const <BottomNavigationBarItem>[
         BottomNavigationBarItem(
           icon: SizedBox(height: 24, width: 24, child: Icon(Icons.home)),
           label: 'Home',

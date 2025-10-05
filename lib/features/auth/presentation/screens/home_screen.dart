@@ -94,8 +94,8 @@ class HomeScreen extends StatelessWidget {
             automaticallyImplyLeading: false,
             centerTitle: false,
           ),
-          body: BlogsHome(),
-          bottomNavigationBar: BottomNavBar(selection: 0),
+          body: const BlogsHome(),
+          bottomNavigationBar: const BottomNavBar(selection: 0),
         );
       },
     );
