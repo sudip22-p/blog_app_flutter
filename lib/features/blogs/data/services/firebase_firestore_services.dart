@@ -25,7 +25,7 @@ class FirestoreBlogService {
     });
   }
 
-  Future<void> deleteTask(String blogId) async {
+  Future<void> deleteBlog(String blogId) async {
     await blogsCollection.doc(blogId).delete();
   }
 

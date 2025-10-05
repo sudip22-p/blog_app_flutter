@@ -16,7 +16,7 @@ class _BlogPreviewScreenState extends State<BlogPreviewScreen> {
   late int _likeCount;
   late int _viewCount;
   late bool _isLiked;
-  late bool _isBookmarked;
+  late bool _isFavourite;
 
   // Static comments data
   final List<Comment> _comments = [
@@ -56,7 +56,7 @@ class _BlogPreviewScreenState extends State<BlogPreviewScreen> {
     _likeCount = (widget.blog.id.hashCode % 50) + 10;
     _viewCount = (widget.blog.id.hashCode % 1000) + 100;
     _isLiked = false;
-    _isBookmarked = false;
+    _isFavourite = false;
   }
 
   @override
@@ -76,15 +76,15 @@ class _BlogPreviewScreenState extends State<BlogPreviewScreen> {
     });
   }
 
-  void _toggleBookmark() {
+  void _toggleFavourite() {
     setState(() {
-      _isBookmarked = !_isBookmarked;
+      _isFavourite = !_isFavourite;
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          _isBookmarked ? 'Added to bookmarks' : 'Removed from bookmarks',
+          _isFavourite ? 'Added to favourites' : 'Removed from favourites',
         ),
         duration: const Duration(seconds: 2),
       ),
@@ -150,10 +150,10 @@ class _BlogPreviewScreenState extends State<BlogPreviewScreen> {
         title: const Text('Blog'),
         actions: [
           IconButton(
-            onPressed: _toggleBookmark,
+            onPressed: _toggleFavourite,
             icon: Icon(
-              _isBookmarked ? Icons.bookmark : Icons.bookmark_border,
-              color: _isBookmarked ? theme.colorScheme.primary : null,
+              _isFavourite ? Icons.favorite_outline : Icons.favorite_border,
+              color: _isFavourite ? theme.colorScheme.primary : null,
             ),
           ),
           IconButton(onPressed: _shareContent, icon: const Icon(Icons.share)),

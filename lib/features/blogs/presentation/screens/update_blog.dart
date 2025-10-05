@@ -1,5 +1,10 @@
+import 'dart:io';
+
+import 'package:blog_app/core/services/cloudinary_services.dart';
 import 'package:blog_app/features/blogs/data/models/blog.dart';
 import 'package:blog_app/features/blogs/presentation/bloc/blog_bloc.dart';
+import 'package:blog_app/features/blogs/presentation/widgets/form_widgets.dart';
+import 'package:blog_app/features/blogs/presentation/widgets/image_picker_widget.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -15,6 +20,15 @@ class UpdateBlog extends StatefulWidget {
 
 class _UpdateBlogState extends State<UpdateBlog> {
   late final Blog currentBlog;
+  File? _selectedImage;
+  String? _currentImageUrl;
+
+  final _titleController = TextEditingController();
+  final _contentController = TextEditingController();
+  final _tagsController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -22,44 +36,83 @@ class _UpdateBlogState extends State<UpdateBlog> {
     currentBlog = widget.blogs.firstWhere((blog) => blog.id == widget.blogId);
     _titleController.text = currentBlog.title;
     _contentController.text = currentBlog.content;
-    _tagsController.text = currentBlog.tags.join(",");
-    _coverImageController.text = currentBlog.coverImageUrl ?? "";
+    _tagsController.text = currentBlog.tags.join(", ");
+    _currentImageUrl = currentBlog.coverImageUrl;
   }
 
-  final _titleController = TextEditingController();
-  final _contentController = TextEditingController();
-  final _tagsController = TextEditingController();
-  final _coverImageController = TextEditingController();
-
-  final _formKey = GlobalKey<FormState>();
-  final String? currentUserId = FirebaseAuth.instance.currentUser?.uid;
-  final String? currentUserName =
-      FirebaseAuth.instance.currentUser?.displayName ?? "Unknown";
-
-  void _submitBlog() {
+  void _submitBlog() async {
     if (_formKey.currentState!.validate()) {
-      final currentUserId = FirebaseAuth.instance.currentUser?.uid ?? "N/A";
-      final currentUserName =
-          FirebaseAuth.instance.currentUser?.displayName ?? "Unknown";
-      context.read<BlogBloc>().add(
-        BlogUpdated(
-          _titleController.text.trim(),
-          _contentController.text.trim(),
-          currentUserId,
-          currentUserName,
-          _coverImageController.text.trim(),
-          _tagsController.text.trim().split(",").toList(),
-        ),
-      );
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Blog Updated successfully!")),
-      );
-      Navigator.pop(context);
-      _titleController.clear();
-      _contentController.clear();
-      _tagsController.clear();
-      _coverImageController.clear();
+      setState(() {
+        _isLoading = true;
+      });
+
+      try {
+        final currentUser = FirebaseAuth.instance.currentUser;
+        if (currentUser == null) return;
+
+        final currentUserId = currentUser.uid;
+        final currentUserName = currentUser.displayName ?? 'Anonymous';
+        final cloudinaryService = CloudinaryService();
+
+        String imageUrl = _currentImageUrl ?? '';
+        // Upload new image to Cloudinary if image was changed
+        if (_selectedImage != null) {
+          imageUrl = await cloudinaryService.uploadImage(_selectedImage!);
+        }
+
+        // Update blog via Bloc
+        if (mounted) {
+          context.read<BlogBloc>().add(
+            BlogUpdated(
+              _titleController.text.trim(),
+              _contentController.text.trim(),
+              currentUserId,
+              currentUserName,
+              imageUrl,
+              _tagsController.text
+                  .split(',')
+                  .map((e) => e.trim())
+                  .where((e) => e.isNotEmpty)
+                  .toList(),
+            ),
+          );
+        }
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Blog updated successfully!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          Navigator.pop(context);
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error updating blog: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+      }
     }
+  }
+
+  void _resetForm() {
+    _titleController.text = currentBlog.title;
+    _contentController.text = currentBlog.content;
+    _tagsController.text = currentBlog.tags.join(", ");
+    _selectedImage = null;
+    _currentImageUrl = currentBlog.coverImageUrl;
+    setState(() {});
   }
 
   @override
@@ -67,63 +120,186 @@ class _UpdateBlogState extends State<UpdateBlog> {
     _titleController.dispose();
     _contentController.dispose();
     _tagsController.dispose();
-    _coverImageController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      appBar: AppBar(title: const Text("Update Blog")),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: ListView(
+      appBar: AppBar(
+        title: const Text('Update Blog'),
+        centerTitle: true,
+        elevation: 0,
+      ),
+      body: Form(
+        key: _formKey,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
             children: [
-              TextFormField(
-                controller: _titleController,
-                decoration: const InputDecoration(
-                  labelText: "Title",
-                  border: OutlineInputBorder(),
+              // Blog Info Section
+              FormSection(
+                title: 'Blog Information',
+                child: Column(
+                  children: [
+                    CustomTextFormField(
+                      controller: _titleController,
+                      labelText: 'Title',
+                      hintText: 'Enter your blog title',
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Please enter a title';
+                        }
+                        if (value.trim().length < 3) {
+                          return 'Title must be at least 3 characters long';
+                        }
+                        return null;
+                      },
+                      maxLines: 2,
+                    ),
+                    const SizedBox(height: 16),
+                    ImagePickerWidget(
+                      onImageSelected: (file) {
+                        setState(() {
+                          _selectedImage = file;
+                        });
+                      },
+                    ),
+                    // Show current image if exists and no new image selected
+                    if (_currentImageUrl != null && _selectedImage == null)
+                      Column(
+                        children: [
+                          const SizedBox(height: 8),
+                          Container(
+                            height: 200,
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: theme.colorScheme.outline.withValues(
+                                  alpha: 0.3,
+                                ),
+                              ),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.network(
+                                _currentImageUrl!,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Container(
+                                    color: theme
+                                        .colorScheme
+                                        .surfaceContainerHighest,
+                                    child: const Center(
+                                      child: Icon(
+                                        Icons.broken_image,
+                                        size: 64,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Current image (select new image to replace)',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ],
+                      ),
+                    const SizedBox(height: 16),
+                    CustomTextFormField(
+                      controller: _tagsController,
+                      labelText: 'Tags',
+                      hintText:
+                          'Enter tags separated by commas (e.g., technology, programming, tutorial)',
+                      validator: (value) {
+                        if (value != null && value.trim().isNotEmpty) {
+                          final tags = value.split(',').map((e) => e.trim());
+                          if (tags.length > 10) {
+                            return 'Maximum 10 tags allowed';
+                          }
+                        }
+                        return null;
+                      },
+                    ),
+                  ],
                 ),
-                validator: (value) =>
-                    value == null || value.isEmpty ? "Enter a title" : null,
               ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _contentController,
-                maxLines: 6,
-                decoration: const InputDecoration(
-                  labelText: "Content",
-                  alignLabelWithHint: true,
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) =>
-                    value == null || value.isEmpty ? "Enter content" : null,
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _coverImageController,
-                decoration: const InputDecoration(
-                  labelText: "Cover Image URL (optional)",
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextFormField(
-                controller: _tagsController,
-                decoration: const InputDecoration(
-                  labelText: "Tags (comma separated)",
-                  border: OutlineInputBorder(),
+
+              const SizedBox(height: 24),
+
+              // Content Section
+              FormSection(
+                title: 'Content',
+                child: CustomTextFormField(
+                  controller: _contentController,
+                  labelText: 'Blog Content',
+                  hintText: 'Write your blog content here...',
+                  maxLines: 15,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Please enter blog content';
+                    }
+                    if (value.trim().length < 50) {
+                      return 'Content must be at least 50 characters long';
+                    }
+                    return null;
+                  },
                 ),
               ),
-              const SizedBox(height: 20),
-              ElevatedButton.icon(
-                onPressed: _submitBlog,
-                icon: const Icon(Icons.add),
-                label: const Text("Update Blog"),
+
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: theme.scaffoldBackgroundColor,
+                  border: Border(
+                    top: BorderSide(color: theme.dividerColor, width: 0.5),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: _isLoading ? null : _resetForm,
+                        child: const Text('Reset Changes'),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: _isLoading ? null : _submitBlog,
+                        child: _isLoading
+                            ? const Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  SizedBox(
+                                    height: 16,
+                                    width: 16,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  ),
+                                  SizedBox(width: 8),
+                                  Text('...'),
+                                ],
+                              )
+                            : const Text('Update Blog'),
+                      ),
+                    ),
+                  ],
+                ),
               ),
+
+              const SizedBox(height: 100), // Space for bottom navigation
             ],
           ),
         ),

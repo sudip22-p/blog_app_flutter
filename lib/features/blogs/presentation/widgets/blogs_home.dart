@@ -1,9 +1,11 @@
 import 'package:blog_app/features/blogs/data/demo_blogs.dart';
 import 'package:blog_app/features/blogs/data/models/blog.dart';
+import 'package:blog_app/features/blogs/presentation/bloc/blog_bloc.dart';
 import 'package:blog_app/features/blogs/presentation/screens/blog_preview_screen.dart';
 import 'package:blog_app/features/blogs/presentation/widgets/blog_card.dart';
 import 'package:blog_app/features/blogs/presentation/widgets/empty_state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class BlogsHome extends StatefulWidget {
   const BlogsHome({super.key});
@@ -82,20 +84,43 @@ class _BlogsHomeState extends State<BlogsHome> {
         ),
 
         // Blog list
-        Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: demoBlogs.length,
-            itemBuilder: (context, index) {
-              final blog = demoBlogs[index];
-              return BlogCard(
-                blog: blog,
-                isFavorite: favoriteBlogIds.contains(blog.id),
-                onFavoriteToggle: () => _toggleFavorite(blog.id),
-                onTap: () => _openBlog(blog),
-              );
-            },
-          ),
+        BlocBuilder<BlogBloc, BlogState>(
+          builder: (context, state) {
+            dynamic blogs;
+            if (state is BlogInitial) {
+              context.read<BlogBloc>().add(BlogsLoaded());
+              return const Center(child: CircularProgressIndicator());
+            } else if (state is BlogLoading) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (state is BlogOperationFailure) {
+              return Center(child: Text('Error: ${state.errorMessage}'));
+            } else if (state is BlogOperationSuccess) {
+              blogs = state.blogs;
+              if (blogs.isEmpty) {
+                return const Center(child: Text('No blogs available.'));
+              }
+            } else if (state is BlogLoadSuccess) {
+              blogs = state.blogs;
+              if (blogs.isEmpty) {
+                return const Center(child: Text('No blogs available.'));
+              }
+            }
+            return Expanded(
+              child: ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: blogs.length,
+                itemBuilder: (context, index) {
+                  final blog = blogs[index];
+                  return BlogCard(
+                    blog: blog,
+                    isFavorite: favoriteBlogIds.contains(blog.id),
+                    onFavoriteToggle: () => _toggleFavorite(blog.id),
+                    onTap: () => _openBlog(blog),
+                  );
+                },
+              ),
+            );
+          },
         ),
       ],
     );

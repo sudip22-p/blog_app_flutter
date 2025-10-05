@@ -1,11 +1,14 @@
-import 'package:blog_app/features/blogs/data/demo_blogs.dart';
 import 'package:blog_app/features/blogs/data/models/blog.dart';
+import 'package:blog_app/features/blogs/presentation/bloc/blog_bloc.dart';
 import 'package:blog_app/features/blogs/presentation/screens/add_blog.dart';
 import 'package:blog_app/features/blogs/presentation/screens/blog_preview_screen.dart';
+import 'package:blog_app/features/blogs/presentation/screens/update_blog.dart';
 import 'package:blog_app/features/blogs/presentation/widgets/bottom_nav_bar.dart';
 import 'package:blog_app/features/blogs/presentation/widgets/empty_state.dart';
 import 'package:blog_app/features/blogs/presentation/widgets/blog_card.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class MyBlogsScreen extends StatefulWidget {
   const MyBlogsScreen({super.key});
@@ -15,8 +18,7 @@ class MyBlogsScreen extends StatefulWidget {
 }
 
 class _MyBlogsScreenState extends State<MyBlogsScreen> {
-  // For demo, assume current user is 'u101' (Sudip Paudel)
-  final String currentUserId = 'u101';
+  String? get currentUserId => FirebaseAuth.instance.currentUser?.uid;
 
   void _deleteBlog(Blog blog) {
     showDialog(
@@ -32,9 +34,8 @@ class _MyBlogsScreenState extends State<MyBlogsScreen> {
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
-              setState(() {
-                demoBlogs.removeWhere((b) => b.id == blog.id);
-              });
+              // Delete blog using BlogBloc
+              context.read<BlogBloc>().add(BlogDeleted(blog.id));
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text('Blog "${blog.title}" deleted'),
@@ -53,9 +54,12 @@ class _MyBlogsScreenState extends State<MyBlogsScreen> {
     );
   }
 
-  void _editBlog(Blog blog) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Opening editor for "${blog.title}"...')),
+  void _editBlog(Blog blog, List<Blog> allBlogs) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => UpdateBlog(blogId: blog.id, blogs: allBlogs),
+      ),
     );
   }
 
@@ -66,14 +70,14 @@ class _MyBlogsScreenState extends State<MyBlogsScreen> {
     );
   }
 
-  List<Blog> get myBlogs {
-    return demoBlogs.where((blog) => blog.authorId == currentUserId).toList();
+  List<Blog> _getMyBlogs(List<Blog> allBlogs) {
+    if (currentUserId == null) return [];
+    return allBlogs.where((blog) => blog.authorId == currentUserId).toList();
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final myBlogsList = myBlogs;
 
     return Scaffold(
       appBar: AppBar(
@@ -93,71 +97,144 @@ class _MyBlogsScreenState extends State<MyBlogsScreen> {
             icon: const Icon(Icons.add),
             tooltip: 'Create New Blog',
           ),
-          Chip(
-            avatar: const Icon(Icons.article, size: 16),
-            label: Text('${myBlogsList.length}'),
-          ),
           const SizedBox(width: 16),
         ],
       ),
-      body: myBlogsList.isEmpty
-          ? EmptyState(
-              icon: Icons.edit_note_outlined,
-              title: 'Start Your Writing Journey!',
-              message:
-                  'You haven\'t created any blogs yet. Share your ideas and stories with the world.',
-              buttonText: 'Write Your First Blog',
-              onButtonPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Blog editor coming soon!')),
-                );
-              },
-            )
-          : Column(
-              children: [
-                // Header info
-                Container(
-                  margin: const EdgeInsets.all(16),
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primaryContainer.withValues(
-                      alpha: 0.3,
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.auto_stories),
-                      const SizedBox(width: 12),
-                      Text(
-                        '${myBlogsList.length} blog${myBlogsList.length == 1 ? '' : 's'} published',
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                    ],
-                  ),
-                ),
+      body: BlocBuilder<BlogBloc, BlogState>(
+        builder: (context, state) {
+          // Handle initial state and trigger blog loading
+          if (state is BlogInitial) {
+            context.read<BlogBloc>().add(BlogsLoaded());
+            return const Center(child: CircularProgressIndicator());
+          }
 
-                // Blog list
-                Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: myBlogsList.length,
-                    itemBuilder: (context, index) {
-                      final blog = myBlogsList[index];
-                      return BlogCard(
-                        blog: blog,
-                        showFavoriteButton: false,
-                        showActions: true,
-                        onEdit: () => _editBlog(blog),
-                        onDelete: () => _deleteBlog(blog),
-                        onTap: () => _previewBlog(blog),
-                      );
+          // Handle loading state
+          if (state is BlogLoading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          // Handle error state
+          if (state is BlogOperationFailure) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    size: 64,
+                    color: theme.colorScheme.error,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Error loading blogs',
+                    style: theme.textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    state.errorMessage,
+                    style: theme.textTheme.bodyMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      context.read<BlogBloc>().add(BlogsLoaded());
                     },
+                    child: const Text('Retry'),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
+            );
+          }
 
+          // Handle success states
+          List<Blog> allBlogs = [];
+          if (state is BlogLoadSuccess) {
+            allBlogs = state.blogs;
+          } else if (state is BlogOperationSuccess) {
+            allBlogs = state.blogs;
+          }
+
+          // Filter blogs for current user
+          final myBlogsList = _getMyBlogs(allBlogs);
+
+          // Check if user is not logged in
+          if (currentUserId == null) {
+            return const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.login, size: 64, color: Colors.grey),
+                  SizedBox(height: 16),
+                  Text(
+                    'Please log in to view your blogs',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          return myBlogsList.isEmpty
+              ? EmptyState(
+                  icon: Icons.edit_note_outlined,
+                  title: 'Start Your Writing Journey!',
+                  message:
+                      'You haven\'t created any blogs yet. Share your ideas and stories with the world.',
+                  buttonText: 'Write Your First Blog',
+                  onButtonPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const AddBlog()),
+                    );
+                  },
+                )
+              : Column(
+                  children: [
+                    // Header info
+                    Container(
+                      margin: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primaryContainer.withValues(
+                          alpha: 0.3,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.auto_stories),
+                          const SizedBox(width: 12),
+                          Text(
+                            '${myBlogsList.length} blog${myBlogsList.length == 1 ? '' : 's'} published',
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Blog list
+                    Expanded(
+                      child: ListView.builder(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        itemCount: myBlogsList.length,
+                        itemBuilder: (context, index) {
+                          final blog = myBlogsList[index];
+                          return BlogCard(
+                            blog: blog,
+                            showFavoriteButton: false,
+                            showActions: true,
+                            onEdit: () => _editBlog(blog, allBlogs),
+                            onDelete: () => _deleteBlog(blog),
+                            onTap: () => _previewBlog(blog),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                );
+        },
+      ),
       bottomNavigationBar: const BottomNavBar(selection: 3),
     );
   }

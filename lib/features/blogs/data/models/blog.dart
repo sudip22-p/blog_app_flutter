@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Blog {
   final String id;
   final String title;
@@ -46,8 +48,18 @@ class Blog {
       authorName: map['authorName'] ?? '',
       coverImageUrl: map['coverImageUrl'],
       tags: List<String>.from(map['tags'] ?? []),
-      createdAt: map['createdAt'] ?? DateTime.now(),
-      lastUpdatedAt: map['lastUpdatedAt'] ?? DateTime.now(),
+      createdAt: _convertToDateTime(map['createdAt']),
+      lastUpdatedAt: _convertToDateTime(map['lastUpdatedAt']),
     );
+  }
+
+  static DateTime _convertToDateTime(dynamic value) {
+    if (value is Timestamp) {
+      return value.toDate();
+    } else if (value is DateTime) {
+      return value;
+    } else {
+      return DateTime.now();
+    }
   }
 }
