@@ -37,6 +37,7 @@ class NewBlogAdded extends BlogEvent {
 }
 
 class BlogUpdated extends BlogEvent {
+  final String id;
   final String title;
   final String content;
   final String authorId;
@@ -44,6 +45,7 @@ class BlogUpdated extends BlogEvent {
   final String coverImageUrl;
   final List<String> tags;
   const BlogUpdated(
+    this.id,
     this.title,
     this.content,
     this.authorId,

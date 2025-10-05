@@ -8,10 +8,11 @@ part 'blog_state.dart';
 
 class BlogBloc extends Bloc<BlogEvent, BlogState> {
   final firestoreService = FirestoreBlogService();
+
   BlogBloc() : super(BlogInitial()) {
     on<BlogsLoaded>(_onBlogsLoaded);
     on<NewBlogAdded>(_onNewBlogAdded);
-    on<BlogUpdated>((event, emit) {});
+    on<BlogUpdated>(_onBlogUpdated);
     on<BlogDeleted>(_onBlogDeleted);
   }
   @override
@@ -35,7 +36,6 @@ class BlogBloc extends Bloc<BlogEvent, BlogState> {
 
   void _onBlogsLoaded(BlogsLoaded event, Emitter<BlogState> emit) async {
     emit(BlogLoading());
-
     try {
       await for (var blogs in firestoreService.getBlogsStream()) {
         emit(BlogLoadSuccess(blogs));
@@ -46,7 +46,6 @@ class BlogBloc extends Bloc<BlogEvent, BlogState> {
   }
 
   void _onNewBlogAdded(NewBlogAdded event, Emitter<BlogState> emit) async {
-    emit(BlogLoading());
     try {
       await firestoreService.addTask(
         event.title,
@@ -56,7 +55,22 @@ class BlogBloc extends Bloc<BlogEvent, BlogState> {
         event.coverImageUrl,
         event.tags,
       );
-      emit(BlogOperationSuccess([]));
+    } catch (e) {
+      emit(BlogOperationFailure(e.toString()));
+    }
+  }
+
+  void _onBlogUpdated(BlogUpdated event, Emitter<BlogState> emit) async {
+    try {
+      await firestoreService.updateBlog(
+        event.id,
+        event.title,
+        event.content,
+        event.authorId,
+        event.authorName,
+        event.coverImageUrl,
+        event.tags,
+      );
     } catch (e) {
       emit(BlogOperationFailure(e.toString()));
     }

@@ -29,6 +29,26 @@ class FirestoreBlogService {
     await blogsCollection.doc(blogId).delete();
   }
 
+  Future<void> updateBlog(
+    String id,
+    String title,
+    String content,
+    String authorId,
+    String authorName,
+    String coverImageUrl,
+    List<String> tags,
+  ) async {
+    await blogsCollection.doc(id).update({
+      "title": title,
+      "content": content,
+      "authorId": authorId,
+      "authorName": authorName,
+      "coverImageUrl": coverImageUrl,
+      "tags": tags,
+      "lastUpdatedAt": DateTime.now(),
+    });
+  }
+
   Stream<List<Blog>> getBlogsStream() {
     return FirebaseFirestore.instance
         .collection("blogs")

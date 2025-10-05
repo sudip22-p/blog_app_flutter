@@ -64,6 +64,7 @@ class _UpdateBlogState extends State<UpdateBlog> {
         if (mounted) {
           context.read<BlogBloc>().add(
             BlogUpdated(
+              currentBlog.id,
               _titleController.text.trim(),
               _contentController.text.trim(),
               currentUserId,
