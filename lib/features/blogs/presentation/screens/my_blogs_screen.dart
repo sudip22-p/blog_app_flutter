@@ -1,5 +1,6 @@
 import 'package:blog_app/features/blogs/data/demo_blogs.dart';
 import 'package:blog_app/features/blogs/data/models/blog.dart';
+import 'package:blog_app/features/blogs/presentation/screens/add_blog.dart';
 import 'package:blog_app/features/blogs/presentation/screens/blog_preview_screen.dart';
 import 'package:blog_app/features/blogs/presentation/widgets/bottom_nav_bar.dart';
 import 'package:blog_app/features/blogs/presentation/widgets/empty_state.dart';
@@ -84,8 +85,9 @@ class _MyBlogsScreenState extends State<MyBlogsScreen> {
         actions: [
           IconButton(
             onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Opening blog editor...')),
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AddBlog()),
               );
             },
             icon: const Icon(Icons.add),

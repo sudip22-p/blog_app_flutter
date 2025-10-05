@@ -18,45 +18,33 @@ class _BottomNavBarState extends State<BottomNavBar> {
     setState(() {
       _selectedIndex = index;
     });
+    Widget targetScreen;
     switch (_selectedIndex) {
       case 0:
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute<void>(
-            builder: (BuildContext context) => const HomeScreen(),
-          ),
-        );
-        return;
+        targetScreen = const HomeScreen();
+        break;
       case 1:
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute<void>(
-            builder: (BuildContext context) => const ExploreBlogsScreen(),
-          ),
-        );
-        return;
+        targetScreen = const ExploreBlogsScreen();
+        break;
       case 2:
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute<void>(
-            builder: (BuildContext context) => const FavouritesScreen(),
-          ),
-        );
-        return;
+        targetScreen = const FavouritesScreen();
+        break;
       case 3:
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute<void>(
-            builder: (BuildContext context) => const MyBlogsScreen(),
-          ),
-        );
-        return;
+        targetScreen = const MyBlogsScreen();
+        break;
+      default:
+        targetScreen = const HomeScreen();
     }
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute<void>(builder: (BuildContext context) => targetScreen),
+    );
   }
 
   @override
   void initState() {
-    _selectedIndex = widget.selection.clamp(0, 3); // Ensure valid range
+    _selectedIndex = widget.selection.clamp(0, 3);
     super.initState();
   }
 
@@ -64,6 +52,8 @@ class _BottomNavBarState extends State<BottomNavBar> {
   Widget build(BuildContext context) {
     return BottomNavigationBar(
       type: BottomNavigationBarType.fixed,
+      backgroundColor: Colors.white, // remove transparent overlays
+      elevation: 0,
       showSelectedLabels: true,
       showUnselectedLabels: true,
       selectedLabelStyle: const TextStyle(
@@ -74,10 +64,13 @@ class _BottomNavBarState extends State<BottomNavBar> {
         fontWeight: FontWeight.w400,
         fontSize: 12,
       ),
-      unselectedItemColor: const Color(0xff7d869a),
       selectedItemColor: Theme.of(context).colorScheme.primary,
-
-      items: const <BottomNavigationBarItem>[
+      unselectedItemColor: const Color(0xff7d869a),
+      selectedIconTheme: const IconThemeData(opacity: 1.0),
+      unselectedIconTheme: const IconThemeData(opacity: 1.0),
+      currentIndex: _selectedIndex,
+      onTap: _onItemTapped,
+      items: const [
         BottomNavigationBarItem(
           icon: SizedBox(height: 24, width: 24, child: Icon(Icons.home)),
           label: 'Home',
@@ -87,16 +80,27 @@ class _BottomNavBarState extends State<BottomNavBar> {
           label: 'Explore',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.favorite_outline),
+          icon: SizedBox(
+            height: 24,
+            width: 24,
+            child: Icon(Icons.favorite_outline),
+          ),
+          activeIcon: SizedBox(
+            height: 24,
+            width: 24,
+            child: Icon(Icons.favorite),
+          ),
           label: 'Favourite',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.my_library_books_outlined),
+          icon: SizedBox(
+            height: 24,
+            width: 24,
+            child: Icon(Icons.my_library_books_outlined),
+          ),
           label: 'My Blogs',
         ),
       ],
-      currentIndex: _selectedIndex,
-      onTap: _onItemTapped,
     );
   }
 }

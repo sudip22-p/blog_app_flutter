@@ -1,8 +1,13 @@
+import 'dart:io';
+
+import 'package:blog_app/core/services/cloudinary_services.dart';
 import 'package:blog_app/features/blogs/presentation/bloc/blog_bloc.dart';
 import 'package:blog_app/features/blogs/presentation/widgets/form_widgets.dart';
+import 'package:blog_app/features/blogs/presentation/widgets/image_picker_widget.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:cloudinary_public/cloudinary_public.dart';
 
 class AddBlog extends StatefulWidget {
   const AddBlog({super.key});
@@ -12,10 +17,15 @@ class AddBlog extends StatefulWidget {
 }
 
 class _AddBlogState extends State<AddBlog> {
+  final cloudinary = CloudinaryPublic(
+    'your-cloud-name',
+    'your-upload-preset',
+    cache: false,
+  );
+  File? _selectedImage;
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
   final _tagsController = TextEditingController();
-  final _coverImageController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
   bool _isLoading = false;
@@ -32,23 +42,30 @@ class _AddBlogState extends State<AddBlog> {
 
         final currentUserId = currentUser.uid;
         final currentUserName = currentUser.displayName ?? 'Anonymous';
+        final cloudinaryService = CloudinaryService();
 
-        context.read<BlogBloc>().add(
-          NewBlogAdded(
-            _titleController.text.trim(),
-            _contentController.text.trim(),
-            currentUserId,
-            currentUserName,
-            _coverImageController.text.trim().isEmpty
-                ? ''
-                : _coverImageController.text.trim(),
-            _tagsController.text
-                .split(',')
-                .map((e) => e.trim())
-                .where((e) => e.isNotEmpty)
-                .toList(),
-          ),
-        );
+        String imageUrl = '';
+        // Uploading to Cloudinary if image selected
+        if (_selectedImage != null) {
+          imageUrl = await cloudinaryService.uploadImage(_selectedImage!);
+        }
+        // Adding blog to Firestore via Bloc
+        if (mounted) {
+          context.read<BlogBloc>().add(
+            NewBlogAdded(
+              _titleController.text.trim(),
+              _contentController.text.trim(),
+              currentUserId,
+              currentUserName,
+              imageUrl,
+              _tagsController.text
+                  .split(',')
+                  .map((e) => e.trim())
+                  .where((e) => e.isNotEmpty)
+                  .toList(),
+            ),
+          );
+        }
 
         _clearForm();
         if (mounted) {
@@ -83,7 +100,7 @@ class _AddBlogState extends State<AddBlog> {
     _titleController.clear();
     _contentController.clear();
     _tagsController.clear();
-    _coverImageController.clear();
+    _selectedImage = null;
   }
 
   @override
@@ -91,7 +108,6 @@ class _AddBlogState extends State<AddBlog> {
     _titleController.dispose();
     _contentController.dispose();
     _tagsController.dispose();
-    _coverImageController.dispose();
     super.dispose();
   }
 
@@ -132,11 +148,12 @@ class _AddBlogState extends State<AddBlog> {
                       maxLines: 2,
                     ),
                     const SizedBox(height: 16),
-                    CustomTextFormField(
-                      controller: _coverImageController,
-                      labelText: 'Cover Image URL (Optional)',
-                      hintText: 'Enter image URL',
+                    ImagePickerWidget(
+                      onImageSelected: (file) {
+                        _selectedImage = file;
+                      },
                     ),
+
                     const SizedBox(height: 16),
                     CustomTextFormField(
                       controller: _tagsController,
@@ -211,7 +228,7 @@ class _AddBlogState extends State<AddBlog> {
                                     ),
                                   ),
                                   SizedBox(width: 8),
-                                  Text('Publishing...'),
+                                  Text('...'),
                                 ],
                               )
                             : const Text('Publish Blog'),
