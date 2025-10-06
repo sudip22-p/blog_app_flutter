@@ -1,27 +1,30 @@
 import 'package:blog_app/features/blogs/data/models/blog.dart';
+import 'package:blog_app/features/blogs/data/models/blog_engagement.dart';
+import 'package:blog_app/features/blogs/presentation/bloc/engagement/engagement_bloc.dart';
+import 'package:blog_app/features/blogs/presentation/bloc/engagement/engagement_state.dart';
+import 'package:blog_app/features/blogs/presentation/bloc/engagement/engagement_event.dart';
+import 'package:blog_app/features/blogs/presentation/bloc/favorites/favorites_bloc.dart';
+import 'package:blog_app/features/blogs/presentation/bloc/favorites/favorites_state.dart';
+import 'package:blog_app/features/blogs/presentation/bloc/favorites/favorites_event.dart';
 import 'package:blog_app/features/blogs/presentation/screens/blog_preview_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class BlogCard extends StatelessWidget {
   final Blog blog;
-  final bool isFavorite;
-  final VoidCallback? onFavoriteToggle;
   final VoidCallback? onTap;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
   final bool showActions;
-  final bool showFavoriteButton;
 
   const BlogCard({
     super.key,
     required this.blog,
-    this.isFavorite = false,
-    this.onFavoriteToggle,
     this.onTap,
     this.onEdit,
     this.onDelete,
     this.showActions = false,
-    this.showFavoriteButton = true,
   });
 
   @override
@@ -53,13 +56,7 @@ class BlogCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _CoverImageSection(
-                blog: blog,
-                isFavorite: isFavorite,
-                onFavoriteToggle: onFavoriteToggle,
-                showFavoriteButton: showFavoriteButton,
-                theme: theme,
-              ),
+              _CoverImageSection(blog: blog, theme: theme),
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -73,7 +70,7 @@ class BlogCard extends StatelessWidget {
                     const SizedBox(height: 12),
                     _AuthorSection(blog: blog, theme: theme),
                     const SizedBox(height: 12),
-                    _BlogStats(blog: blog, theme: theme),
+                    _BlogStatsWithBlocs(blog: blog, theme: theme),
                     if (showActions) ...[
                       const SizedBox(height: 12),
                       _ActionButtons(
@@ -102,18 +99,9 @@ class BlogCard extends StatelessWidget {
 
 class _CoverImageSection extends StatelessWidget {
   final Blog blog;
-  final bool isFavorite;
-  final VoidCallback? onFavoriteToggle;
-  final bool showFavoriteButton;
   final ThemeData theme;
 
-  const _CoverImageSection({
-    required this.blog,
-    required this.isFavorite,
-    required this.onFavoriteToggle,
-    required this.showFavoriteButton,
-    required this.theme,
-  });
+  const _CoverImageSection({required this.blog, required this.theme});
 
   @override
   Widget build(BuildContext context) {
@@ -163,40 +151,56 @@ class _CoverImageSection extends StatelessWidget {
               },
             ),
           ),
-          // Favorite button overlay
-          if (showFavoriteButton && onFavoriteToggle != null)
-            Positioned(
-              top: 8,
-              right: 8,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.9),
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.1),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: onFavoriteToggle,
-                    borderRadius: BorderRadius.circular(20),
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      child: Icon(
-                        isFavorite ? Icons.favorite : Icons.favorite_border,
-                        color: isFavorite ? Colors.red : Colors.grey.shade600,
-                        size: 20,
+          // Favorite button overlay using BLoC
+          Positioned(
+            top: 8,
+            right: 8,
+            child: BlocBuilder<FavoritesBloc, FavoritesState>(
+              builder: (context, state) {
+                bool isFavorite = false;
+
+                if (state is FavoritesLoaded) {
+                  isFavorite = state.isFavorited(blog.id);
+                }
+
+                return Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.9),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.1),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () {
+                        final userId = FirebaseAuth.instance.currentUser?.uid;
+                        if (userId != null) {
+                          context.read<FavoritesBloc>().add(
+                            ToggleFavorite(userId, blog.id),
+                          );
+                        }
+                      },
+                      borderRadius: BorderRadius.circular(20),
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        child: Icon(
+                          isFavorite ? Icons.favorite : Icons.favorite_border,
+                          color: isFavorite ? Colors.red : Colors.grey.shade600,
+                          size: 20,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ),
+                );
+              },
             ),
+          ),
         ],
       ),
     );
@@ -357,51 +361,90 @@ class _AuthorSection extends StatelessWidget {
   }
 }
 
-class _BlogStats extends StatelessWidget {
+class _BlogStatsWithBlocs extends StatefulWidget {
   final Blog blog;
   final ThemeData theme;
 
-  const _BlogStats({required this.blog, required this.theme});
+  const _BlogStatsWithBlocs({required this.blog, required this.theme});
+
+  @override
+  State<_BlogStatsWithBlocs> createState() => _BlogStatsWithBlocsState();
+}
+
+class _BlogStatsWithBlocsState extends State<_BlogStatsWithBlocs> {
+  @override
+  void initState() {
+    super.initState();
+    // Load engagement data for this blog
+    context.read<EngagementBloc>().add(LoadBlogEngagement(widget.blog.id));
+
+    // Add view when the card is displayed
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId != null) {
+      context.read<EngagementBloc>().add(AddView(widget.blog.id, userId));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final likeCount = (blog.id.hashCode % 50) + 5;
-    final viewCount = (blog.id.hashCode % 1000) + 100;
-    final commentCount = (blog.id.hashCode % 20) + 2;
+    return BlocBuilder<EngagementBloc, EngagementState>(
+      builder: (context, state) {
+        BlogEngagement? engagement;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: theme.colorScheme.outline.withValues(alpha: 0.1),
-          width: 1,
-        ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          _StatItem(
-            icon: Icons.favorite_rounded,
-            count: likeCount,
-            color: Colors.red.shade400,
-            theme: theme,
+        if (state is EngagementLoaded) {
+          engagement = state.engagement;
+        }
+
+        // Default values if no engagement data
+        final likeCount = engagement?.likesCount ?? 0;
+        final viewCount = engagement?.viewsCount ?? 0;
+        final commentCount = engagement?.commentsCount ?? 0;
+
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: widget.theme.colorScheme.surfaceContainerHighest.withValues(
+              alpha: 0.3,
+            ),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: widget.theme.colorScheme.outline.withValues(alpha: 0.1),
+              width: 1,
+            ),
           ),
-          _StatItem(
-            icon: Icons.visibility_rounded,
-            count: viewCount,
-            color: theme.colorScheme.primary,
-            theme: theme,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _StatItem(
+                icon: Icons.favorite_rounded,
+                count: likeCount,
+                color: Colors.red.shade400,
+                theme: widget.theme,
+                onTap: () {
+                  final userId = FirebaseAuth.instance.currentUser?.uid;
+                  if (userId != null) {
+                    context.read<EngagementBloc>().add(
+                      ToggleLike(widget.blog.id, userId),
+                    );
+                  }
+                },
+              ),
+              _StatItem(
+                icon: Icons.visibility_rounded,
+                count: viewCount,
+                color: widget.theme.colorScheme.primary,
+                theme: widget.theme,
+              ),
+              _StatItem(
+                icon: Icons.chat_bubble_rounded,
+                count: commentCount,
+                color: widget.theme.colorScheme.onSurfaceVariant,
+                theme: widget.theme,
+              ),
+            ],
           ),
-          _StatItem(
-            icon: Icons.chat_bubble_rounded,
-            count: commentCount,
-            color: theme.colorScheme.onSurfaceVariant,
-            theme: theme,
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
@@ -411,17 +454,19 @@ class _StatItem extends StatelessWidget {
   final int count;
   final Color color;
   final ThemeData theme;
+  final VoidCallback? onTap;
 
   const _StatItem({
     required this.icon,
     required this.count,
     required this.color,
     required this.theme,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    Widget content = Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Icon(icon, size: 16, color: color),
@@ -436,6 +481,19 @@ class _StatItem extends StatelessWidget {
         ),
       ],
     );
+
+    if (onTap != null) {
+      return Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(8),
+          child: Padding(padding: const EdgeInsets.all(4), child: content),
+        ),
+      );
+    }
+
+    return content;
   }
 
   String _formatCount(int count) {

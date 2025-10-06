@@ -1,5 +1,5 @@
 import 'package:blog_app/features/blogs/data/models/blog.dart';
-import 'package:blog_app/features/blogs/presentation/bloc/blog_bloc.dart';
+import 'package:blog_app/features/blogs/presentation/bloc/blog/blog_bloc.dart';
 import 'package:blog_app/features/blogs/presentation/screens/blog_preview_screen.dart';
 import 'package:blog_app/features/blogs/presentation/widgets/bottom_nav_bar.dart';
 import 'package:blog_app/features/blogs/presentation/widgets/blog_card.dart';
@@ -27,7 +27,6 @@ class _ExploreBlogsScreenState extends State<ExploreBlogsScreen> {
   bool _isLoading = false;
   final ScrollController _scrollController = ScrollController();
   bool _showPagination = false;
-  Set<String> favoriteBlogIds = {}; // Store favorite blog IDs
 
   late List<Blog> _allBlogs;
   late List<Blog> _filteredBlogs;
@@ -56,29 +55,6 @@ class _ExploreBlogsScreenState extends State<ExploreBlogsScreen> {
       _currentPage = 1;
       _filterBlogs();
     });
-  }
-
-  void _toggleFavorite(String blogId) {
-    setState(() {
-      if (favoriteBlogIds.contains(blogId)) {
-        favoriteBlogIds.remove(blogId);
-        _showSnackBar('Removed from favorites', Colors.orange);
-      } else {
-        favoriteBlogIds.add(blogId);
-        _showSnackBar('Added to favorites ❤️', Colors.pink);
-      }
-    });
-  }
-
-  void _showSnackBar(String message, Color color) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: color,
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 2),
-      ),
-    );
   }
 
   void _openBlog(Blog blog) {
@@ -389,12 +365,7 @@ class _ExploreBlogsScreenState extends State<ExploreBlogsScreen> {
       sliver: SliverList(
         delegate: SliverChildBuilderDelegate((context, index) {
           final blog = blogs[index];
-          return BlogCard(
-            blog: blog,
-            isFavorite: favoriteBlogIds.contains(blog.id),
-            onFavoriteToggle: () => _toggleFavorite(blog.id),
-            onTap: () => _openBlog(blog),
-          );
+          return BlogCard(blog: blog, onTap: () => _openBlog(blog));
         }, childCount: blogs.length),
       ),
     );

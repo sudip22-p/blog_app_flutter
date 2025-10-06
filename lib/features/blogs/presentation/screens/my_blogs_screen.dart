@@ -1,5 +1,5 @@
 import 'package:blog_app/features/blogs/data/models/blog.dart';
-import 'package:blog_app/features/blogs/presentation/bloc/blog_bloc.dart';
+import 'package:blog_app/features/blogs/presentation/bloc/blog/blog_bloc.dart';
 import 'package:blog_app/features/blogs/presentation/screens/add_blog.dart';
 import 'package:blog_app/features/blogs/presentation/screens/blog_preview_screen.dart';
 import 'package:blog_app/features/blogs/presentation/screens/update_blog.dart';
@@ -222,7 +222,6 @@ class _MyBlogsScreenState extends State<MyBlogsScreen> {
                           final blog = myBlogsList[index];
                           return BlogCard(
                             blog: blog,
-                            showFavoriteButton: false,
                             showActions: true,
                             onEdit: () => _editBlog(blog, allBlogs),
                             onDelete: () => _deleteBlog(blog),

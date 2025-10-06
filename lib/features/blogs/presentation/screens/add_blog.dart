@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:blog_app/core/services/cloudinary_services.dart';
-import 'package:blog_app/features/blogs/presentation/bloc/blog_bloc.dart';
+import 'package:blog_app/features/blogs/presentation/bloc/blog/blog_bloc.dart';
 import 'package:blog_app/features/blogs/presentation/widgets/form_widgets.dart';
 import 'package:blog_app/features/blogs/presentation/widgets/image_picker_widget.dart';
 import 'package:firebase_auth/firebase_auth.dart';

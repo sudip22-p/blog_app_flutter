@@ -1,6 +1,6 @@
 import 'package:blog_app/features/blogs/data/demo_blogs.dart';
 import 'package:blog_app/features/blogs/data/models/blog.dart';
-import 'package:blog_app/features/blogs/presentation/bloc/blog_bloc.dart';
+import 'package:blog_app/features/blogs/presentation/bloc/blog/blog_bloc.dart';
 import 'package:blog_app/features/blogs/presentation/screens/blog_preview_screen.dart';
 import 'package:blog_app/features/blogs/presentation/widgets/blog_card.dart';
 import 'package:blog_app/features/blogs/presentation/widgets/empty_state.dart';
@@ -15,31 +15,6 @@ class BlogsHome extends StatefulWidget {
 }
 
 class _BlogsHomeState extends State<BlogsHome> {
-  Set<String> favoriteBlogIds = {}; // Store favorite blog IDs
-
-  void _toggleFavorite(String blogId) {
-    setState(() {
-      if (favoriteBlogIds.contains(blogId)) {
-        favoriteBlogIds.remove(blogId);
-        _showSnackBar('Removed from favorites', Colors.orange);
-      } else {
-        favoriteBlogIds.add(blogId);
-        _showSnackBar('Added to favorites ❤️', Colors.pink);
-      }
-    });
-  }
-
-  void _showSnackBar(String message, Color color) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: color,
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 2),
-      ),
-    );
-  }
-
   void _openBlog(Blog blog) {
     Navigator.push(
       context,
@@ -57,9 +32,13 @@ class _BlogsHomeState extends State<BlogsHome> {
             'Start creating amazing content and share your thoughts with the world.',
         buttonText: 'Create Your First Post',
         onButtonPressed: () {
-          _showSnackBar(
-            'Blog creation feature coming soon!',
-            Theme.of(context).colorScheme.primary,
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Blog creation feature coming soon!'),
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              behavior: SnackBarBehavior.floating,
+              duration: const Duration(seconds: 2),
+            ),
           );
         },
       );
@@ -82,7 +61,6 @@ class _BlogsHomeState extends State<BlogsHome> {
             ],
           ),
         ),
-
         // Blog list
         BlocBuilder<BlogBloc, BlogState>(
           builder: (context, state) {
@@ -111,12 +89,7 @@ class _BlogsHomeState extends State<BlogsHome> {
                 itemCount: blogs.length,
                 itemBuilder: (context, index) {
                   final blog = blogs[index];
-                  return BlogCard(
-                    blog: blog,
-                    isFavorite: favoriteBlogIds.contains(blog.id),
-                    onFavoriteToggle: () => _toggleFavorite(blog.id),
-                    onTap: () => _openBlog(blog),
-                  );
+                  return BlogCard(blog: blog, onTap: () => _openBlog(blog));
                 },
               ),
             );

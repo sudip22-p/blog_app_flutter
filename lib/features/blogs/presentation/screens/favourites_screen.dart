@@ -139,8 +139,6 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
                         onDismissed: (_) => _removeFavorite(blog.id),
                         child: BlogCard(
                           blog: blog,
-                          isFavorite: true,
-                          onFavoriteToggle: () => _removeFavorite(blog.id),
                           onTap: () => _openBlog(blog),
                         ),
                       );

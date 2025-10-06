@@ -1,9 +1,13 @@
 import 'package:blog_app/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:blog_app/features/blogs/presentation/bloc/blog_bloc.dart';
+import 'package:blog_app/features/blogs/presentation/bloc/blog/blog_bloc.dart';
+import 'package:blog_app/features/blogs/presentation/bloc/engagement/engagement_bloc.dart';
+import 'package:blog_app/features/blogs/presentation/bloc/favorites/favorites_bloc.dart';
+import 'package:blog_app/features/blogs/presentation/bloc/favorites/favorites_event.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'core/core.dart';
 
 void main() async {
@@ -22,6 +26,13 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => AuthBloc()),
         BlocProvider(create: (context) => ThemeBloc()),
         BlocProvider(create: (context) => BlogBloc()),
+        BlocProvider(create: (context) => EngagementBloc()),
+        BlocProvider(
+          create: (context) => FavoritesBloc()
+            ..add(
+              LoadUserFavorites(FirebaseAuth.instance.currentUser?.uid ?? ''),
+            ),
+        ),
       ],
       child: BlocBuilder<ThemeBloc, ThemeState>(
         builder: (context, themeState) {

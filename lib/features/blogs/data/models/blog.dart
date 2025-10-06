@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:blog_app/features/blogs/data/models/blog_engagement.dart';
 
 class Blog {
   final String id;
@@ -10,6 +11,8 @@ class Blog {
   final List<String> tags;
   final DateTime createdAt;
   final DateTime lastUpdatedAt;
+  final BlogEngagement? engagement;
+  final bool? isFavorited;
 
   Blog({
     required this.id,
@@ -21,6 +24,8 @@ class Blog {
     required this.tags,
     required this.createdAt,
     required this.lastUpdatedAt,
+    this.engagement,
+    this.isFavorited,
   });
 
   // Convert Blog to Map (Firestore friendly)
@@ -53,6 +58,35 @@ class Blog {
     );
   }
 
+  // Copy with method for updating engagement and favorite status
+  Blog copyWith({
+    String? id,
+    String? title,
+    String? content,
+    String? authorId,
+    String? authorName,
+    String? coverImageUrl,
+    List<String>? tags,
+    DateTime? createdAt,
+    DateTime? lastUpdatedAt,
+    BlogEngagement? engagement,
+    bool? isFavorited,
+  }) {
+    return Blog(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      content: content ?? this.content,
+      authorId: authorId ?? this.authorId,
+      authorName: authorName ?? this.authorName,
+      coverImageUrl: coverImageUrl ?? this.coverImageUrl,
+      tags: tags ?? this.tags,
+      createdAt: createdAt ?? this.createdAt,
+      lastUpdatedAt: lastUpdatedAt ?? this.lastUpdatedAt,
+      engagement: engagement ?? this.engagement,
+      isFavorited: isFavorited ?? this.isFavorited,
+    );
+  }
+
   static DateTime _convertToDateTime(dynamic value) {
     if (value is Timestamp) {
       return value.toDate();
@@ -61,5 +95,19 @@ class Blog {
     } else {
       return DateTime.now();
     }
+  }
+
+  // Helper methods for easy access to engagement metrics
+  int get likesCount => engagement?.likesCount ?? 0;
+  int get commentsCount => engagement?.commentsCount ?? 0;
+  int get viewsCount => engagement?.viewsCount ?? 0;
+  
+  bool isLikedBy(String userId) => engagement?.isLikedBy(userId) ?? false;
+  bool hasViewedBy(String userId) => engagement?.hasViewedBy(userId) ?? false;
+  List<BlogComment> get comments => engagement?.commentsList ?? [];
+
+  @override
+  String toString() {
+    return 'Blog(id: $id, title: $title, likesCount: $likesCount, isFavorited: $isFavorited)';
   }
 }
