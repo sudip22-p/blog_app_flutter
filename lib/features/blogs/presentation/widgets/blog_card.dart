@@ -4,8 +4,6 @@ import 'package:blog_app/features/blogs/presentation/bloc/engagement/engagement_
 import 'package:blog_app/features/blogs/presentation/bloc/engagement/engagement_state.dart';
 import 'package:blog_app/features/blogs/presentation/bloc/engagement/engagement_event.dart';
 import 'package:blog_app/features/blogs/presentation/bloc/favorites/favorites_bloc.dart';
-import 'package:blog_app/features/blogs/presentation/bloc/favorites/favorites_state.dart';
-import 'package:blog_app/features/blogs/presentation/bloc/favorites/favorites_event.dart';
 import 'package:blog_app/features/blogs/presentation/screens/blog_preview_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -70,7 +68,7 @@ class BlogCard extends StatelessWidget {
                     const SizedBox(height: 12),
                     _AuthorSection(blog: blog, theme: theme),
                     const SizedBox(height: 12),
-                    _BlogStatsWithBlocs(blog: blog, theme: theme),
+                    _BlogStats(blog: blog, theme: theme),
                     if (showActions) ...[
                       const SizedBox(height: 12),
                       _ActionButtons(
@@ -97,15 +95,46 @@ class BlogCard extends StatelessWidget {
   }
 }
 
-class _CoverImageSection extends StatelessWidget {
+class _CoverImageSection extends StatefulWidget {
   final Blog blog;
   final ThemeData theme;
 
   const _CoverImageSection({required this.blog, required this.theme});
 
   @override
+  State<_CoverImageSection> createState() => _CoverImageSectionState();
+}
+
+class _CoverImageSectionState extends State<_CoverImageSection> {
+  bool? _localFavoriteState; // For instant UI feedback
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _ensureFavoritesLoaded();
+  }
+
+  void _ensureFavoritesLoaded() {
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId != null) {
+      // Use addPostFrameCallback to ensure context is ready
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          final favoritesBloc = context.read<FavoritesBloc>();
+          // Only load if we're in initial state
+          if (favoritesBloc.state is FavoritesInitial) {
+            favoritesBloc.add(LoadUserFavorites(userId));
+          }
+        }
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (blog.coverImageUrl == null) return const SizedBox.shrink();
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    if (widget.blog.coverImageUrl == null) return const SizedBox.shrink();
 
     return SizedBox(
       height: 160,
@@ -118,18 +147,18 @@ class _CoverImageSection extends StatelessWidget {
               topRight: Radius.circular(16),
             ),
             child: Image.network(
-              blog.coverImageUrl!,
+              widget.blog.coverImageUrl!,
               fit: BoxFit.cover,
               width: double.infinity,
               height: double.infinity,
               errorBuilder: (context, error, stackTrace) {
                 return Container(
-                  color: theme.colorScheme.surfaceContainerHighest,
+                  color: widget.theme.colorScheme.surfaceContainerHighest,
                   child: Center(
                     child: Icon(
                       Icons.article_outlined,
                       size: 48,
-                      color: theme.colorScheme.onSurfaceVariant,
+                      color: widget.theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
                 );
@@ -137,7 +166,7 @@ class _CoverImageSection extends StatelessWidget {
               loadingBuilder: (context, child, loadingProgress) {
                 if (loadingProgress == null) return child;
                 return Container(
-                  color: theme.colorScheme.surfaceContainerHighest,
+                  color: widget.theme.colorScheme.surfaceContainerHighest,
                   child: Center(
                     child: CircularProgressIndicator(
                       value: loadingProgress.expectedTotalBytes != null
@@ -151,17 +180,18 @@ class _CoverImageSection extends StatelessWidget {
               },
             ),
           ),
-          // Favorite button overlay using BLoC
+          // Simple favorite button
           Positioned(
             top: 8,
             right: 8,
             child: BlocBuilder<FavoritesBloc, FavoritesState>(
               builder: (context, state) {
-                bool isFavorite = false;
-
-                if (state is FavoritesLoaded) {
-                  isFavorite = state.isFavorited(blog.id);
-                }
+                // Use local state for instant feedback, fallback to bloc state
+                bool isFavorite =
+                    _localFavoriteState ??
+                    (state is FavoritesLoaded
+                        ? state.isFavorited(widget.blog.id)
+                        : false);
 
                 return Container(
                   decoration: BoxDecoration(
@@ -178,22 +208,32 @@ class _CoverImageSection extends StatelessWidget {
                   child: Material(
                     color: Colors.transparent,
                     child: InkWell(
-                      onTap: () {
-                        final userId = FirebaseAuth.instance.currentUser?.uid;
-                        if (userId != null) {
-                          context.read<FavoritesBloc>().add(
-                            ToggleFavorite(userId, blog.id),
-                          );
-                        }
-                      },
+                      onTap: () => _handleFavoriteTap(userId, isFavorite),
                       borderRadius: BorderRadius.circular(20),
                       child: Container(
                         padding: const EdgeInsets.all(8),
-                        child: Icon(
-                          isFavorite ? Icons.favorite : Icons.favorite_border,
-                          color: isFavorite ? Colors.red : Colors.grey.shade600,
-                          size: 20,
-                        ),
+                        child: _isLoading
+                            ? SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                    isFavorite
+                                        ? Colors.red
+                                        : Colors.grey.shade600,
+                                  ),
+                                ),
+                              )
+                            : Icon(
+                                isFavorite
+                                    ? Icons.favorite
+                                    : Icons.favorite_border,
+                                color: isFavorite
+                                    ? Colors.red
+                                    : Colors.grey.shade600,
+                                size: 20,
+                              ),
                       ),
                     ),
                   ),
@@ -204,6 +244,38 @@ class _CoverImageSection extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  void _handleFavoriteTap(String? userId, bool currentlyFavorite) async {
+    if (userId == null || _isLoading) return;
+
+    // Instant UI update
+    setState(() {
+      _localFavoriteState = !currentlyFavorite;
+      _isLoading = true;
+    });
+
+    try {
+      // Simple database call
+      context.read<FavoritesBloc>().add(ToggleFavorite(userId, widget.blog.id));
+
+      // Reset after short delay
+      await Future.delayed(const Duration(milliseconds: 1000));
+      if (mounted) {
+        setState(() {
+          _localFavoriteState = null;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      // Revert on error
+      if (mounted) {
+        setState(() {
+          _localFavoriteState = currentlyFavorite;
+          _isLoading = false;
+        });
+      }
+    }
   }
 }
 
@@ -361,29 +433,11 @@ class _AuthorSection extends StatelessWidget {
   }
 }
 
-class _BlogStatsWithBlocs extends StatefulWidget {
+class _BlogStats extends StatelessWidget {
   final Blog blog;
   final ThemeData theme;
 
-  const _BlogStatsWithBlocs({required this.blog, required this.theme});
-
-  @override
-  State<_BlogStatsWithBlocs> createState() => _BlogStatsWithBlocsState();
-}
-
-class _BlogStatsWithBlocsState extends State<_BlogStatsWithBlocs> {
-  @override
-  void initState() {
-    super.initState();
-    // Load engagement data for this blog
-    context.read<EngagementBloc>().add(LoadBlogEngagement(widget.blog.id));
-
-    // Add view when the card is displayed
-    final userId = FirebaseAuth.instance.currentUser?.uid;
-    if (userId != null) {
-      context.read<EngagementBloc>().add(AddView(widget.blog.id, userId));
-    }
-  }
+  const _BlogStats({required this.blog, required this.theme});
 
   @override
   Widget build(BuildContext context) {
@@ -393,6 +447,11 @@ class _BlogStatsWithBlocsState extends State<_BlogStatsWithBlocs> {
 
         if (state is EngagementLoaded) {
           engagement = state.engagement;
+        } else if (state is! EngagementLoading) {
+          // Only load if not already loading
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            context.read<EngagementBloc>().add(LoadBlogEngagement(blog.id));
+          });
         }
 
         // Default values if no engagement data
@@ -403,12 +462,12 @@ class _BlogStatsWithBlocsState extends State<_BlogStatsWithBlocs> {
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
-            color: widget.theme.colorScheme.surfaceContainerHighest.withValues(
+            color: theme.colorScheme.surfaceContainerHighest.withValues(
               alpha: 0.3,
             ),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: widget.theme.colorScheme.outline.withValues(alpha: 0.1),
+              color: theme.colorScheme.outline.withValues(alpha: 0.1),
               width: 1,
             ),
           ),
@@ -419,12 +478,12 @@ class _BlogStatsWithBlocsState extends State<_BlogStatsWithBlocs> {
                 icon: Icons.favorite_rounded,
                 count: likeCount,
                 color: Colors.red.shade400,
-                theme: widget.theme,
+                theme: theme,
                 onTap: () {
                   final userId = FirebaseAuth.instance.currentUser?.uid;
                   if (userId != null) {
                     context.read<EngagementBloc>().add(
-                      ToggleLike(widget.blog.id, userId),
+                      ToggleLike(blog.id, userId),
                     );
                   }
                 },
@@ -432,14 +491,14 @@ class _BlogStatsWithBlocsState extends State<_BlogStatsWithBlocs> {
               _StatItem(
                 icon: Icons.visibility_rounded,
                 count: viewCount,
-                color: widget.theme.colorScheme.primary,
-                theme: widget.theme,
+                color: theme.colorScheme.primary,
+                theme: theme,
               ),
               _StatItem(
                 icon: Icons.chat_bubble_rounded,
                 count: commentCount,
-                color: widget.theme.colorScheme.onSurfaceVariant,
-                theme: widget.theme,
+                color: theme.colorScheme.onSurfaceVariant,
+                theme: theme,
               ),
             ],
           ),

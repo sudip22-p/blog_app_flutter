@@ -137,7 +137,6 @@ class RealtimeDatabaseEngagementService {
     } else {
       likes[userId] = true;
     }
-
     // Update comment with new likes
     await commentRef.update({'likes': likes, 'likesCount': likes.length});
   }

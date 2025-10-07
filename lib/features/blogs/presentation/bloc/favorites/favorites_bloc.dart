@@ -2,9 +2,12 @@ import 'dart:async';
 import 'package:blog_app/features/blogs/data/services/firestore_favorites_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:blog_app/features/blogs/data/models/favorite.dart';
+import 'package:blog_app/features/blogs/data/models/blog.dart';
+import 'package:equatable/equatable.dart';
 
-import 'favorites_event.dart';
-import 'favorites_state.dart';
+part 'favorites_event.dart';
+part 'favorites_state.dart';
 
 class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
   final FirestoreFavoritesService _favoritesService =
@@ -14,8 +17,6 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
   FavoritesBloc() : super(FavoritesInitial()) {
     on<LoadUserFavorites>(_onLoadUserFavorites);
     on<ToggleFavorite>(_onToggleFavorite);
-    on<AddToFavorites>(_onAddToFavorites);
-    on<RemoveFromFavorites>(_onRemoveFromFavorites);
   }
 
   @override
@@ -33,14 +34,18 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
     try {
       await _favoritesSubscription?.cancel();
 
-      // Get initial data without stream to avoid emit issues
+      // Get favorites and favorite blogs in parallel
       final favorites = await _favoritesService.getUserFavorites(event.userId);
+      final favoriteBlogs = await _favoritesService.getUserFavoriteBlogs(
+        event.userId,
+      );
+
       if (!isClosed) {
-        emit(FavoritesLoaded(favorites));
+        emit(FavoritesLoaded(favorites, favoriteBlogs));
       }
     } catch (e) {
       if (!isClosed) {
-        emit(FavoritesOperationFailure(e.toString()));
+        emit(FavoritesError(e.toString()));
       }
     }
   }
@@ -50,57 +55,21 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
     Emitter<FavoritesState> emit,
   ) async {
     try {
-      final isFavorited = await _favoritesService.toggleFavorite(
+      await _favoritesService.toggleFavorite(event.userId, event.blogId);
+
+      // Reload both favorites and favorite blogs
+      final favorites = await _favoritesService.getUserFavorites(event.userId);
+      final favoriteBlogs = await _favoritesService.getUserFavoriteBlogs(
         event.userId,
-        event.blogId,
       );
-      emit(
-        FavoritesOperationSuccess(
-          isFavorited ? 'Added to favorites ❤️' : 'Removed from favorites',
-          isFavorited,
-        ),
-      );
-
-      // Reload favorites after toggle
-      add(LoadUserFavorites(event.userId));
+      emit(FavoritesLoaded(favorites, favoriteBlogs));
     } catch (e) {
-      emit(FavoritesOperationFailure(e.toString()));
-    }
-  }
-
-  void _onAddToFavorites(
-    AddToFavorites event,
-    Emitter<FavoritesState> emit,
-  ) async {
-    try {
-      await _favoritesService.addToFavorites(event.userId, event.blogId);
-      emit(FavoritesOperationSuccess('Added to favorites ❤️', true));
-
-      // Reload favorites after adding
-      add(LoadUserFavorites(event.userId));
-    } catch (e) {
-      emit(FavoritesOperationFailure(e.toString()));
-    }
-  }
-
-  void _onRemoveFromFavorites(
-    RemoveFromFavorites event,
-    Emitter<FavoritesState> emit,
-  ) async {
-    try {
-      await _favoritesService.removeFromFavorites(event.userId, event.blogId);
-      emit(FavoritesOperationSuccess('Removed from favorites', false));
-
-      // Reload favorites after removing
-      add(LoadUserFavorites(event.userId));
-    } catch (e) {
-      emit(FavoritesOperationFailure(e.toString()));
+      emit(FavoritesError(e.toString()));
     }
   }
 
   // Helper method to get current user ID
   String? get currentUserId => FirebaseAuth.instance.currentUser?.uid;
-
   // Helper method to check if a blog is favorited
   bool isBlogFavorited(String blogId) {
     final currentState = state;

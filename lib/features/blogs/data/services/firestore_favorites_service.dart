@@ -1,11 +1,14 @@
 import 'package:blog_app/features/blogs/data/models/favorite.dart';
+import 'package:blog_app/features/blogs/data/models/blog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FirestoreFavoritesService {
   final CollectionReference _favoritesCollection = FirebaseFirestore.instance
       .collection('favorites');
+  final CollectionReference _blogsCollection = FirebaseFirestore.instance
+      .collection('blogs');
 
-  // Get user favorites (one-time fetch)
+  // Get user favorites
   Future<List<Favorite>> getUserFavorites(String userId) async {
     try {
       final querySnapshot = await _favoritesCollection
@@ -17,8 +20,29 @@ class FirestoreFavoritesService {
         return Favorite.fromMap(data, doc.id);
       }).toList();
     } catch (e) {
-      // If index doesn't exist, return empty list
       print('Error fetching favorites: $e');
+      return [];
+    }
+  }
+
+  // Get user favorite blogs (with full blog data)
+  Future<List<Blog>> getUserFavoriteBlogs(String userId) async {
+    try {
+      final favorites = await getUserFavorites(userId);
+      final blogIds = favorites.map((f) => f.blogId).toList();
+
+      if (blogIds.isEmpty) return [];
+
+      final blogsQuery = await _blogsCollection
+          .where(FieldPath.documentId, whereIn: blogIds)
+          .get();
+
+      return blogsQuery.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        return Blog.fromMap(data, doc.id);
+      }).toList();
+    } catch (e) {
+      print('Error fetching favorite blogs: $e');
       return [];
     }
   }
@@ -37,10 +61,11 @@ class FirestoreFavoritesService {
     final querySnapshot = await _favoritesCollection
         .where('userId', isEqualTo: userId)
         .where('blogId', isEqualTo: blogId)
+        .limit(1)
         .get();
 
-    for (var doc in querySnapshot.docs) {
-      await doc.reference.delete();
+    if (querySnapshot.docs.isNotEmpty) {
+      await querySnapshot.docs.first.reference.delete();
     }
   }
 
@@ -49,66 +74,13 @@ class FirestoreFavoritesService {
     final querySnapshot = await _favoritesCollection
         .where('userId', isEqualTo: userId)
         .where('blogId', isEqualTo: blogId)
+        .limit(1)
         .get();
 
     return querySnapshot.docs.isNotEmpty;
   }
 
-  // Get user's favorite blogs stream
-  Stream<List<Favorite>> getUserFavoritesStream(String userId) {
-    return _favoritesCollection
-        .where('userId', isEqualTo: userId)
-        .snapshots()
-        .map(
-          (snapshot) => snapshot.docs
-              .map(
-                (doc) => Favorite.fromMap(
-                  doc.data() as Map<String, dynamic>,
-                  doc.id,
-                ),
-              )
-              .toList(),
-        );
-  }
-
-  // Get all favorites for a blog (to count favorites)
-  Stream<List<Favorite>> getBlogFavoritesStream(String blogId) {
-    return _favoritesCollection
-        .where('blogId', isEqualTo: blogId)
-        .snapshots()
-        .map(
-          (snapshot) => snapshot.docs
-              .map(
-                (doc) => Favorite.fromMap(
-                  doc.data() as Map<String, dynamic>,
-                  doc.id,
-                ),
-              )
-              .toList(),
-        );
-  }
-
-  // Get favorite count for a blog
-  Future<int> getFavoriteCount(String blogId) async {
-    final querySnapshot = await _favoritesCollection
-        .where('blogId', isEqualTo: blogId)
-        .get();
-
-    return querySnapshot.docs.length;
-  }
-
-  // Get favorite counts for multiple blogs
-  Future<Map<String, int>> getFavoriteCounts(List<String> blogIds) async {
-    Map<String, int> counts = {};
-
-    for (String blogId in blogIds) {
-      counts[blogId] = await getFavoriteCount(blogId);
-    }
-
-    return counts;
-  }
-
-  // Toggle favorite status
+  // Simple toggle favorite
   Future<bool> toggleFavorite(String userId, String blogId) async {
     final isFav = await isFavorited(userId, blogId);
 

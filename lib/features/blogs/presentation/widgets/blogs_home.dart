@@ -1,6 +1,7 @@
 import 'package:blog_app/features/blogs/data/demo_blogs.dart';
 import 'package:blog_app/features/blogs/data/models/blog.dart';
 import 'package:blog_app/features/blogs/presentation/bloc/blog/blog_bloc.dart';
+import 'package:blog_app/features/blogs/presentation/screens/add_blog.dart';
 import 'package:blog_app/features/blogs/presentation/screens/blog_preview_screen.dart';
 import 'package:blog_app/features/blogs/presentation/widgets/blog_card.dart';
 import 'package:blog_app/features/blogs/presentation/widgets/empty_state.dart';
@@ -32,12 +33,10 @@ class _BlogsHomeState extends State<BlogsHome> {
             'Start creating amazing content and share your thoughts with the world.',
         buttonText: 'Create Your First Post',
         onButtonPressed: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: const Text('Blog creation feature coming soon!'),
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              behavior: SnackBarBehavior.floating,
-              duration: const Duration(seconds: 2),
+          Navigator.push(
+            context,
+            MaterialPageRoute<void>(
+              builder: (BuildContext context) => const AddBlog(),
             ),
           );
         },

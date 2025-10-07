@@ -4,8 +4,6 @@ import 'package:blog_app/features/blogs/presentation/bloc/engagement/engagement_
 import 'package:blog_app/features/blogs/presentation/bloc/engagement/engagement_event.dart';
 import 'package:blog_app/features/blogs/presentation/bloc/engagement/engagement_state.dart';
 import 'package:blog_app/features/blogs/presentation/bloc/favorites/favorites_bloc.dart';
-import 'package:blog_app/features/blogs/presentation/bloc/favorites/favorites_event.dart';
-import 'package:blog_app/features/blogs/presentation/bloc/favorites/favorites_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

@@ -1,5 +1,6 @@
-import 'package:blog_app/features/blogs/data/models/favorite.dart';
-import 'package:equatable/equatable.dart';
+
+part of 'favorites_bloc.dart';
+
 
 abstract class FavoritesState extends Equatable {
   @override
@@ -12,31 +13,22 @@ class FavoritesLoading extends FavoritesState {}
 
 class FavoritesLoaded extends FavoritesState {
   final List<Favorite> favorites;
+  final List<Blog> favoriteBlogs;
   final Set<String> favoriteBlogIds;
 
-  FavoritesLoaded(this.favorites)
+  FavoritesLoaded(this.favorites, this.favoriteBlogs)
     : favoriteBlogIds = favorites.map((f) => f.blogId).toSet();
 
   @override
-  List<Object?> get props => [favorites];
+  List<Object?> get props => [favorites, favoriteBlogs];
 
   bool isFavorited(String blogId) => favoriteBlogIds.contains(blogId);
 }
 
-class FavoritesOperationSuccess extends FavoritesState {
-  final String message;
-  final bool isFavorited;
-
-  FavoritesOperationSuccess(this.message, this.isFavorited);
-
-  @override
-  List<Object?> get props => [message, isFavorited];
-}
-
-class FavoritesOperationFailure extends FavoritesState {
+class FavoritesError extends FavoritesState {
   final String error;
 
-  FavoritesOperationFailure(this.error);
+  FavoritesError(this.error);
 
   @override
   List<Object?> get props => [error];

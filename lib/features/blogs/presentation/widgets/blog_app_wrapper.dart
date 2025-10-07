@@ -1,7 +1,6 @@
 import 'package:blog_app/features/blogs/presentation/bloc/blog/blog_bloc.dart';
 import 'package:blog_app/features/blogs/presentation/bloc/engagement/engagement_bloc.dart';
 import 'package:blog_app/features/blogs/presentation/bloc/favorites/favorites_bloc.dart';
-import 'package:blog_app/features/blogs/presentation/bloc/favorites/favorites_event.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
