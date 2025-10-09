@@ -1,5 +1,4 @@
-import 'package:blog_app/features/blogs/data/models/blog_engagement.dart';
-import 'package:equatable/equatable.dart';
+part of 'engagement_bloc.dart';
 
 abstract class EngagementState extends Equatable {
   @override
@@ -19,33 +18,11 @@ class EngagementLoaded extends EngagementState {
   List<Object?> get props => [engagement];
 }
 
-class EngagementOperationSuccess extends EngagementState {
-  final String message;
-  final BlogEngagement? engagement;
-
-  EngagementOperationSuccess(this.message, [this.engagement]);
-
-  @override
-  List<Object?> get props => [message, engagement];
-}
-
-class EngagementOperationFailure extends EngagementState {
+class EngagementError extends EngagementState {
   final String error;
 
-  EngagementOperationFailure(this.error);
+  EngagementError(this.error);
 
   @override
   List<Object?> get props => [error];
-}
-
-// Multi-blog engagement state for blog lists
-class MultiBlogEngagementLoaded extends EngagementState {
-  final Map<String, BlogEngagement> engagements;
-
-  MultiBlogEngagementLoaded(this.engagements);
-
-  @override
-  List<Object?> get props => [engagements];
-
-  BlogEngagement? getEngagement(String blogId) => engagements[blogId];
 }

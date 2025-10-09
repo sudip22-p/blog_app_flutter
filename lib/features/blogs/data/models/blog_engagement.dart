@@ -100,8 +100,6 @@ class BlogComment {
   final String userAvatar;
   final String content;
   final DateTime createdAt;
-  final Map<String, bool> likes; // userId -> true/false for comment likes
-  final int likesCount;
 
   BlogComment({
     required this.id,
@@ -110,8 +108,6 @@ class BlogComment {
     this.userAvatar = '',
     required this.content,
     required this.createdAt,
-    this.likes = const {},
-    this.likesCount = 0,
   });
 
   Map<String, dynamic> toMap() {
@@ -121,13 +117,10 @@ class BlogComment {
       'userAvatar': userAvatar,
       'content': content,
       'createdAt': createdAt.millisecondsSinceEpoch,
-      'likes': likes,
-      'likesCount': likesCount,
     };
   }
 
   factory BlogComment.fromMap(Map<String, dynamic> map, String commentId) {
-    final likesMap = Map<String, bool>.from(map['likes'] ?? {});
     return BlogComment(
       id: commentId,
       userId: map['userId'] ?? '',
@@ -135,15 +128,10 @@ class BlogComment {
       userAvatar: map['userAvatar'] ?? '',
       content: map['content'] ?? '',
       createdAt: DateTime.fromMillisecondsSinceEpoch(map['createdAt'] ?? 0),
-      likes: likesMap,
-      likesCount: map['likesCount'] ?? 0,
     );
   }
 
-  // Helper method to check if user liked this comment
-  bool isLikedBy(String userId) => likes[userId] == true;
-
-  // Helper method to create copy with updated likes
+  // Helper method to create copy
   BlogComment copyWith({
     String? id,
     String? userId,
@@ -151,8 +139,6 @@ class BlogComment {
     String? userAvatar,
     String? content,
     DateTime? createdAt,
-    Map<String, bool>? likes,
-    int? likesCount,
   }) {
     return BlogComment(
       id: id ?? this.id,
@@ -161,13 +147,11 @@ class BlogComment {
       userAvatar: userAvatar ?? this.userAvatar,
       content: content ?? this.content,
       createdAt: createdAt ?? this.createdAt,
-      likes: likes ?? this.likes,
-      likesCount: likesCount ?? this.likesCount,
     );
   }
 
   @override
   String toString() {
-    return 'BlogComment(id: $id, userId: $userId, userName: $userName, content: $content, likesCount: $likesCount)';
+    return 'BlogComment(id: $id, userId: $userId, userName: $userName, content: $content)';
   }
 }

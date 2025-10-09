@@ -1,8 +1,6 @@
 import 'package:blog_app/features/blogs/data/models/blog.dart';
 import 'package:blog_app/features/blogs/data/models/blog_engagement.dart';
-import 'package:blog_app/features/blogs/presentation/bloc/engagement/engagement_bloc.dart';
-import 'package:blog_app/features/blogs/presentation/bloc/engagement/engagement_state.dart';
-import 'package:blog_app/features/blogs/presentation/bloc/engagement/engagement_event.dart';
+import 'package:blog_app/features/blogs/data/services/realtime_database_engagement_service.dart';
 import 'package:blog_app/features/blogs/presentation/bloc/favorites/favorites_bloc.dart';
 import 'package:blog_app/features/blogs/presentation/screens/blog_preview_screen.dart';
 import 'package:flutter/material.dart';
@@ -433,78 +431,159 @@ class _AuthorSection extends StatelessWidget {
   }
 }
 
-class _BlogStats extends StatelessWidget {
+class _BlogStats extends StatefulWidget {
   final Blog blog;
   final ThemeData theme;
 
   const _BlogStats({required this.blog, required this.theme});
 
   @override
+  State<_BlogStats> createState() => _BlogStatsState();
+}
+
+class _BlogStatsState extends State<_BlogStats> {
+  bool _isLiking = false;
+  BlogEngagement? _engagement;
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadEngagement();
+  }
+
+  Future<void> _loadEngagement() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final service = RealtimeDatabaseEngagementService();
+      final engagement = await service.getBlogEngagement(widget.blog.id);
+      if (mounted) {
+        setState(() {
+          _engagement = engagement;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return BlocBuilder<EngagementBloc, EngagementState>(
-      builder: (context, state) {
-        BlogEngagement? engagement;
+    // Use local state instead of BLoC for simple display
+    final likeCount = _engagement?.likesCount ?? 0;
+    final viewCount = _engagement?.viewsCount ?? 0;
+    final commentCount = _engagement?.commentsCount ?? 0;
 
-        if (state is EngagementLoaded) {
-          engagement = state.engagement;
-        } else if (state is! EngagementLoading) {
-          // Only load if not already loading
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            context.read<EngagementBloc>().add(LoadBlogEngagement(blog.id));
-          });
-        }
-
-        // Default values if no engagement data
-        final likeCount = engagement?.likesCount ?? 0;
-        final viewCount = engagement?.viewsCount ?? 0;
-        final commentCount = engagement?.commentsCount ?? 0;
-
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: BoxDecoration(
-            color: theme.colorScheme.surfaceContainerHighest.withValues(
-              alpha: 0.3,
-            ),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: theme.colorScheme.outline.withValues(alpha: 0.1),
-              width: 1,
-            ),
+    if (_isLoading) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: widget.theme.colorScheme.surfaceContainerHighest.withValues(
+            alpha: 0.3,
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _StatItem(
-                icon: Icons.favorite_rounded,
-                count: likeCount,
-                color: Colors.red.shade400,
-                theme: theme,
-                onTap: () {
-                  final userId = FirebaseAuth.instance.currentUser?.uid;
-                  if (userId != null) {
-                    context.read<EngagementBloc>().add(
-                      ToggleLike(blog.id, userId),
-                    );
-                  }
-                },
-              ),
-              _StatItem(
-                icon: Icons.visibility_rounded,
-                count: viewCount,
-                color: theme.colorScheme.primary,
-                theme: theme,
-              ),
-              _StatItem(
-                icon: Icons.chat_bubble_rounded,
-                count: commentCount,
-                color: theme.colorScheme.onSurfaceVariant,
-                theme: theme,
-              ),
-            ],
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: widget.theme.colorScheme.outline.withValues(alpha: 0.1),
+            width: 1,
           ),
-        );
-      },
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  widget.theme.colorScheme.primary,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: widget.theme.colorScheme.surfaceContainerHighest.withValues(
+          alpha: 0.3,
+        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: widget.theme.colorScheme.outline.withValues(alpha: 0.1),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          _StatItem(
+            icon: Icons.favorite_rounded,
+            count: likeCount,
+            color: Colors.red.shade400,
+            theme: widget.theme,
+            isLoading: _isLiking,
+            onTap: () => _handleLikeTap(),
+          ),
+          _StatItem(
+            icon: Icons.visibility_rounded,
+            count: viewCount,
+            color: widget.theme.colorScheme.primary,
+            theme: widget.theme,
+            isLoading: false,
+          ),
+          _StatItem(
+            icon: Icons.chat_bubble_rounded,
+            count: commentCount,
+            color: widget.theme.colorScheme.onSurfaceVariant,
+            theme: widget.theme,
+            isLoading: false,
+          ),
+        ],
+      ),
     );
+  }
+
+  void _handleLikeTap() async {
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId == null || _isLiking) return;
+
+    // Simple loading state
+    setState(() {
+      _isLiking = true;
+    });
+
+    try {
+      // Direct database call
+      final service = RealtimeDatabaseEngagementService();
+      await service.toggleLike(widget.blog.id, userId);
+
+      // Reload engagement data to get updated counts
+      await _loadEngagement();
+
+      if (mounted) {
+        setState(() {
+          _isLiking = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLiking = false;
+        });
+      }
+    }
   }
 }
 
@@ -514,6 +593,7 @@ class _StatItem extends StatelessWidget {
   final Color color;
   final ThemeData theme;
   final VoidCallback? onTap;
+  final bool isLoading;
 
   const _StatItem({
     required this.icon,
@@ -521,6 +601,7 @@ class _StatItem extends StatelessWidget {
     required this.color,
     required this.theme,
     this.onTap,
+    this.isLoading = false,
   });
 
   @override
@@ -528,7 +609,16 @@ class _StatItem extends StatelessWidget {
     Widget content = Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 16, color: color),
+        isLoading
+            ? SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(color),
+                ),
+              )
+            : Icon(icon, size: 16, color: color),
         const SizedBox(width: 4),
         Text(
           _formatCount(count),
@@ -545,7 +635,7 @@ class _StatItem extends StatelessWidget {
       return Material(
         color: Colors.transparent,
         child: InkWell(
-          onTap: onTap,
+          onTap: isLoading ? null : onTap,
           borderRadius: BorderRadius.circular(8),
           child: Padding(padding: const EdgeInsets.all(4), child: content),
         ),
