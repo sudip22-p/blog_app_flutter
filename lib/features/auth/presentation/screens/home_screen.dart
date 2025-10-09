@@ -160,6 +160,14 @@ class ProfileDialog extends StatelessWidget {
           children: [
             Row(
               children: [
+                const Icon(Icons.person, color: Colors.green),
+                const SizedBox(width: 8),
+                Expanded(child: Text(user?.displayName ?? 'No name')),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
                 const Icon(Icons.email, color: Colors.blue),
                 const SizedBox(width: 8),
                 Expanded(child: Text(user?.email ?? 'No email')),

@@ -46,12 +46,21 @@ class AuthService {
   Future<UserCredential?> createUserWithEmailAndPassword({
     required String email,
     required String password,
+    required String name,
   }) async {
     try {
       final credential = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
+
+      // Set the display name for the newly created user
+      if (credential.user != null) {
+        await credential.user!.updateDisplayName(name);
+        // Reload user to get updated data
+        await credential.user!.reload();
+      }
+
       return credential;
     } on FirebaseAuthException catch (e) {
       switch (e.code) {

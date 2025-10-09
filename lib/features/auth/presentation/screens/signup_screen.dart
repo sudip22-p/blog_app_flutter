@@ -11,6 +11,7 @@ class SignUpScreen extends StatefulWidget {
 
 class _SignUpScreenState extends State<SignUpScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
@@ -19,6 +20,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   @override
   void dispose() {
+    _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
@@ -30,10 +32,25 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
     context.read<AuthBloc>().add(
       AuthSignUpRequested(
+        name: _nameController.text.trim(),
         email: _emailController.text.trim(),
         password: _passwordController.text,
       ),
     );
+  }
+
+  void _signInWithGoogle() {
+    context.read<AuthBloc>().add(AuthGoogleSignInRequested());
+  }
+
+  String? _validateName(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Name is required';
+    }
+    if (value.trim().length < 2) {
+      return 'Name must be at least 2 characters';
+    }
+    return null;
   }
 
   String? _validateEmail(String? value) {
@@ -137,6 +154,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
           if (state is AuthSignUpSuccess) {
             // Show success message and ask about email verification
             _showEmailVerificationDialog(context, state.message);
+          } else if (state is AuthAuthenticated) {
+            // Handle successful Google sign-in - navigate back to let AuthWrapper handle it
+            Navigator.of(context).pop();
           } else if (state is AuthEmailVerificationSent) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -170,6 +190,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 48),
+
+                  TextFormField(
+                    controller: _nameController,
+                    keyboardType: TextInputType.name,
+                    textCapitalization: TextCapitalization.words,
+                    validator: _validateName,
+                    decoration: const InputDecoration(
+                      labelText: 'Full Name',
+                      prefixIcon: Icon(Icons.person_outlined),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
 
                   TextFormField(
                     controller: _emailController,
@@ -237,6 +269,38 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         child: isLoading
                             ? const CircularProgressIndicator()
                             : const Text('Create Account'),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Divider with "OR"
+                  Row(
+                    children: [
+                      const Expanded(child: Divider()),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          'OR',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ),
+                      const Expanded(child: Divider()),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Google Sign In Button
+                  BlocBuilder<AuthBloc, AuthState>(
+                    builder: (context, state) {
+                      final isLoading = state is AuthLoading;
+                      return OutlinedButton.icon(
+                        onPressed: isLoading ? null : _signInWithGoogle,
+                        icon: const Icon(Icons.g_mobiledata, size: 24),
+                        label: const Text('Continue with Google'),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
                       );
                     },
                   ),

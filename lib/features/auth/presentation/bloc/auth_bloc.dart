@@ -56,6 +56,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       final userCredential = await _authService.createUserWithEmailAndPassword(
         email: event.email,
         password: event.password,
+        name: event.name,
       );
 
       if (userCredential?.user != null) {
