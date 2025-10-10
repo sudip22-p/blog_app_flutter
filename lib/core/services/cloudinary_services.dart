@@ -14,4 +14,15 @@ class CloudinaryService {
     );
     return response.secureUrl;
   }
+
+  Future<String> uploadProfilePicture(File image, String userId) async {
+    final response = await _cloudinary.uploadFile(
+      CloudinaryFile.fromFile(
+        image.path,
+        folder: 'blogs/profile_pictures',
+        publicId: 'user_$userId',
+      ),
+    );
+    return response.secureUrl;
+  }
 }

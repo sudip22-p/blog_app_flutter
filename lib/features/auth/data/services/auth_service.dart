@@ -1,9 +1,13 @@
+import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:blog_app/core/services/cloudinary_services.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final CloudinaryService _cloudinaryService = CloudinaryService();
 
   // Get current user
   User? get currentUser => _auth.currentUser;
@@ -163,6 +167,55 @@ class AuthService {
       }
     } catch (e) {
       throw 'Failed to update display name: $e';
+    }
+  }
+
+  // Update user photo URL
+  Future<void> updatePhotoURL(String photoURL) async {
+    try {
+      final user = _auth.currentUser;
+      if (user != null) {
+        await user.updatePhotoURL(photoURL);
+        await user.reload();
+      } else {
+        throw 'No user is currently signed in.';
+      }
+    } catch (e) {
+      throw 'Failed to update profile picture: $e';
+    }
+  }
+
+  // Pick image and update photo URL
+  Future<void> updateProfilePicture() async {
+    try {
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 512,
+        maxHeight: 512,
+        imageQuality: 75,
+      );
+
+      if (pickedFile == null) {
+        throw 'No image selected.';
+      }
+
+      final user = _auth.currentUser;
+      if (user == null) {
+        throw 'No user is currently signed in.';
+      }
+
+      // Upload to Cloudinary using the service
+      final imageFile = File(pickedFile.path);
+      final imageUrl = await _cloudinaryService.uploadProfilePicture(
+        imageFile,
+        user.uid,
+      );
+
+      // Update Firebase Auth photo URL
+      await updatePhotoURL(imageUrl);
+    } catch (e) {
+      throw 'Failed to update profile picture: $e';
     }
   }
 

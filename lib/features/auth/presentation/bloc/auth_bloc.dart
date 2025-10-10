@@ -23,6 +23,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthSendPasswordResetRequested>(_onAuthSendPasswordResetRequested);
     on<AuthDeleteAccountRequested>(_onAuthDeleteAccountRequested);
     on<AuthUpdateDisplayNameRequested>(_onAuthUpdateDisplayNameRequested);
+    on<AuthUpdateProfilePictureRequested>(_onAuthUpdateProfilePictureRequested);
     on<AuthLoadProfileRequested>(_onAuthLoadProfileRequested);
   }
   Future<void> _onAuthSignInRequested(
@@ -173,6 +174,24 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       await _authService.updateDisplayName(event.displayName);
       emit(const AuthProfileUpdated(message: 'Profile updated successfully!'));
+    } catch (e) {
+      emit(AuthError(message: e.toString()));
+    }
+  }
+
+  Future<void> _onAuthUpdateProfilePictureRequested(
+    AuthUpdateProfilePictureRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthLoading());
+
+    try {
+      await _authService.updateProfilePicture();
+      emit(
+        const AuthProfileUpdated(
+          message: 'Profile picture updated successfully!',
+        ),
+      );
     } catch (e) {
       emit(AuthError(message: e.toString()));
     }

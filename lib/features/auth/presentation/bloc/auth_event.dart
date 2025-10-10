@@ -58,4 +58,6 @@ class AuthUpdateDisplayNameRequested extends AuthEvent {
   List<Object?> get props => [displayName];
 }
 
+class AuthUpdateProfilePictureRequested extends AuthEvent {}
+
 class AuthLoadProfileRequested extends AuthEvent {}
