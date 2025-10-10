@@ -235,7 +235,7 @@ class _ExploreBlogsScreenState extends State<ExploreBlogsScreen> {
             slivers: [
               // Compact App Bar with Prominent Search
               SliverAppBar(
-                expandedHeight: 120, // Reduced from 160 to 120
+                expandedHeight: 130,
                 floating: true,
                 pinned: true,
                 automaticallyImplyLeading: false,

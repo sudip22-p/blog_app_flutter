@@ -25,8 +25,8 @@ class AppSearchBar extends StatelessWidget {
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: theme.colorScheme.outline.withValues(alpha: 0.6),
-          width: 1,
+          color: theme.colorScheme.outline.withValues(alpha: 0.8),
+          width: 2,
         ),
         boxShadow: [
           BoxShadow(
