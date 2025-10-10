@@ -48,28 +48,28 @@ class BlogCard extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          onTap: onTap ?? () => _navigateToBlogPreview(context),
+          onTap: onTap ?? () => navigateToBlogPreview(context),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _CoverImageSection(blog: blog, theme: theme),
+              CoverImageSection(blog: blog, theme: theme),
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _TagsSection(tags: blog.tags, theme: theme),
+                    TagsSection(tags: blog.tags, theme: theme),
                     if (blog.tags.isNotEmpty) const SizedBox(height: 8),
-                    _BlogTitle(title: blog.title, theme: theme),
+                    BlogTitle(title: blog.title, theme: theme),
                     const SizedBox(height: 6),
-                    _BlogContent(content: blog.content, theme: theme),
+                    BlogContent(content: blog.content, theme: theme),
                     const SizedBox(height: 12),
-                    _AuthorSection(blog: blog, theme: theme),
+                    AuthorSection(blog: blog, theme: theme),
                     const SizedBox(height: 12),
-                    _BlogStats(blog: blog, theme: theme),
+                    BlogStats(blog: blog, theme: theme),
                     if (showActions) ...[
                       const SizedBox(height: 12),
-                      _ActionButtons(
+                      ActionButtons(
                         onEdit: onEdit,
                         onDelete: onDelete,
                         theme: theme,
@@ -85,7 +85,7 @@ class BlogCard extends StatelessWidget {
     );
   }
 
-  void _navigateToBlogPreview(BuildContext context) {
+  void navigateToBlogPreview(BuildContext context) {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => BlogPreviewScreen(blog: blog)),
@@ -93,27 +93,27 @@ class BlogCard extends StatelessWidget {
   }
 }
 
-class _CoverImageSection extends StatefulWidget {
+class CoverImageSection extends StatefulWidget {
   final Blog blog;
   final ThemeData theme;
 
-  const _CoverImageSection({required this.blog, required this.theme});
+  const CoverImageSection({super.key, required this.blog, required this.theme});
 
   @override
-  State<_CoverImageSection> createState() => _CoverImageSectionState();
+  State<CoverImageSection> createState() => CoverImageSectionState();
 }
 
-class _CoverImageSectionState extends State<_CoverImageSection> {
-  bool? _localFavoriteState; // For instant UI feedback
-  bool _isLoading = false;
+class CoverImageSectionState extends State<CoverImageSection> {
+  bool? localFavoriteState; // For instant UI feedback
+  bool isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _ensureFavoritesLoaded();
+    ensureFavoritesLoaded();
   }
 
-  void _ensureFavoritesLoaded() {
+  void ensureFavoritesLoaded() {
     final userId = FirebaseAuth.instance.currentUser?.uid;
     if (userId != null) {
       // Use addPostFrameCallback to ensure context is ready
@@ -178,15 +178,15 @@ class _CoverImageSectionState extends State<_CoverImageSection> {
               },
             ),
           ),
-          // Simple favorite button
+          // favorite button
           Positioned(
             top: 8,
             right: 8,
             child: BlocBuilder<FavoritesBloc, FavoritesState>(
               builder: (context, state) {
-                // Use local state for instant feedback, fallback to bloc state
+                //local state for instant feedback, fallback to bloc state
                 bool isFavorite =
-                    _localFavoriteState ??
+                    localFavoriteState ??
                     (state is FavoritesLoaded
                         ? state.isFavorited(widget.blog.id)
                         : false);
@@ -206,14 +206,14 @@ class _CoverImageSectionState extends State<_CoverImageSection> {
                   child: Material(
                     color: Colors.transparent,
                     child: InkWell(
-                      onTap: () => _handleFavoriteTap(userId, isFavorite),
+                      onTap: () => handleFavoriteTap(userId, isFavorite),
                       borderRadius: BorderRadius.circular(20),
                       child: Container(
-                        padding: const EdgeInsets.all(8),
-                        child: _isLoading
+                        padding: const EdgeInsets.all(5),
+                        child: isLoading
                             ? SizedBox(
-                                width: 20,
-                                height: 20,
+                                width: 16,
+                                height: 16,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
                                   valueColor: AlwaysStoppedAnimation<Color>(
@@ -244,44 +244,43 @@ class _CoverImageSectionState extends State<_CoverImageSection> {
     );
   }
 
-  void _handleFavoriteTap(String? userId, bool currentlyFavorite) async {
-    if (userId == null || _isLoading) return;
+  void handleFavoriteTap(String? userId, bool currentlyFavorite) async {
+    if (userId == null || isLoading) return;
 
     // Instant UI update
     setState(() {
-      _localFavoriteState = !currentlyFavorite;
-      _isLoading = true;
+      localFavoriteState = !currentlyFavorite;
+      isLoading = true;
     });
 
     try {
-      // Simple database call
       context.read<FavoritesBloc>().add(ToggleFavorite(userId, widget.blog.id));
 
       // Reset after short delay
-      await Future.delayed(const Duration(milliseconds: 1000));
+      await Future.delayed(const Duration(milliseconds: 500));
       if (mounted) {
         setState(() {
-          _localFavoriteState = null;
-          _isLoading = false;
+          localFavoriteState = null;
+          isLoading = false;
         });
       }
     } catch (e) {
       // Revert on error
       if (mounted) {
         setState(() {
-          _localFavoriteState = currentlyFavorite;
-          _isLoading = false;
+          localFavoriteState = currentlyFavorite;
+          isLoading = false;
         });
       }
     }
   }
 }
 
-class _TagsSection extends StatelessWidget {
+class TagsSection extends StatelessWidget {
   final List<String> tags;
   final ThemeData theme;
 
-  const _TagsSection({required this.tags, required this.theme});
+  const TagsSection({super.key, required this.tags, required this.theme});
 
   @override
   Widget build(BuildContext context) {
@@ -311,11 +310,11 @@ class _TagsSection extends StatelessWidget {
   }
 }
 
-class _BlogTitle extends StatelessWidget {
+class BlogTitle extends StatelessWidget {
   final String title;
   final ThemeData theme;
 
-  const _BlogTitle({required this.title, required this.theme});
+  const BlogTitle({super.key, required this.title, required this.theme});
 
   @override
   Widget build(BuildContext context) {
@@ -332,11 +331,11 @@ class _BlogTitle extends StatelessWidget {
   }
 }
 
-class _BlogContent extends StatelessWidget {
+class BlogContent extends StatelessWidget {
   final String content;
   final ThemeData theme;
 
-  const _BlogContent({required this.content, required this.theme});
+  const BlogContent({super.key, required this.content, required this.theme});
 
   @override
   Widget build(BuildContext context) {
@@ -353,11 +352,11 @@ class _BlogContent extends StatelessWidget {
   }
 }
 
-class _AuthorSection extends StatelessWidget {
+class AuthorSection extends StatelessWidget {
   final Blog blog;
   final ThemeData theme;
 
-  const _AuthorSection({required this.blog, required this.theme});
+  const AuthorSection({super.key, required this.blog, required this.theme});
 
   @override
   Widget build(BuildContext context) {
@@ -396,13 +395,13 @@ class _AuthorSection extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                blog.authorName,
+                blog.authorName == "" ? "Anonymous" : blog.authorName,
                 style: theme.textTheme.labelMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
               ),
               Text(
-                _formatTimeAgo(blog.createdAt),
+                formatTimeAgo(blog.createdAt),
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                   fontSize: 11,
@@ -415,7 +414,7 @@ class _AuthorSection extends StatelessWidget {
     );
   }
 
-  String _formatTimeAgo(DateTime dateTime) {
+  String formatTimeAgo(DateTime dateTime) {
     final now = DateTime.now();
     final difference = now.difference(dateTime);
 
@@ -431,45 +430,45 @@ class _AuthorSection extends StatelessWidget {
   }
 }
 
-class _BlogStats extends StatefulWidget {
+class BlogStats extends StatefulWidget {
   final Blog blog;
   final ThemeData theme;
 
-  const _BlogStats({required this.blog, required this.theme});
+  const BlogStats({super.key, required this.blog, required this.theme});
 
   @override
-  State<_BlogStats> createState() => _BlogStatsState();
+  State<BlogStats> createState() => BlogStatsState();
 }
 
-class _BlogStatsState extends State<_BlogStats> {
-  bool _isLiking = false;
-  BlogEngagement? _engagement;
-  bool _isLoading = false;
+class BlogStatsState extends State<BlogStats> {
+  bool isLiking = false;
+  BlogEngagement? engagement;
+  bool isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _loadEngagement();
+    loadEngagement();
   }
 
-  Future<void> _loadEngagement() async {
+  Future<void> loadEngagement() async {
     setState(() {
-      _isLoading = true;
+      isLoading = true;
     });
 
     try {
       final service = RealtimeDatabaseEngagementService();
-      final engagement = await service.getBlogEngagement(widget.blog.id);
+      final engagementData = await service.getBlogEngagement(widget.blog.id);
       if (mounted) {
         setState(() {
-          _engagement = engagement;
-          _isLoading = false;
+          engagement = engagementData;
+          isLoading = false;
         });
       }
     } catch (e) {
       if (mounted) {
         setState(() {
-          _isLoading = false;
+          isLoading = false;
         });
       }
     }
@@ -478,11 +477,11 @@ class _BlogStatsState extends State<_BlogStats> {
   @override
   Widget build(BuildContext context) {
     // Use local state instead of BLoC for simple display
-    final likeCount = _engagement?.likesCount ?? 0;
-    final viewCount = _engagement?.viewsCount ?? 0;
-    final commentCount = _engagement?.commentsCount ?? 0;
+    final likeCount = engagement?.likesCount ?? 0;
+    final viewCount = engagement?.viewsCount ?? 0;
+    final commentCount = engagement?.commentsCount ?? 0;
 
-    if (_isLoading) {
+    if (isLoading) {
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
@@ -528,23 +527,23 @@ class _BlogStatsState extends State<_BlogStats> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          _StatItem(
-            icon: Icons.favorite_rounded,
+          StatItem(
+            icon: Icons.thumb_up,
             count: likeCount,
-            color: Colors.red.shade400,
+            color: widget.theme.colorScheme.primary,
             theme: widget.theme,
-            isLoading: _isLiking,
-            onTap: () => _handleLikeTap(),
+            isLoading: isLiking,
+            onTap: () => handleLikeTap(),
           ),
-          _StatItem(
+          StatItem(
             icon: Icons.visibility_rounded,
             count: viewCount,
-            color: widget.theme.colorScheme.primary,
+            color: widget.theme.colorScheme.onSurfaceVariant,
             theme: widget.theme,
             isLoading: false,
           ),
-          _StatItem(
-            icon: Icons.chat_bubble_rounded,
+          StatItem(
+            icon: Icons.message_rounded,
             count: commentCount,
             color: widget.theme.colorScheme.onSurfaceVariant,
             theme: widget.theme,
@@ -555,13 +554,13 @@ class _BlogStatsState extends State<_BlogStats> {
     );
   }
 
-  void _handleLikeTap() async {
+  void handleLikeTap() async {
     final userId = FirebaseAuth.instance.currentUser?.uid;
-    if (userId == null || _isLiking) return;
+    if (userId == null || isLiking) return;
 
     // Simple loading state
     setState(() {
-      _isLiking = true;
+      isLiking = true;
     });
 
     try {
@@ -570,24 +569,24 @@ class _BlogStatsState extends State<_BlogStats> {
       await service.toggleLike(widget.blog.id, userId);
 
       // Reload engagement data to get updated counts
-      await _loadEngagement();
+      await loadEngagement();
 
       if (mounted) {
         setState(() {
-          _isLiking = false;
+          isLiking = false;
         });
       }
     } catch (e) {
       if (mounted) {
         setState(() {
-          _isLiking = false;
+          isLiking = false;
         });
       }
     }
   }
 }
 
-class _StatItem extends StatelessWidget {
+class StatItem extends StatelessWidget {
   final IconData icon;
   final int count;
   final Color color;
@@ -595,7 +594,8 @@ class _StatItem extends StatelessWidget {
   final VoidCallback? onTap;
   final bool isLoading;
 
-  const _StatItem({
+  const StatItem({
+    super.key,
     required this.icon,
     required this.count,
     required this.color,
@@ -621,7 +621,7 @@ class _StatItem extends StatelessWidget {
             : Icon(icon, size: 16, color: color),
         const SizedBox(width: 4),
         Text(
-          _formatCount(count),
+          formatCount(count),
           style: theme.textTheme.bodySmall?.copyWith(
             color: theme.colorScheme.onSurface,
             fontWeight: FontWeight.w600,
@@ -645,7 +645,7 @@ class _StatItem extends StatelessWidget {
     return content;
   }
 
-  String _formatCount(int count) {
+  String formatCount(int count) {
     if (count >= 1000) {
       return '${(count / 1000).toStringAsFixed(1)}k';
     }
@@ -653,12 +653,13 @@ class _StatItem extends StatelessWidget {
   }
 }
 
-class _ActionButtons extends StatelessWidget {
+class ActionButtons extends StatelessWidget {
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
   final ThemeData theme;
 
-  const _ActionButtons({
+  const ActionButtons({
+    super.key,
     required this.onEdit,
     required this.onDelete,
     required this.theme,

@@ -239,7 +239,9 @@ class _BlogPreviewScreenState extends State<BlogPreviewScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                widget.blog.authorName,
+                                widget.blog.authorName == ""
+                                    ? "Anonymous"
+                                    : widget.blog.authorName,
                                 style: theme.textTheme.bodyMedium?.copyWith(
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -286,9 +288,9 @@ class _BlogPreviewScreenState extends State<BlogPreviewScreen> {
                               ),
                               const SizedBox(width: 16),
                               Icon(
-                                Icons.favorite,
+                                Icons.thumb_up_alt_rounded,
                                 size: 16,
-                                color: Colors.red.withValues(alpha: 0.7),
+                                color: theme.colorScheme.primary,
                               ),
                               const SizedBox(width: 4),
                               Text(
@@ -586,22 +588,30 @@ class _LikeButtonState extends State<_LikeButton> {
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
                     valueColor: AlwaysStoppedAnimation<Color>(
-                      displayLiked ? Colors.red : theme.colorScheme.primary,
+                      displayLiked
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.primary,
                     ),
                   ),
                 )
               : Icon(
-                  displayLiked ? Icons.favorite : Icons.favorite_border,
-                  size: 18,
-                  color: displayLiked ? Colors.red : null,
+                  displayLiked
+                      ? Icons.thumb_up_alt_rounded
+                      : Icons.thumb_up_outlined,
+                  size: 20,
+                  color: displayLiked
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.onSurface,
                 ),
           label: Text(displayLiked ? 'Liked' : 'Like'),
           style: OutlinedButton.styleFrom(
             foregroundColor: displayLiked
-                ? Colors.red
-                : theme.colorScheme.primary,
+                ? theme.colorScheme.primary
+                : theme.colorScheme.onSurface,
             side: BorderSide(
-              color: displayLiked ? Colors.red : theme.colorScheme.outline,
+              color: displayLiked
+                  ? theme.colorScheme.primary
+                  : theme.colorScheme.outline,
             ),
           ),
         );
