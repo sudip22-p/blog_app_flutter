@@ -126,8 +126,27 @@ class AuthService {
   // Send email verification
   Future<void> sendEmailVerification() async {
     try {
-      await _auth.currentUser?.sendEmailVerification();
+      final user = _auth.currentUser;
+      if (user == null) {
+        throw 'No user is currently signed in.';
+      }
+
+      if (user.emailVerified) {
+        throw 'Email is already verified.';
+      }
+
+      await user.sendEmailVerification();
+    } on FirebaseAuthException catch (e) {
+      switch (e.code) {
+        case 'too-many-requests':
+          throw 'Too many verification emails sent. Please wait before requesting another.';
+        default:
+          throw 'Failed to send verification email. Please try again.';
+      }
     } catch (e) {
+      if (e.toString().contains('Email is already verified')) {
+        rethrow;
+      }
       throw 'Failed to send verification email.';
     }
   }
@@ -183,16 +202,30 @@ class AuthService {
     return 'User';
   }
 
-  // Delete current user account (minimal implementation)
+  // Delete current user account
   Future<void> deleteAccount() async {
     try {
-      await _auth.currentUser?.delete();
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'requires-recent-login') {
-        throw 'Please sign in again before deleting your account.';
+      final user = _auth.currentUser;
+      if (user == null) {
+        throw 'No user is currently signed in.';
       }
-      throw 'Failed to delete account. Please try again.';
+
+      await user.delete();
+    } on FirebaseAuthException catch (e) {
+      switch (e.code) {
+        case 'requires-recent-login':
+          throw 'For security reasons, please sign in again before deleting your account.';
+        case 'user-disabled':
+          throw 'This account has been disabled and cannot be deleted.';
+        case 'user-not-found':
+          throw 'Account not found.';
+        default:
+          throw 'Failed to delete account: ${e.message ?? 'Unknown error'}';
+      }
     } catch (e) {
+      if (e.toString().contains('No user is currently signed in')) {
+        rethrow;
+      }
       throw 'Failed to delete account. Please try again.';
     }
   }

@@ -73,17 +73,27 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   }
 
   void _sendEmailVerification() {
-    // TODO: Implement email verification
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Email verification sent!')));
+    if (userProfile?['emailVerified'] == true) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Email is already verified!')),
+      );
+      return;
+    }
+
+    context.read<AuthBloc>().add(AuthSendEmailVerificationRequested());
   }
 
   void _sendPasswordReset() {
-    // TODO: Implement password reset
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Password reset email sent!')));
+    final email = userProfile?['email'];
+    if (email != null) {
+      context.read<AuthBloc>().add(
+        AuthSendPasswordResetRequested(email: email),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Email not found. Please try again.')),
+      );
+    }
   }
 
   void _showLogoutDialog() {
@@ -111,30 +121,136 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   }
 
   void _showDeleteAccountDialog() {
+    String deleteConfirmation = '';
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: Row(
+            children: [
+              Icon(Icons.warning, color: Theme.of(context).colorScheme.error),
+              const SizedBox(width: 8),
+              const Text('Delete Account'),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Are you sure you want to permanently delete your account?',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 12),
+              const Text('This action will:'),
+              const SizedBox(height: 8),
+              const Text('• Delete all your data permanently'),
+              const Text('• Remove access to all your blogs'),
+              const Text('• Cannot be undone'),
+              const SizedBox(height: 12),
+              Text(
+                'Type "DELETE" to confirm:',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.error,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                onChanged: (value) {
+                  setState(() {
+                    deleteConfirmation = value;
+                  });
+                },
+                decoration: InputDecoration(
+                  hintText: 'Type DELETE here',
+                  border: const OutlineInputBorder(),
+                  errorText:
+                      deleteConfirmation.isNotEmpty &&
+                          deleteConfirmation != 'DELETE'
+                      ? 'Must type exactly "DELETE"'
+                      : null,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: deleteConfirmation == 'DELETE'
+                  ? () {
+                      Navigator.pop(context);
+                      _showFinalDeleteConfirmation();
+                    }
+                  : null, // Disabled when not "DELETE"
+              style: TextButton.styleFrom(
+                foregroundColor: deleteConfirmation == 'DELETE'
+                    ? Theme.of(context).colorScheme.error
+                    : Theme.of(context).disabledColor,
+              ),
+              child: const Text('Delete'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showFinalDeleteConfirmation() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Account'),
-        content: const Text(
-          'Are you sure you want to delete your account? This action cannot be undone.',
+        title: Row(
+          children: [
+            Icon(Icons.dangerous, color: Theme.of(context).colorScheme.error),
+            const SizedBox(width: 8),
+            const Text('Final Confirmation'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              '⚠️ LAST WARNING ⚠️',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.error,
+              ),
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'You typed "DELETE" to confirm. Your account will be permanently deleted and cannot be recovered.',
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'Are you absolutely sure you want to proceed?',
+              style: TextStyle(fontWeight: FontWeight.w600),
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text('Cancel'),
           ),
-          TextButton(
+          ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
-              // TODO: Implement account deletion
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Account deletion requested')),
-              );
+              context.read<AuthBloc>().add(AuthDeleteAccountRequested());
+              Navigator.pop(context);
             },
-            style: TextButton.styleFrom(
-              foregroundColor: Theme.of(context).colorScheme.error,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+              foregroundColor: Theme.of(context).colorScheme.onError,
             ),
-            child: const Text('Delete'),
+            child: const Text('Yes, Delete Forever'),
           ),
         ],
       ),
@@ -207,6 +323,19 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Profile updated successfully!')),
             );
+          } else if (state is AuthEmailVerificationSent) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.message)));
+          } else if (state is AuthPasswordResetSent) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.message)));
+          } else if (state is AuthAccountDeleted) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.message)));
+            Navigator.pushReplacementNamed(context, '/login');
           } else if (state is AuthError) {
             ScaffoldMessenger.of(
               context,
