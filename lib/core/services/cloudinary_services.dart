@@ -1,10 +1,11 @@
 import 'dart:io';
+import 'package:blog_app/core/services/cloudinary_secrets.dart';
 import 'package:cloudinary_public/cloudinary_public.dart';
 
 class CloudinaryService {
   final _cloudinary = CloudinaryPublic(
-    'dn8myhtjp',
-    'blog_uploads',
+    CloudinarySecrets.key,
+    CloudinarySecrets.location,
     cache: false,
   );
 
