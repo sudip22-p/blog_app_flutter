@@ -22,8 +22,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
     on<AuthSendPasswordResetRequested>(_onAuthSendPasswordResetRequested);
     on<AuthDeleteAccountRequested>(_onAuthDeleteAccountRequested);
+    on<AuthUpdateDisplayNameRequested>(_onAuthUpdateDisplayNameRequested);
+    on<AuthLoadProfileRequested>(_onAuthLoadProfileRequested);
   }
-
   Future<void> _onAuthSignInRequested(
     AuthSignInRequested event,
     Emitter<AuthState> emit,
@@ -158,6 +159,47 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       await _authService.deleteAccount();
       emit(const AuthAccountDeleted(message: 'Account deleted successfully.'));
+    } catch (e) {
+      emit(AuthError(message: e.toString()));
+    }
+  }
+
+  Future<void> _onAuthUpdateDisplayNameRequested(
+    AuthUpdateDisplayNameRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthLoading());
+
+    try {
+      await _authService.updateDisplayName(event.displayName);
+      emit(const AuthProfileUpdated(message: 'Profile updated successfully!'));
+    } catch (e) {
+      emit(AuthError(message: e.toString()));
+    }
+  }
+
+  Future<void> _onAuthLoadProfileRequested(
+    AuthLoadProfileRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    // Don't emit loading if we're not in a state where we should load profile
+    if (state is! AuthAuthenticated) {
+      if (_authService.currentUser == null) {
+        emit(const AuthError(message: 'User not authenticated'));
+        return;
+      }
+      // User exists but BLoC state might be out of sync, continue with loading
+    }
+
+    emit(AuthLoading());
+
+    try {
+      final profile = await _authService.getCurrentUserProfile();
+      if (profile != null) {
+        emit(AuthProfileLoaded(profile: profile));
+      } else {
+        emit(const AuthError(message: 'Failed to load user profile'));
+      }
     } catch (e) {
       emit(AuthError(message: e.toString()));
     }

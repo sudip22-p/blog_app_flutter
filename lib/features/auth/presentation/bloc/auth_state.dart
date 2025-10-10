@@ -66,3 +66,21 @@ class AuthAccountDeleted extends AuthState {
   @override
   List<Object?> get props => [message];
 }
+
+class AuthProfileUpdated extends AuthState {
+  final String message;
+
+  const AuthProfileUpdated({required this.message});
+
+  @override
+  List<Object?> get props => [message];
+}
+
+class AuthProfileLoaded extends AuthState {
+  final Map<String, dynamic> profile;
+
+  const AuthProfileLoaded({required this.profile});
+
+  @override
+  List<Object?> get props => [profile];
+}

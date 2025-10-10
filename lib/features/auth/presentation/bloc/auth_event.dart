@@ -48,3 +48,14 @@ class AuthSendPasswordResetRequested extends AuthEvent {
 }
 
 class AuthDeleteAccountRequested extends AuthEvent {}
+
+class AuthUpdateDisplayNameRequested extends AuthEvent {
+  final String displayName;
+
+  const AuthUpdateDisplayNameRequested({required this.displayName});
+
+  @override
+  List<Object?> get props => [displayName];
+}
+
+class AuthLoadProfileRequested extends AuthEvent {}

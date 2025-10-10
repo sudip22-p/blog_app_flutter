@@ -310,6 +310,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Text("Already have an account? "),
+
                       TextButton(
                         onPressed: () => Navigator.pop(context),
                         child: const Text('Sign In'),

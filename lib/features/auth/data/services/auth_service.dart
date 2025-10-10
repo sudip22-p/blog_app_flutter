@@ -132,6 +132,57 @@ class AuthService {
     }
   }
 
+  // Update user display name
+  Future<void> updateDisplayName(String displayName) async {
+    try {
+      final user = _auth.currentUser;
+      if (user != null) {
+        await user.updateDisplayName(displayName);
+        await user.reload();
+      } else {
+        throw 'No user is currently signed in.';
+      }
+    } catch (e) {
+      throw 'Failed to update display name: $e';
+    }
+  }
+
+  // Get current user profile data
+  Future<Map<String, dynamic>?> getCurrentUserProfile() async {
+    try {
+      // Ensure we have the latest user data
+      await _auth.currentUser?.reload();
+
+      final user = _auth.currentUser;
+      if (user == null) return null;
+
+      return {
+        'uid': user.uid,
+        'email': user.email,
+        'displayName': user.displayName,
+        'photoURL': user.photoURL,
+        'emailVerified': user.emailVerified,
+        'createdAt': user.metadata.creationTime,
+      };
+    } catch (e) {
+      return null;
+    }
+  } // Check if user is signed in
+
+  bool get isSignedIn => _auth.currentUser != null;
+
+  // Get user display name with fallback
+  String getUserDisplayName() {
+    final user = _auth.currentUser;
+    if (user?.displayName != null && user!.displayName!.isNotEmpty) {
+      return user.displayName!;
+    }
+    if (user?.email != null && user!.email!.isNotEmpty) {
+      return user.email!.split('@')[0]; // Use email prefix as fallback
+    }
+    return 'User';
+  }
+
   // Delete current user account (minimal implementation)
   Future<void> deleteAccount() async {
     try {
