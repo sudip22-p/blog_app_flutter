@@ -276,7 +276,6 @@ class _ExploreBlogsScreenState extends State<ExploreBlogsScreen> {
                           ],
                         ),
                         const SizedBox(height: 12), 
-                        // Prominent Search Bar
                         AppSearchBar(
                           controller: _searchController,
                           searchQuery: _searchQuery,

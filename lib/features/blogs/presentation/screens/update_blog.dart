@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:blog_app/core/services/cloudinary_services.dart';
 import 'package:blog_app/features/blogs/data/models/blog.dart';
 import 'package:blog_app/features/blogs/presentation/bloc/blog/blog_bloc.dart';
@@ -13,22 +12,19 @@ class UpdateBlog extends StatefulWidget {
   const UpdateBlog({super.key, required this.blogId, required this.blogs});
   final String blogId;
   final List<Blog> blogs;
-
   @override
   State<UpdateBlog> createState() => _UpdateBlogState();
 }
 
 class _UpdateBlogState extends State<UpdateBlog> {
   late final Blog currentBlog;
-  File? _selectedImage;
-  String? _currentImageUrl;
-
+  File? selectedImage;
+  String? currentImageUrl;
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
   final _tagsController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-
-  bool _isLoading = false;
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -37,30 +33,26 @@ class _UpdateBlogState extends State<UpdateBlog> {
     _titleController.text = currentBlog.title;
     _contentController.text = currentBlog.content;
     _tagsController.text = currentBlog.tags.join(", ");
-    _currentImageUrl = currentBlog.coverImageUrl;
+    currentImageUrl = currentBlog.coverImageUrl;
   }
 
-  void _submitBlog() async {
+  void submitBlog() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
-        _isLoading = true;
+        isLoading = true;
       });
 
       try {
         final currentUser = FirebaseAuth.instance.currentUser;
         if (currentUser == null) return;
-
         final currentUserId = currentUser.uid;
         final currentUserName = currentUser.displayName ?? 'Anonymous';
         final cloudinaryService = CloudinaryService();
-
-        String imageUrl = _currentImageUrl ?? '';
+        String imageUrl = currentImageUrl ?? '';
         // Upload new image to Cloudinary if image was changed
-        if (_selectedImage != null) {
-          imageUrl = await cloudinaryService.uploadImage(_selectedImage!);
+        if (selectedImage != null) {
+          imageUrl = await cloudinaryService.uploadImage(selectedImage!);
         }
-
-        // Update blog via Bloc
         if (mounted) {
           context.read<BlogBloc>().add(
             BlogUpdated(
@@ -78,7 +70,6 @@ class _UpdateBlogState extends State<UpdateBlog> {
             ),
           );
         }
-
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -100,19 +91,19 @@ class _UpdateBlogState extends State<UpdateBlog> {
       } finally {
         if (mounted) {
           setState(() {
-            _isLoading = false;
+            isLoading = false;
           });
         }
       }
     }
   }
 
-  void _resetForm() {
+  void resetForm() {
     _titleController.text = currentBlog.title;
     _contentController.text = currentBlog.content;
     _tagsController.text = currentBlog.tags.join(", ");
-    _selectedImage = null;
-    _currentImageUrl = currentBlog.coverImageUrl;
+    selectedImage = null;
+    currentImageUrl = currentBlog.coverImageUrl;
     setState(() {});
   }
 
@@ -127,7 +118,6 @@ class _UpdateBlogState extends State<UpdateBlog> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Update Blog'),
@@ -164,12 +154,12 @@ class _UpdateBlogState extends State<UpdateBlog> {
                     ImagePickerWidget(
                       onImageSelected: (file) {
                         setState(() {
-                          _selectedImage = file;
+                          selectedImage = file;
                         });
                       },
                     ),
                     // Show current image if exists and no new image selected
-                    if (_currentImageUrl != null && _selectedImage == null)
+                    if (currentImageUrl != null && selectedImage == null)
                       Column(
                         children: [
                           const SizedBox(height: 8),
@@ -187,7 +177,7 @@ class _UpdateBlogState extends State<UpdateBlog> {
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(12),
                               child: Image.network(
-                                _currentImageUrl!,
+                                currentImageUrl!,
                                 fit: BoxFit.cover,
                                 errorBuilder: (context, error, stackTrace) {
                                   return Container(
@@ -234,9 +224,7 @@ class _UpdateBlogState extends State<UpdateBlog> {
                   ],
                 ),
               ),
-
               const SizedBox(height: 24),
-
               // Content Section
               FormSection(
                 title: 'Content',
@@ -256,7 +244,6 @@ class _UpdateBlogState extends State<UpdateBlog> {
                   },
                 ),
               ),
-
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -269,15 +256,15 @@ class _UpdateBlogState extends State<UpdateBlog> {
                   children: [
                     Expanded(
                       child: OutlinedButton(
-                        onPressed: _isLoading ? null : _resetForm,
+                        onPressed: isLoading ? null : resetForm,
                         child: const Text('Reset Changes'),
                       ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
                       child: ElevatedButton(
-                        onPressed: _isLoading ? null : _submitBlog,
-                        child: _isLoading
+                        onPressed: isLoading ? null : submitBlog,
+                        child: isLoading
                             ? const Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 mainAxisSize: MainAxisSize.min,

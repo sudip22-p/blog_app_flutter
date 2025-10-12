@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:blog_app/core/services/cloudinary_services.dart';
 import 'package:blog_app/features/blogs/presentation/bloc/blog/blog_bloc.dart';
 import 'package:blog_app/features/blogs/presentation/widgets/form_widgets.dart';
@@ -7,49 +6,37 @@ import 'package:blog_app/features/blogs/presentation/widgets/image_picker_widget
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:cloudinary_public/cloudinary_public.dart';
 
 class AddBlog extends StatefulWidget {
   const AddBlog({super.key});
-
   @override
   State<AddBlog> createState() => _AddBlogState();
 }
 
 class _AddBlogState extends State<AddBlog> {
-  final cloudinary = CloudinaryPublic(
-    'your-cloud-name',
-    'your-upload-preset',
-    cache: false,
-  );
-  File? _selectedImage;
+  File? selectedImage;
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
   final _tagsController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  bool isLoading = false;
 
-  bool _isLoading = false;
-
-  void _submitBlog() async {
+  void submitBlog() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
-        _isLoading = true;
+        isLoading = true;
       });
-
       try {
         final currentUser = FirebaseAuth.instance.currentUser;
         if (currentUser == null) return;
-
         final currentUserId = currentUser.uid;
         final currentUserName = currentUser.displayName ?? 'Anonymous';
         final cloudinaryService = CloudinaryService();
-
         String imageUrl = '';
         // Uploading to Cloudinary if image selected
-        if (_selectedImage != null) {
-          imageUrl = await cloudinaryService.uploadImage(_selectedImage!);
+        if (selectedImage != null) {
+          imageUrl = await cloudinaryService.uploadImage(selectedImage!);
         }
-        // Adding blog to Firestore via Bloc
         if (mounted) {
           context.read<BlogBloc>().add(
             NewBlogAdded(
@@ -66,8 +53,7 @@ class _AddBlogState extends State<AddBlog> {
             ),
           );
         }
-
-        _clearForm();
+        clearForm();
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -89,18 +75,18 @@ class _AddBlogState extends State<AddBlog> {
       } finally {
         if (mounted) {
           setState(() {
-            _isLoading = false;
+            isLoading = false;
           });
         }
       }
     }
   }
 
-  void _clearForm() {
+  void clearForm() {
     _titleController.clear();
     _contentController.clear();
     _tagsController.clear();
-    _selectedImage = null;
+    selectedImage = null;
   }
 
   @override
@@ -114,7 +100,6 @@ class _AddBlogState extends State<AddBlog> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Create New Blog'),
@@ -150,10 +135,9 @@ class _AddBlogState extends State<AddBlog> {
                     const SizedBox(height: 16),
                     ImagePickerWidget(
                       onImageSelected: (file) {
-                        _selectedImage = file;
+                        selectedImage = file;
                       },
                     ),
-
                     const SizedBox(height: 16),
                     CustomTextFormField(
                       controller: _tagsController,
@@ -173,9 +157,7 @@ class _AddBlogState extends State<AddBlog> {
                   ],
                 ),
               ),
-
               const SizedBox(height: 24),
-
               // Content Section
               FormSection(
                 title: 'Content',
@@ -207,15 +189,15 @@ class _AddBlogState extends State<AddBlog> {
                   children: [
                     Expanded(
                       child: OutlinedButton(
-                        onPressed: _isLoading ? null : _clearForm,
+                        onPressed: isLoading ? null : clearForm,
                         child: const Text('Clear All'),
                       ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
                       child: ElevatedButton(
-                        onPressed: _isLoading ? null : _submitBlog,
-                        child: _isLoading
+                        onPressed: isLoading ? null : submitBlog,
+                        child: isLoading
                             ? const Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 mainAxisSize: MainAxisSize.min,
@@ -237,8 +219,7 @@ class _AddBlogState extends State<AddBlog> {
                   ],
                 ),
               ),
-
-              const SizedBox(height: 100), // Space for bottom navigation
+              const SizedBox(height: 100),
             ],
           ),
         ),
