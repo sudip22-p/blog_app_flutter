@@ -8,32 +8,33 @@ part 'auth_event.dart';
 part 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  final AuthService _authService;
+  final AuthService authService;
 
   AuthBloc({AuthService? authService})
-    : _authService = authService ?? AuthService(),
+    : authService = authService ?? AuthService(),
       super(AuthInitial()) {
-    on<AuthSignInRequested>(_onAuthSignInRequested);
-    on<AuthSignUpRequested>(_onAuthSignUpRequested);
-    on<AuthGoogleSignInRequested>(_onAuthGoogleSignInRequested);
-    on<AuthSignOutRequested>(_onAuthSignOutRequested);
+    on<AuthSignInRequested>(onAuthSignInRequested);
+    on<AuthSignUpRequested>(onAuthSignUpRequested);
+    on<AuthGoogleSignInRequested>(onAuthGoogleSignInRequested);
+    on<AuthSignOutRequested>(onAuthSignOutRequested);
     on<AuthSendEmailVerificationRequested>(
-      _onAuthSendEmailVerificationRequested,
+      onAuthSendEmailVerificationRequested,
     );
-    on<AuthSendPasswordResetRequested>(_onAuthSendPasswordResetRequested);
-    on<AuthDeleteAccountRequested>(_onAuthDeleteAccountRequested);
-    on<AuthUpdateDisplayNameRequested>(_onAuthUpdateDisplayNameRequested);
-    on<AuthUpdateProfilePictureRequested>(_onAuthUpdateProfilePictureRequested);
-    on<AuthLoadProfileRequested>(_onAuthLoadProfileRequested);
+    on<AuthSendPasswordResetRequested>(onAuthSendPasswordResetRequested);
+    on<AuthDeleteAccountRequested>(onAuthDeleteAccountRequested);
+    on<AuthUpdateDisplayNameRequested>(onAuthUpdateDisplayNameRequested);
+    on<AuthUpdateProfilePictureRequested>(onAuthUpdateProfilePictureRequested);
+    on<AuthLoadProfileRequested>(onAuthLoadProfileRequested);
   }
-  Future<void> _onAuthSignInRequested(
+
+  Future<void> onAuthSignInRequested(
     AuthSignInRequested event,
     Emitter<AuthState> emit,
   ) async {
     emit(AuthLoading());
 
     try {
-      final userCredential = await _authService.signInWithEmailAndPassword(
+      final userCredential = await authService.signInWithEmailAndPassword(
         email: event.email,
         password: event.password,
       );
@@ -48,14 +49,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  Future<void> _onAuthSignUpRequested(
+  Future<void> onAuthSignUpRequested(
     AuthSignUpRequested event,
     Emitter<AuthState> emit,
   ) async {
     emit(AuthLoading());
 
     try {
-      final userCredential = await _authService.createUserWithEmailAndPassword(
+      final userCredential = await authService.createUserWithEmailAndPassword(
         email: event.email,
         password: event.password,
         name: event.name,
@@ -64,7 +65,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       if (userCredential?.user != null) {
         // Send email verification after successful signup
         try {
-          await _authService.sendEmailVerification();
+          await authService.sendEmailVerification();
           emit(
             const AuthSignUpSuccess(
               message:
@@ -86,14 +87,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  Future<void> _onAuthGoogleSignInRequested(
+  Future<void> onAuthGoogleSignInRequested(
     AuthGoogleSignInRequested event,
     Emitter<AuthState> emit,
   ) async {
     emit(AuthLoading());
 
     try {
-      final userCredential = await _authService.signInWithGoogle();
+      final userCredential = await authService.signInWithGoogle();
 
       if (userCredential?.user != null) {
         emit(AuthAuthenticated(user: userCredential!.user!));
@@ -105,24 +106,24 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  Future<void> _onAuthSignOutRequested(
+  Future<void> onAuthSignOutRequested(
     AuthSignOutRequested event,
     Emitter<AuthState> emit,
   ) async {
     try {
-      await _authService.signOut();
+      await authService.signOut();
       emit(AuthUnauthenticated());
     } catch (e) {
       emit(AuthError(message: e.toString()));
     }
   }
 
-  Future<void> _onAuthSendEmailVerificationRequested(
+  Future<void> onAuthSendEmailVerificationRequested(
     AuthSendEmailVerificationRequested event,
     Emitter<AuthState> emit,
   ) async {
     try {
-      await _authService.sendEmailVerification();
+      await authService.sendEmailVerification();
       emit(
         const AuthEmailVerificationSent(
           message: 'Verification email sent successfully!',
@@ -133,14 +134,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  Future<void> _onAuthSendPasswordResetRequested(
+  Future<void> onAuthSendPasswordResetRequested(
     AuthSendPasswordResetRequested event,
     Emitter<AuthState> emit,
   ) async {
     emit(AuthLoading());
 
     try {
-      await _authService.sendPasswordResetEmail(event.email);
+      await authService.sendPasswordResetEmail(event.email);
       emit(
         const AuthPasswordResetSent(
           message: 'Password reset email sent successfully!',
@@ -151,42 +152,47 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  Future<void> _onAuthDeleteAccountRequested(
+  Future<void> onAuthDeleteAccountRequested(
     AuthDeleteAccountRequested event,
     Emitter<AuthState> emit,
   ) async {
     emit(AuthLoading());
 
     try {
-      await _authService.deleteAccount();
+      await authService.deleteAccount();
+      // Remove the Firebase instance user too.
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        await user.delete();
+      }
       emit(const AuthAccountDeleted(message: 'Account deleted successfully.'));
     } catch (e) {
       emit(AuthError(message: e.toString()));
     }
   }
 
-  Future<void> _onAuthUpdateDisplayNameRequested(
+  Future<void> onAuthUpdateDisplayNameRequested(
     AuthUpdateDisplayNameRequested event,
     Emitter<AuthState> emit,
   ) async {
     emit(AuthLoading());
 
     try {
-      await _authService.updateDisplayName(event.displayName);
+      await authService.updateDisplayName(event.displayName);
       emit(const AuthProfileUpdated(message: 'Profile updated successfully!'));
     } catch (e) {
       emit(AuthError(message: e.toString()));
     }
   }
 
-  Future<void> _onAuthUpdateProfilePictureRequested(
+  Future<void> onAuthUpdateProfilePictureRequested(
     AuthUpdateProfilePictureRequested event,
     Emitter<AuthState> emit,
   ) async {
     emit(AuthLoading());
 
     try {
-      await _authService.updateProfilePicture();
+      await authService.updateProfilePicture();
       emit(
         const AuthProfileUpdated(
           message: 'Profile picture updated successfully!',
@@ -197,23 +203,21 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  Future<void> _onAuthLoadProfileRequested(
+  Future<void> onAuthLoadProfileRequested(
     AuthLoadProfileRequested event,
     Emitter<AuthState> emit,
   ) async {
-    // Don't emit loading if we're not in a state where we should load profile
     if (state is! AuthAuthenticated) {
-      if (_authService.currentUser == null) {
+      if (authService.currentUser == null) {
         emit(const AuthError(message: 'User not authenticated'));
         return;
       }
-      // User exists but BLoC state might be out of sync, continue with loading
     }
 
     emit(AuthLoading());
 
     try {
-      final profile = await _authService.getCurrentUserProfile();
+      final profile = await authService.getCurrentUserProfile();
       if (profile != null) {
         emit(AuthProfileLoaded(profile: profile));
       } else {
@@ -222,5 +226,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     } catch (e) {
       emit(AuthError(message: e.toString()));
     }
+  }
+
+  @override
+  void onTransition(Transition<AuthEvent, AuthState> transition) {
+    super.onTransition(transition);
+    print(transition);
   }
 }

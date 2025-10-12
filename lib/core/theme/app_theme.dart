@@ -3,9 +3,9 @@ import 'package:flutter/services.dart';
 
 class AppTheme {
   // Brand Colors
-  static const Color primaryColor = Color(0xFF6366F1); // Modern Indigo
+  static const Color primaryColor = Color(0xFF6366F1); 
   static const Color primaryVariant = Color(0xFF4F46E5);
-  static const Color secondaryColor = Color(0xFF10B981); // Emerald
+  static const Color secondaryColor = Color(0xFF10B981); 
   static const Color secondaryVariant = Color(0xFF059669);
 
   // Status Colors

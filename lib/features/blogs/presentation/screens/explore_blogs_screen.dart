@@ -23,7 +23,7 @@ class _ExploreBlogsScreenState extends State<ExploreBlogsScreen> {
   String _searchQuery = '';
   String? _selectedTag;
   int _currentPage = 1;
-  final int _itemsPerPage = 8; // Reduced for better performance
+  final int _itemsPerPage = 8;
   bool _isLoading = false;
   final ScrollController _scrollController = ScrollController();
   bool _showPagination = false;
@@ -90,8 +90,6 @@ class _ExploreBlogsScreenState extends State<ExploreBlogsScreen> {
 
       return matchesSearch && matchesTag;
     }).toList();
-
-    // Sort by recency for better UX
     _filteredBlogs.sort((a, b) => b.createdAt.compareTo(a.createdAt));
   }
 
@@ -125,7 +123,6 @@ class _ExploreBlogsScreenState extends State<ExploreBlogsScreen> {
     });
 
     try {
-      // Simulate loading delay with realistic network behavior
       await Future.delayed(const Duration(milliseconds: 600));
 
       if (mounted) {
@@ -233,7 +230,6 @@ class _ExploreBlogsScreenState extends State<ExploreBlogsScreen> {
           return CustomScrollView(
             controller: _scrollController,
             slivers: [
-              // Compact App Bar with Prominent Search
               SliverAppBar(
                 expandedHeight: 130,
                 floating: true,
@@ -248,16 +244,15 @@ class _ExploreBlogsScreenState extends State<ExploreBlogsScreen> {
                       top: kToolbarHeight + 12,
                       left: 16,
                       right: 16,
-                    ), // Reduced top padding
+                    ), 
                     child: Column(
                       children: [
-                        // Compact App Title
                         Row(
                           children: [
                             Container(
                               padding: const EdgeInsets.all(
                                 6,
-                              ), // Smaller padding
+                              ),
                               decoration: BoxDecoration(
                                 color: theme.colorScheme.primaryContainer
                                     .withValues(alpha: 0.8),
@@ -266,22 +261,21 @@ class _ExploreBlogsScreenState extends State<ExploreBlogsScreen> {
                               child: Icon(
                                 Icons.explore_rounded,
                                 color: theme.colorScheme.onPrimaryContainer,
-                                size: 16, // Smaller icon
+                                size: 16,
                               ),
                             ),
-                            const SizedBox(width: 8), // Reduced spacing
+                            const SizedBox(width: 8),
                             Text(
                               'Explore Blogs',
                               style: theme.textTheme.titleLarge?.copyWith(
-                                // Smaller text style
                                 fontWeight: FontWeight.w600,
                                 letterSpacing: -0.3,
-                                fontSize: 20, // Explicit smaller size
+                                fontSize: 20, 
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 12), // Reduced spacing
+                        const SizedBox(height: 12), 
                         // Prominent Search Bar
                         AppSearchBar(
                           controller: _searchController,
@@ -293,12 +287,10 @@ class _ExploreBlogsScreenState extends State<ExploreBlogsScreen> {
                   ),
                 ),
               ),
-
-              // Ultra-Compact Filter Chip Bar
               SliverToBoxAdapter(
                 child: Column(
                   children: [
-                    const SizedBox(height: 4), // Minimal spacing
+                    const SizedBox(height: 4),
                     FilterChipBar(
                       availableTags: availableTags,
                       selectedTag: _selectedTag,
@@ -313,7 +305,7 @@ class _ExploreBlogsScreenState extends State<ExploreBlogsScreen> {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
                     vertical: 4,
-                  ), // Reduced padding
+                  ),
                   child: ResultsInfo(
                     totalResults: _filteredBlogs.length,
                     currentPage: _currentPage,
@@ -348,8 +340,6 @@ class _ExploreBlogsScreenState extends State<ExploreBlogsScreen> {
                     ),
                   ),
                 ),
-
-              // Bottom spacing for navigation bar
               const SliverToBoxAdapter(child: SizedBox(height: 80)),
             ],
           );

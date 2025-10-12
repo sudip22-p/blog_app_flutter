@@ -6,22 +6,22 @@ part 'theme_state.dart';
 
 class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
   ThemeBloc() : super(const SystemTheme()) {
-    on<ThemeToggled>(_onThemeToggled);
-    on<ThemeChanged>(_onThemeChanged);
+    on<ThemeToggled>(onThemeToggled);
+    on<ThemeChanged>(onThemeChanged);
   }
 
-  void _onThemeToggled(ThemeToggled event, Emitter<ThemeState> emit) {
+  void onThemeToggled(ThemeToggled event, Emitter<ThemeState> emit) {
     if (state is LightTheme) {
       emit(const DarkTheme());
     } else if (state is DarkTheme) {
       emit(const LightTheme());
     } else {
-      // If system theme, default to dark
-      emit(const DarkTheme());
+      // default: light theme
+      emit(const LightTheme());
     }
   }
 
-  void _onThemeChanged(ThemeChanged event, Emitter<ThemeState> emit) {
+  void onThemeChanged(ThemeChanged event, Emitter<ThemeState> emit) {
     switch (event.themeMode) {
       case ThemeMode.light:
         emit(const LightTheme());

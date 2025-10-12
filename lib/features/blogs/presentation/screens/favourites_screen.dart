@@ -133,8 +133,6 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
               },
             );
           }
-
-          // Initial state - show loading
           return const Center(child: CircularProgressIndicator());
         },
       ),

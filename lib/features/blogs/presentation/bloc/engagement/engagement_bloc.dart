@@ -15,12 +15,12 @@ class EngagementBloc extends Bloc<EngagementEvent, EngagementState> {
   StreamSubscription<BlogEngagement>? _engagementSubscription;
 
   EngagementBloc() : super(EngagementInitial()) {
-    on<LoadBlogEngagement>(_onLoadBlogEngagement);
-    on<StartBlogEngagementStream>(_onStartBlogEngagementStream);
-    on<EngagementStreamUpdate>(_onEngagementStreamUpdate);
-    on<ToggleLike>(_onToggleLike);
-    on<AddView>(_onAddView);
-    on<AddComment>(_onAddComment);
+    on<LoadBlogEngagement>(onLoadBlogEngagement);
+    on<StartBlogEngagementStream>(onStartBlogEngagementStream);
+    on<EngagementStreamUpdate>(onEngagementStreamUpdate);
+    on<ToggleLike>(onToggleLike);
+    on<AddView>(onAddView);
+    on<AddComment>(onAddComment);
   }
 
   @override
@@ -29,7 +29,7 @@ class EngagementBloc extends Bloc<EngagementEvent, EngagementState> {
     return super.close();
   }
 
-  void _onLoadBlogEngagement(
+  void onLoadBlogEngagement(
     LoadBlogEngagement event,
     Emitter<EngagementState> emit,
   ) async {
@@ -49,7 +49,7 @@ class EngagementBloc extends Bloc<EngagementEvent, EngagementState> {
     }
   }
 
-  void _onStartBlogEngagementStream(
+  void onStartBlogEngagementStream(
     StartBlogEngagementStream event,
     Emitter<EngagementState> emit,
   ) async {
@@ -75,7 +75,7 @@ class EngagementBloc extends Bloc<EngagementEvent, EngagementState> {
         );
   }
 
-  void _onEngagementStreamUpdate(
+  void onEngagementStreamUpdate(
     EngagementStreamUpdate event,
     Emitter<EngagementState> emit,
   ) {
@@ -84,7 +84,7 @@ class EngagementBloc extends Bloc<EngagementEvent, EngagementState> {
     }
   }
 
-  void _onToggleLike(ToggleLike event, Emitter<EngagementState> emit) async {
+  void onToggleLike(ToggleLike event, Emitter<EngagementState> emit) async {
     try {
       // Simple database operation - real-time stream will handle updates
       await _engagementService.toggleLike(event.blogId, event.userId);
@@ -93,7 +93,7 @@ class EngagementBloc extends Bloc<EngagementEvent, EngagementState> {
     }
   }
 
-  void _onAddView(AddView event, Emitter<EngagementState> emit) async {
+  void onAddView(AddView event, Emitter<EngagementState> emit) async {
     try {
       await _engagementService.addView(event.blogId, event.userId);
       // Views are added silently - no state change needed
@@ -102,7 +102,7 @@ class EngagementBloc extends Bloc<EngagementEvent, EngagementState> {
     }
   }
 
-  void _onAddComment(AddComment event, Emitter<EngagementState> emit) async {
+  void onAddComment(AddComment event, Emitter<EngagementState> emit) async {
     try {
       // Simple database operation - real-time stream will handle updates
       await _engagementService.addComment(event.blogId, event.comment);

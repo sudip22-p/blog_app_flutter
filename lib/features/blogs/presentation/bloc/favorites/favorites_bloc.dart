@@ -15,8 +15,8 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
   StreamSubscription? _favoritesSubscription;
 
   FavoritesBloc() : super(FavoritesInitial()) {
-    on<LoadUserFavorites>(_onLoadUserFavorites);
-    on<ToggleFavorite>(_onToggleFavorite);
+    on<LoadUserFavorites>(onLoadUserFavorites);
+    on<ToggleFavorite>(onToggleFavorite);
   }
 
   @override
@@ -25,7 +25,7 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
     return super.close();
   }
 
-  void _onLoadUserFavorites(
+  void onLoadUserFavorites(
     LoadUserFavorites event,
     Emitter<FavoritesState> emit,
   ) async {
@@ -50,7 +50,7 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
     }
   }
 
-  void _onToggleFavorite(
+  void onToggleFavorite(
     ToggleFavorite event,
     Emitter<FavoritesState> emit,
   ) async {

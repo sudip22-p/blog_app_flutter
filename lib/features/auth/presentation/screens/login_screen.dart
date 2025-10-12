@@ -23,7 +23,7 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _signInWithEmailAndPassword() {
+  void signInWithEmailAndPassword() {
     if (!_formKey.currentState!.validate()) return;
 
     context.read<AuthBloc>().add(
@@ -34,11 +34,11 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  void _signInWithGoogle() {
+  void signInWithGoogle() {
     context.read<AuthBloc>().add(AuthGoogleSignInRequested());
   }
 
-  String? _validateEmail(String? value) {
+  String? validateEmail(String? value) {
     if (value == null || value.isEmpty) {
       return 'Email is required';
     }
@@ -49,7 +49,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return null;
   }
 
-  String? _validatePassword(String? value) {
+  String? validatePassword(String? value) {
     if (value == null || value.isEmpty) {
       return 'Password is required';
     }
@@ -59,7 +59,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return null;
   }
 
-  void _showForgotPasswordDialog(BuildContext context) {
+  void showForgotPasswordDialog(BuildContext context) {
     final emailController = TextEditingController();
 
     showDialog(
@@ -177,7 +177,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     TextFormField(
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
-                      validator: _validateEmail,
+                      validator: validateEmail,
                       decoration: const InputDecoration(
                         labelText: 'Email',
                         prefixIcon: Icon(Icons.email_outlined),
@@ -189,7 +189,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     TextFormField(
                       controller: _passwordController,
                       obscureText: !_isPasswordVisible,
-                      validator: _validatePassword,
+                      validator: validatePassword,
                       decoration: InputDecoration(
                         labelText: 'Password',
                         prefixIcon: const Icon(Icons.lock_outlined),
@@ -213,7 +213,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
-                        onPressed: () => _showForgotPasswordDialog(context),
+                        onPressed: () => showForgotPasswordDialog(context),
                         child: const Text('Forgot Password?'),
                       ),
                     ),
@@ -226,7 +226,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         return ElevatedButton(
                           onPressed: isLoading
                               ? null
-                              : _signInWithEmailAndPassword,
+                              : signInWithEmailAndPassword,
                           child: isLoading
                               ? const SizedBox(
                                   height: 20,
@@ -262,7 +262,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       builder: (context, state) {
                         final isLoading = state is AuthLoading;
                         return OutlinedButton.icon(
-                          onPressed: isLoading ? null : _signInWithGoogle,
+                          onPressed: isLoading ? null : signInWithGoogle,
                           icon: const Icon(Icons.g_mobiledata, size: 24),
                           label: const Text('Continue with Google'),
                           style: OutlinedButton.styleFrom(

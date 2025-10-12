@@ -27,7 +27,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     super.dispose();
   }
 
-  void _signUp() {
+  void signUp() {
     if (!_formKey.currentState!.validate()) return;
 
     context.read<AuthBloc>().add(
@@ -39,7 +39,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
-  void _signInWithGoogle() {
+  void signInWithGoogle() {
     context.read<AuthBloc>().add(AuthGoogleSignInRequested());
   }
 
@@ -53,7 +53,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return null;
   }
 
-  String? _validateEmail(String? value) {
+  String? validateEmail(String? value) {
     if (value == null || value.isEmpty) {
       return 'Email is required';
     }
@@ -64,7 +64,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return null;
   }
 
-  String? _validatePassword(String? value) {
+  String? validatePassword(String? value) {
     if (value == null || value.isEmpty) {
       return 'Password is required';
     }
@@ -77,7 +77,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return null;
   }
 
-  String? _validateConfirmPassword(String? value) {
+  String? validateConfirmPassword(String? value) {
     if (value == null || value.isEmpty) {
       return 'Please confirm your password';
     }
@@ -87,7 +87,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return null;
   }
 
-  void _showEmailVerificationDialog(BuildContext context, String message) {
+  void showEmailVerificationDialog(BuildContext context, String message) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -153,7 +153,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         listener: (context, state) {
           if (state is AuthSignUpSuccess) {
             // Show success message and ask about email verification
-            _showEmailVerificationDialog(context, state.message);
+            showEmailVerificationDialog(context, state.message);
           } else if (state is AuthAuthenticated) {
             // Handle successful Google sign-in - navigate back to let AuthWrapper handle it
             Navigator.of(context).pop();
@@ -206,7 +206,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
-                    validator: _validateEmail,
+                    validator: validateEmail,
                     decoration: const InputDecoration(
                       labelText: 'Email',
                       prefixIcon: Icon(Icons.email_outlined),
@@ -217,7 +217,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   TextFormField(
                     controller: _passwordController,
                     obscureText: !_isPasswordVisible,
-                    validator: _validatePassword,
+                    validator: validatePassword,
                     decoration: InputDecoration(
                       labelText: 'Password',
                       prefixIcon: const Icon(Icons.lock_outlined),
@@ -240,7 +240,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   TextFormField(
                     controller: _confirmPasswordController,
                     obscureText: !_isConfirmPasswordVisible,
-                    validator: _validateConfirmPassword,
+                    validator: validateConfirmPassword,
                     decoration: InputDecoration(
                       labelText: 'Confirm Password',
                       prefixIcon: const Icon(Icons.lock_outlined),
@@ -265,7 +265,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     builder: (context, state) {
                       final isLoading = state is AuthLoading;
                       return ElevatedButton(
-                        onPressed: isLoading ? null : _signUp,
+                        onPressed: isLoading ? null : signUp,
                         child: isLoading
                             ? const CircularProgressIndicator()
                             : const Text('Create Account'),
@@ -295,7 +295,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     builder: (context, state) {
                       final isLoading = state is AuthLoading;
                       return OutlinedButton.icon(
-                        onPressed: isLoading ? null : _signInWithGoogle,
+                        onPressed: isLoading ? null : signInWithGoogle,
                         icon: const Icon(Icons.g_mobiledata, size: 24),
                         label: const Text('Continue with Google'),
                         style: OutlinedButton.styleFrom(

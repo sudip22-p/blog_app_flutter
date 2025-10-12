@@ -22,26 +22,19 @@ class ResultsInfo extends StatelessWidget {
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.symmetric(
-        horizontal: 10,
-        vertical: 6,
-      ), // Ultra-compact padding
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 
-          0.4,
-        ), // Lighter background
-        borderRadius: BorderRadius.circular(6), // Smaller radius
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+        borderRadius: BorderRadius.circular(6),
         border: Border.all(
-          color: theme.colorScheme.outline.withValues(alpha: 
-            0.2,
-          ), // More subtle border
+          color: theme.colorScheme.outline.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
       child: Row(
         children: [
           _ResultsIcon(theme: theme, hasResults: totalResults > 0),
-          const SizedBox(width: 8), // Reduced spacing
+          const SizedBox(width: 8),
           Expanded(
             child: _ResultsText(
               totalResults: totalResults,
@@ -73,16 +66,16 @@ class _ResultsIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(4), // Smaller padding
+      padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
         color: hasResults
-            ? theme.colorScheme.primaryContainer.withValues(alpha: 0.6) // Lighter
+            ? theme.colorScheme.primaryContainer.withValues(alpha: 0.6)
             : theme.colorScheme.errorContainer.withValues(alpha: 0.6),
         shape: BoxShape.circle,
       ),
       child: Icon(
         hasResults ? Icons.filter_list_rounded : Icons.filter_list_off_rounded,
-        size: 14, // Smaller icon
+        size: 14,
         color: hasResults
             ? theme.colorScheme.onPrimaryContainer
             : theme.colorScheme.onErrorContainer,
@@ -113,7 +106,6 @@ class _ResultsText extends StatelessWidget {
         RichText(
           text: TextSpan(
             style: theme.textTheme.labelMedium?.copyWith(
-              // Smaller text
               fontWeight: FontWeight.w600,
             ),
             children: [
@@ -132,7 +124,7 @@ class _ResultsText extends StatelessWidget {
           ),
         ),
         if (searchQuery.isNotEmpty || selectedTag != null) ...[
-          const SizedBox(height: 1), // Minimal spacing
+          const SizedBox(height: 1),
           _FilterInfo(
             searchQuery: searchQuery,
             selectedTag: selectedTag,

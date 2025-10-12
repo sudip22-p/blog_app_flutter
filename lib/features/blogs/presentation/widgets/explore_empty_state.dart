@@ -177,8 +177,6 @@ class _EmptyStateActions extends StatelessWidget {
         const SizedBox(height: 12),
         TextButton.icon(
           onPressed: () {
-            // This could trigger a refresh or clear filters
-            // For now, we'll just show a snackbar
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: const Text('Refreshing content...'),

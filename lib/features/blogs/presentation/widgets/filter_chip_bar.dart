@@ -17,17 +17,17 @@ class FilterChipBar extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
-      height: 36, // Reduced from 44 to 36 for ultra-compact
-      margin: const EdgeInsets.only(bottom: 2), // Minimal margin
+      height: 36,
+      margin: const EdgeInsets.only(bottom: 2),
       child: ListView(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
         children: [
           _buildAllChip(theme),
-          const SizedBox(width: 4), // Tighter spacing
+          const SizedBox(width: 4),
           ...availableTags.map(
             (tag) => Padding(
-              padding: const EdgeInsets.only(right: 4), // Tighter spacing
+              padding: const EdgeInsets.only(right: 4),
               child: _buildTagChip(tag, theme),
             ),
           ),
@@ -48,17 +48,17 @@ class FilterChipBar extends StatelessWidget {
         children: [
           Icon(
             Icons.apps_rounded,
-            size: 12, // Even smaller icon
+            size: 12,
             color: isSelected
                 ? theme.colorScheme.onPrimary
                 : theme.colorScheme.primary,
           ),
-          const SizedBox(width: 3), // Minimal spacing
+          const SizedBox(width: 3),
           Text(
             'All',
             style: theme.textTheme.labelSmall?.copyWith(
               fontWeight: FontWeight.w600,
-              fontSize: 11, // Smaller font
+              fontSize: 11,
               color: isSelected
                   ? theme.colorScheme.onPrimary
                   : theme.colorScheme.primary,
@@ -80,7 +80,7 @@ class FilterChipBar extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 4, // Even smaller dot
+            width: 4,
             height: 4,
             decoration: BoxDecoration(
               color: isSelected
@@ -89,12 +89,12 @@ class FilterChipBar extends StatelessWidget {
               shape: BoxShape.circle,
             ),
           ),
-          const SizedBox(width: 4), // Minimal spacing
+          const SizedBox(width: 4),
           Text(
             tag,
             style: theme.textTheme.labelSmall?.copyWith(
               fontWeight: FontWeight.w500,
-              fontSize: 11, // Smaller font
+              fontSize: 11,
               color: isSelected
                   ? theme.colorScheme.onPrimary
                   : theme.colorScheme.onSurface,
@@ -135,7 +135,7 @@ class _ChipContainer extends StatelessWidget {
           padding: const EdgeInsets.symmetric(
             horizontal: 10,
             vertical: 6,
-          ), // Ultra-compact padding
+          ), 
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
             border: isSelected

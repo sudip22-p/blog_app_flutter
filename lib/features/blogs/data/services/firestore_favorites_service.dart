@@ -20,7 +20,7 @@ class FirestoreFavoritesService {
         return Favorite.fromMap(data, doc.id);
       }).toList();
     } catch (e) {
-      print('Error fetching favorites: $e');
+      // print('Error fetching favorites: $e');
       return [];
     }
   }
@@ -42,7 +42,7 @@ class FirestoreFavoritesService {
         return Blog.fromMap(data, doc.id);
       }).toList();
     } catch (e) {
-      print('Error fetching favorite blogs: $e');
+      // print('Error fetching favorite blogs: $e');
       return [];
     }
   }

@@ -10,31 +10,31 @@ class BlogBloc extends Bloc<BlogEvent, BlogState> {
   final firestoreService = FirestoreBlogService();
 
   BlogBloc() : super(BlogInitial()) {
-    on<BlogsLoaded>(_onBlogsLoaded);
-    on<NewBlogAdded>(_onNewBlogAdded);
-    on<BlogUpdated>(_onBlogUpdated);
-    on<BlogDeleted>(_onBlogDeleted);
+    on<BlogsLoaded>(onBlogsLoaded);
+    on<NewBlogAdded>(onNewBlogAdded);
+    on<BlogUpdated>(onBlogUpdated);
+    on<BlogDeleted>(onBlogDeleted);
   }
-  @override
-  void onChange(Change<BlogState> change) {
-    super.onChange(change);
-    print('auth bloc change - $change');
-  }
+  // @override
+  // void onChange(Change<BlogState> change) {
+  //   super.onChange(change);
+  //   print('auth bloc change - $change');
+  // }
 
-  @override
-  void onTransition(Transition<BlogEvent, BlogState> transition) {
-    super.onTransition(transition);
-    print("sud transition- $transition");
-  }
+  // @override
+  // void onTransition(Transition<BlogEvent, BlogState> transition) {
+  //   super.onTransition(transition);
+  //   print("sud transition- $transition");
+  // }
 
-  @override
-  void onError(Object error, StackTrace stackTrace) {
-    super.onError(error, stackTrace);
-    print("sud error- $error");
-    print("sud stack trace- $stackTrace");
-  }
+  // @override
+  // void onError(Object error, StackTrace stackTrace) {
+  //   super.onError(error, stackTrace);
+  //   print("sud error- $error");
+  //   print("sud stack trace- $stackTrace");
+  // }
 
-  void _onBlogsLoaded(BlogsLoaded event, Emitter<BlogState> emit) async {
+  void onBlogsLoaded(BlogsLoaded event, Emitter<BlogState> emit) async {
     emit(BlogLoading());
     try {
       await for (var blogs in firestoreService.getBlogsStream()) {
@@ -45,7 +45,7 @@ class BlogBloc extends Bloc<BlogEvent, BlogState> {
     }
   }
 
-  void _onNewBlogAdded(NewBlogAdded event, Emitter<BlogState> emit) async {
+  void onNewBlogAdded(NewBlogAdded event, Emitter<BlogState> emit) async {
     try {
       await firestoreService.addTask(
         event.title,
@@ -60,7 +60,7 @@ class BlogBloc extends Bloc<BlogEvent, BlogState> {
     }
   }
 
-  void _onBlogUpdated(BlogUpdated event, Emitter<BlogState> emit) async {
+  void onBlogUpdated(BlogUpdated event, Emitter<BlogState> emit) async {
     try {
       await firestoreService.updateBlog(
         event.id,
@@ -76,7 +76,7 @@ class BlogBloc extends Bloc<BlogEvent, BlogState> {
     }
   }
 
-  void _onBlogDeleted(BlogDeleted event, Emitter<BlogState> emit) async {
+  void onBlogDeleted(BlogDeleted event, Emitter<BlogState> emit) async {
     try {
       await firestoreService.deleteBlog(event.id);
     } catch (e) {

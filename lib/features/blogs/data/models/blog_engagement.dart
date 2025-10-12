@@ -3,9 +3,9 @@ class BlogEngagement {
   final int likesCount;
   final int commentsCount;
   final int viewsCount;
-  final Map<String, bool> likes; // userId -> true/false
-  final Map<String, BlogComment> comments; // commentId -> comment
-  final Map<String, DateTime> views; // userId -> timestamp
+  final Map<String, bool> likes;
+  final Map<String, BlogComment> comments;
+  final Map<String, DateTime> views;
 
   BlogEngagement({
     required this.blogId,

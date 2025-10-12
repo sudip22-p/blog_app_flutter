@@ -23,7 +23,6 @@ class ToggleLike extends EngagementEvent {
   ToggleLike(this.blogId, this.userId);
 }
 
-// Essential events for blog preview functionality
 class AddView extends EngagementEvent {
   final String blogId;
   final String userId;

@@ -52,7 +52,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
   Widget build(BuildContext context) {
     return BottomNavigationBar(
       type: BottomNavigationBarType.fixed,
-      backgroundColor: Colors.white, // remove transparent overlays
+      backgroundColor: Colors.white,
       elevation: 0,
       showSelectedLabels: true,
       showUnselectedLabels: true,

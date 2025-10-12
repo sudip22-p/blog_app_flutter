@@ -300,7 +300,7 @@ class _UpdateBlogState extends State<UpdateBlog> {
                 ),
               ),
 
-              const SizedBox(height: 100), // Space for bottom navigation
+              const SizedBox(height: 100),
             ],
           ),
         ),

@@ -1,3 +1,5 @@
+import 'package:blog_app/features/auth/presentation/widgets/profile_form_section.dart';
+import 'package:blog_app/features/auth/presentation/widgets/profile_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/auth_bloc.dart';
@@ -13,50 +15,29 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  bool _isEditing = false;
+  bool isEditing = false;
   Map<String, dynamic>? userProfile;
 
   @override
   void initState() {
     super.initState();
     // Always load profile when screen initializes
-    _loadUserProfile();
+    loadUserProfile();
   }
+
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // Load profile if not already loaded or if we need to refresh
-    if (userProfile == null) {
-      _loadUserProfile();
-    }
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    super.dispose();
   }
 
-  Future<void> _loadUserProfile() async {
+  Future<void> loadUserProfile() async {
     context.read<AuthBloc>().add(AuthLoadProfileRequested());
   }
 
-  String? _validateName(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'Name is required';
-    }
-    if (value.trim().length < 2) {
-      return 'Name must be at least 2 characters';
-    }
-    return null;
-  }
-
-  void _toggleEdit() {
-    setState(() {
-      _isEditing = !_isEditing;
-      if (!_isEditing) {
-        // Reset form if canceling edit
-        _nameController.text = userProfile?['displayName'] ?? '';
-      }
-    });
-  }
-
-  void _saveChanges() {
+  void saveChanges() {
     if (_formKey.currentState!.validate()) {
       final newName = _nameController.text.trim();
       context.read<AuthBloc>().add(
@@ -65,14 +46,24 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     }
   }
 
-  void _cancelEdit() {
+  void cancelEdit() {
     setState(() {
-      _isEditing = false;
+      isEditing = false;
       _nameController.text = userProfile?['displayName'] ?? '';
     });
   }
 
-  void _sendEmailVerification() {
+  void toggleEdit() {
+    setState(() {
+      isEditing = !isEditing;
+      if (!isEditing) {
+        // Reset form if canceling edit
+        _nameController.text = userProfile?['displayName'] ?? '';
+      }
+    });
+  }
+
+  void sendEmailVerification() {
     if (userProfile?['emailVerified'] == true) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Email is already verified!')),
@@ -83,7 +74,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     context.read<AuthBloc>().add(AuthSendEmailVerificationRequested());
   }
 
-  void _sendPasswordReset() {
+  void sendPasswordReset() {
     final email = userProfile?['email'];
     if (email != null) {
       context.read<AuthBloc>().add(
@@ -96,7 +87,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     }
   }
 
-  void _showLogoutDialog() {
+  void showLogoutDialog() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -114,143 +105,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               Navigator.pop(context);
             },
             child: const Text('Logout'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showDeleteAccountDialog() {
-    String deleteConfirmation = '';
-
-    showDialog(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          title: Row(
-            children: [
-              Icon(Icons.warning, color: Theme.of(context).colorScheme.error),
-              const SizedBox(width: 8),
-              const Text('Delete Account'),
-            ],
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Are you sure you want to permanently delete your account?',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 12),
-              const Text('This action will:'),
-              const SizedBox(height: 8),
-              const Text('• Delete all your data permanently'),
-              const Text('• Remove access to all your blogs'),
-              const Text('• Cannot be undone'),
-              const SizedBox(height: 12),
-              Text(
-                'Type "DELETE" to confirm:',
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.error,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                onChanged: (value) {
-                  setState(() {
-                    deleteConfirmation = value;
-                  });
-                },
-                decoration: InputDecoration(
-                  hintText: 'Type DELETE here',
-                  border: const OutlineInputBorder(),
-                  errorText:
-                      deleteConfirmation.isNotEmpty &&
-                          deleteConfirmation != 'DELETE'
-                      ? 'Must type exactly "DELETE"'
-                      : null,
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: deleteConfirmation == 'DELETE'
-                  ? () {
-                      Navigator.pop(context);
-                      _showFinalDeleteConfirmation();
-                    }
-                  : null, // Disabled when not "DELETE"
-              style: TextButton.styleFrom(
-                foregroundColor: deleteConfirmation == 'DELETE'
-                    ? Theme.of(context).colorScheme.error
-                    : Theme.of(context).disabledColor,
-              ),
-              child: const Text('Delete'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showFinalDeleteConfirmation() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Row(
-          children: [
-            Icon(Icons.dangerous, color: Theme.of(context).colorScheme.error),
-            const SizedBox(width: 8),
-            const Text('Final Confirmation'),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              '⚠️ LAST WARNING ⚠️',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.error,
-              ),
-            ),
-            const SizedBox(height: 12),
-            const Text(
-              'You typed "DELETE" to confirm. Your account will be permanently deleted and cannot be recovered.',
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 12),
-            const Text(
-              'Are you absolutely sure you want to proceed?',
-              style: TextStyle(fontWeight: FontWeight.w600),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              context.read<AuthBloc>().add(AuthDeleteAccountRequested());
-              Navigator.pop(context);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.error,
-              foregroundColor: Theme.of(context).colorScheme.onError,
-            ),
-            child: const Text('Yes, Delete Forever'),
           ),
         ],
       ),
@@ -286,9 +140,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           ),
         ),
         actions: [
-          if (!_isEditing)
+          if (!isEditing)
             IconButton(
-              onPressed: _toggleEdit,
+              onPressed: toggleEdit,
               icon: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
@@ -317,9 +171,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             });
           } else if (state is AuthProfileUpdated) {
             setState(() {
-              _isEditing = false;
+              isEditing = false;
             });
-            _loadUserProfile(); // Reload the profile
+            loadUserProfile(); // Reload the profile
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Profile updated successfully!')),
             );
@@ -336,6 +190,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               context,
             ).showSnackBar(SnackBar(content: Text(state.message)));
             Navigator.pushReplacementNamed(context, '/login');
+          } else if (state is AuthUnauthenticated) {
+            Navigator.pushReplacementNamed(context, '/login');
           } else if (state is AuthError) {
             ScaffoldMessenger.of(
               context,
@@ -346,7 +202,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         },
         child: BlocBuilder<AuthBloc, AuthState>(
           builder: (context, state) {
-            // Show loading indicator if we're loading or profile is null
+            // Show loading indicator if loading or profile is null
             if (state is AuthLoading) {
               return const Center(
                 child: Padding(
@@ -368,229 +224,27 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             return SingleChildScrollView(
               child: Column(
                 children: [
-                  // Profile Header Section with Gradient
+                  // Profile Header Section
                   ProfileHeader(
                     colorScheme: colorScheme,
                     userProfile: userProfile,
-                    isEditing: _isEditing,
+                    isEditing: isEditing,
                   ),
 
                   const SizedBox(height: 24),
 
                   // Profile Form Section
-                  Card(
-                    margin: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Personal Information',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                                color: colorScheme.primary,
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-
-                            // Name Field
-                            TextFormField(
-                              controller: _nameController,
-                              enabled: _isEditing,
-                              validator: _isEditing ? _validateName : null,
-                              textCapitalization: TextCapitalization.words,
-                              decoration: InputDecoration(
-                                labelText: 'Full Name',
-                                prefixIcon: const Icon(Icons.person),
-                                filled: !_isEditing,
-                                fillColor: _isEditing
-                                    ? null
-                                    : colorScheme.surfaceContainerHighest,
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-
-                            // Email Field (Read-only)
-                            TextFormField(
-                              controller: _emailController,
-                              enabled: false,
-                              decoration: InputDecoration(
-                                labelText: 'Email',
-                                prefixIcon: const Icon(Icons.email),
-                                suffixIcon:
-                                    userProfile?['emailVerified'] == true
-                                    ? Icon(
-                                        Icons.verified,
-                                        color: colorScheme.secondary,
-                                      )
-                                    : Icon(
-                                        Icons.warning,
-                                        color: colorScheme.error,
-                                      ),
-                                filled: true,
-                                fillColor: colorScheme.surfaceContainerHighest,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-
-                            // Email Verification Status
-                            Row(
-                              children: [
-                                Icon(
-                                  userProfile?['emailVerified'] == true
-                                      ? Icons.check_circle
-                                      : Icons.warning,
-                                  size: 16,
-                                  color: userProfile?['emailVerified'] == true
-                                      ? colorScheme.secondary
-                                      : colorScheme.error,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  userProfile?['emailVerified'] == true
-                                      ? 'Email verified'
-                                      : 'Email not verified',
-                                  style: TextStyle(
-                                    color: userProfile?['emailVerified'] == true
-                                        ? colorScheme.secondary
-                                        : colorScheme.error,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 32),
-
-                            // Action Buttons
-                            if (!_isEditing) ...[
-                              // Email Verification Button
-                              if (userProfile?['emailVerified'] == false)
-                                SizedBox(
-                                  width: double.infinity,
-                                  child: OutlinedButton.icon(
-                                    onPressed: _sendEmailVerification,
-                                    icon: const Icon(Icons.email),
-                                    label: const Text('Verify Email'),
-                                  ),
-                                ),
-
-                              if (userProfile?['emailVerified'] == false)
-                                const SizedBox(height: 12),
-
-                              // Password Reset Button
-                              SizedBox(
-                                width: double.infinity,
-                                child: OutlinedButton.icon(
-                                  onPressed: _sendPasswordReset,
-                                  icon: const Icon(Icons.lock_reset),
-                                  label: const Text('Reset Password'),
-                                ),
-                              ),
-
-                              const SizedBox(height: 12),
-
-                              // Logout Button
-                              SizedBox(
-                                width: double.infinity,
-                                child: ElevatedButton.icon(
-                                  onPressed: _showLogoutDialog,
-                                  icon: const Icon(Icons.logout),
-                                  label: const Text('Logout'),
-                                ),
-                              ),
-
-                              const SizedBox(height: 40),
-
-                              // Danger Zone
-                              Container(
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                    color: colorScheme.error.withAlpha(128),
-                                  ),
-                                  borderRadius: BorderRadius.circular(8),
-                                  color: colorScheme.errorContainer.withAlpha(
-                                    128,
-                                  ),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Icon(
-                                          Icons.warning,
-                                          color: colorScheme.error,
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Text(
-                                          'Danger Zone',
-                                          style: TextStyle(
-                                            color: colorScheme.error,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 12),
-                                    Text(
-                                      'Once you delete your account, there is no going back. Please be certain.',
-                                      style: TextStyle(
-                                        color: colorScheme.onErrorContainer,
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 12),
-                                    SizedBox(
-                                      width: double.infinity,
-                                      child: OutlinedButton.icon(
-                                        onPressed: _showDeleteAccountDialog,
-                                        icon: const Icon(Icons.delete_forever),
-                                        label: const Text('Delete Account'),
-                                        style: OutlinedButton.styleFrom(
-                                          foregroundColor: colorScheme.error,
-                                          side: BorderSide(
-                                            color: colorScheme.error.withAlpha(
-                                              128,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ] else ...[
-                              // Edit Mode Action Buttons
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: OutlinedButton.icon(
-                                      onPressed: _cancelEdit,
-                                      icon: const Icon(Icons.close),
-                                      label: const Text('Cancel'),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 16),
-                                  Expanded(
-                                    child: ElevatedButton.icon(
-                                      onPressed: _saveChanges,
-                                      icon: const Icon(Icons.save),
-                                      label: const Text('Save'),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
-                    ),
+                  ProfileFormSection(
+                    colorScheme: colorScheme,
+                    userProfile: userProfile,
+                    isEditing: isEditing,
+                    nameController: _nameController,
+                    emailController: _emailController,
+                    formKey: _formKey,
+                    sendEmailVerification: sendEmailVerification,
+                    sendPasswordReset: sendPasswordReset,
+                    cancelEdit: cancelEdit,
+                    saveChanges: saveChanges,
                   ),
 
                   const SizedBox(height: 40),
@@ -598,185 +252,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               ),
             );
           },
-        ),
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    _emailController.dispose();
-    super.dispose();
-  }
-}
-
-class ProfileHeader extends StatelessWidget {
-  const ProfileHeader({
-    super.key,
-    required this.colorScheme,
-    required this.userProfile,
-    required bool isEditing,
-  }) : _isEditing = isEditing;
-
-  final ColorScheme colorScheme;
-  final Map<String, dynamic>? userProfile;
-  final bool _isEditing;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [colorScheme.primary, colorScheme.primary.withAlpha(204)],
-        ),
-        borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(30),
-          bottomRight: Radius.circular(30),
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.only(
-          left: 20,
-          right: 20,
-          bottom: 40,
-          top: 20,
-        ),
-        child: Column(
-          children: [
-            // Enhanced Avatar Section
-            Stack(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: colorScheme.surface,
-                    boxShadow: [
-                      BoxShadow(
-                        color: colorScheme.shadow.withAlpha(25),
-                        blurRadius: 20,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
-                  ),
-                  child: CircleAvatar(
-                    radius: 65,
-                    backgroundColor: colorScheme.surfaceContainerHighest,
-                    backgroundImage: userProfile?['photoURL'] != null
-                        ? NetworkImage(userProfile!['photoURL'])
-                        : null,
-                    child: userProfile?['photoURL'] == null
-                        ? Text(
-                            userProfile?['displayName']?.isNotEmpty == true
-                                ? userProfile!['displayName'][0].toUpperCase()
-                                : (userProfile?['email']?.isNotEmpty == true
-                                      ? userProfile!['email'][0].toUpperCase()
-                                      : 'U'),
-                            style: TextStyle(
-                              fontSize: 36,
-                              fontWeight: FontWeight.bold,
-                              color: colorScheme.primary,
-                            ),
-                          )
-                        : null,
-                  ),
-                ),
-                if (_isEditing)
-                  Positioned(
-                    bottom: 0,
-                    right: 0,
-                    child: GestureDetector(
-                      onTap: () {
-                        context.read<AuthBloc>().add(
-                          AuthUpdateProfilePictureRequested(),
-                        );
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: colorScheme.surface,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: colorScheme.shadow.withAlpha(25),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Icon(
-                          Icons.camera_alt,
-                          size: 20,
-                          color: colorScheme.primary,
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            // User Name Display
-            Text(
-              userProfile?['displayName']?.isNotEmpty == true
-                  ? userProfile!['displayName']
-                  : (userProfile?['email']?.split('@')[0] ?? 'User'),
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: colorScheme.onPrimary,
-              ),
-            ),
-            const SizedBox(height: 8),
-            // Email with verification status
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.email,
-                  size: 16,
-                  color: colorScheme.onPrimary.withAlpha(230),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  userProfile?['email'] ?? 'Loading...',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: colorScheme.onPrimary.withAlpha(230),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: userProfile?['emailVerified'] == true
-                        ? colorScheme.secondary
-                        : colorScheme.error,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    userProfile?['emailVerified'] == true
-                        ? 'Verified'
-                        : 'Unverified',
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: userProfile?['emailVerified'] == true
-                          ? colorScheme.onSecondary
-                          : colorScheme.onTertiary,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 30),
-          ],
         ),
       ),
     );

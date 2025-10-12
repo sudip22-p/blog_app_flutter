@@ -20,7 +20,7 @@ class MyBlogsScreen extends StatefulWidget {
 class _MyBlogsScreenState extends State<MyBlogsScreen> {
   String? get currentUserId => FirebaseAuth.instance.currentUser?.uid;
 
-  void _deleteBlog(Blog blog) {
+  void deleteBlog(Blog blog) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -54,7 +54,7 @@ class _MyBlogsScreenState extends State<MyBlogsScreen> {
     );
   }
 
-  void _editBlog(Blog blog, List<Blog> allBlogs) {
+  void editBlog(Blog blog, List<Blog> allBlogs) {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -63,14 +63,14 @@ class _MyBlogsScreenState extends State<MyBlogsScreen> {
     );
   }
 
-  void _previewBlog(Blog blog) {
+  void previewBlog(Blog blog) {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => BlogPreviewScreen(blog: blog)),
     );
   }
 
-  List<Blog> _getMyBlogs(List<Blog> allBlogs) {
+  List<Blog> getMyBlogs(List<Blog> allBlogs) {
     if (currentUserId == null) return [];
     return allBlogs.where((blog) => blog.authorId == currentUserId).toList();
   }
@@ -156,7 +156,7 @@ class _MyBlogsScreenState extends State<MyBlogsScreen> {
           }
 
           // Filter blogs for current user
-          final myBlogsList = _getMyBlogs(allBlogs);
+          final myBlogsList = getMyBlogs(allBlogs);
 
           // Check if user is not logged in
           if (currentUserId == null) {
@@ -223,9 +223,9 @@ class _MyBlogsScreenState extends State<MyBlogsScreen> {
                           return BlogCard(
                             blog: blog,
                             showActions: true,
-                            onEdit: () => _editBlog(blog, allBlogs),
-                            onDelete: () => _deleteBlog(blog),
-                            onTap: () => _previewBlog(blog),
+                            onEdit: () => editBlog(blog, allBlogs),
+                            onDelete: () => deleteBlog(blog),
+                            onTap: () => previewBlog(blog),
                           );
                         },
                       ),

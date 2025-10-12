@@ -1,4 +1,3 @@
-import 'package:blog_app/features/blogs/data/demo_blogs.dart';
 import 'package:blog_app/features/blogs/data/models/blog.dart';
 import 'package:blog_app/features/blogs/presentation/bloc/blog/blog_bloc.dart';
 import 'package:blog_app/features/blogs/presentation/screens/add_blog.dart';
@@ -25,24 +24,6 @@ class _BlogsHomeState extends State<BlogsHome> {
 
   @override
   Widget build(BuildContext context) {
-    if (demoBlogs.isEmpty) {
-      return EmptyState(
-        icon: Icons.article_outlined,
-        title: 'Welcome to Blog App !',
-        message:
-            'Start creating amazing content and share your thoughts with the world.',
-        buttonText: 'Create Your First Post',
-        onButtonPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute<void>(
-              builder: (BuildContext context) => const AddBlog(),
-            ),
-          );
-        },
-      );
-    }
-
     return Column(
       children: [
         Padding(
@@ -74,12 +55,42 @@ class _BlogsHomeState extends State<BlogsHome> {
             } else if (state is BlogOperationSuccess) {
               blogs = state.blogs;
               if (blogs.isEmpty) {
-                return const Center(child: Text('No blogs available.'));
+                // return const Center(child: Text('No blogs available.'));
+                return EmptyState(
+                  icon: Icons.article_outlined,
+                  title: 'Welcome to Blog App !',
+                  message:
+                      'Start creating amazing content and share your thoughts with the world.',
+                  buttonText: 'Create Your First Post',
+                  onButtonPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute<void>(
+                        builder: (BuildContext context) => const AddBlog(),
+                      ),
+                    );
+                  },
+                );
               }
             } else if (state is BlogLoadSuccess) {
               blogs = state.blogs;
               if (blogs.isEmpty) {
-                return const Center(child: Text('No blogs available.'));
+                // return const Center(child: Text('No blogs available.'));
+                return EmptyState(
+                  icon: Icons.article_outlined,
+                  title: 'Welcome to Blog App !',
+                  message:
+                      'Start creating amazing content and share your thoughts with the world.',
+                  buttonText: 'Create Your First Post',
+                  onButtonPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute<void>(
+                        builder: (BuildContext context) => const AddBlog(),
+                      ),
+                    );
+                  },
+                );
               }
             }
             return Expanded(
