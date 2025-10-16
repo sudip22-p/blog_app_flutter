@@ -1,8 +1,7 @@
 import 'package:blog_app/common/common.dart';
 import 'package:blog_app/core/core.dart';
-import 'package:blog_app/modules/auth/presentation/widgets/widgets.dart';
+import 'package:blog_app/modules/auth/auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:blog_app/modules/auth/presentation/bloc/auth_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -65,15 +64,12 @@ class _LoginScreenState extends State<LoginScreen> {
         child: SafeArea(
           child: SingleChildScrollView(
             child: Padding(
-              padding: const EdgeInsets.all(24.0),
+              padding: const EdgeInsets.all(AppSpacing.lg),
               child: Form(
                 key: _formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const SizedBox(height: 60),
-
-                    // Welcome Text
                     Text(
                       'Welcome Back!',
                       style: context.textTheme.titleMedium?.copyWith(
@@ -81,7 +77,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 8),
+
+                    AppGaps.gapH4,
+
                     Text(
                       'Sign in to your account',
                       style: context.textTheme.bodyMedium?.copyWith(
@@ -89,9 +87,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    const SizedBox(height: 48),
 
-                    // Email Field
+                    AppGaps.gapH40,
+
                     TextFormField(
                       style: context.textTheme.bodyMedium,
                       controller: _emailController,
@@ -104,9 +102,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         prefixIcon: Icon(Icons.email_outlined),
                       ),
                     ),
-                    const SizedBox(height: 16),
 
-                    // Password Field
+                    AppGaps.gapH16,
+
                     TextFormField(
                       style: context.textTheme.bodyMedium,
                       controller: _passwordController,
@@ -132,22 +130,25 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16),
+
+                    AppGaps.gapH4,
+
                     ForgotPassword(),
-                    const SizedBox(height: 8),
 
-                    // Sign In Button
+                    AppGaps.gapH12,
+
                     EmailAuthButton(isLogin: true, authentication: signIn),
-                    const SizedBox(height: 16),
-                    // Divider
+
+                    AppGaps.gapH24,
+
                     AuthDivider(),
-                    const SizedBox(height: 16),
 
-                    // Google Sign In Button
+                    AppGaps.gapH24,
+
                     GoogleAuthentication(),
-                    const SizedBox(height: 24),
 
-                    // Sign Up Link
+                    AppGaps.gapH24,
+
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -160,7 +161,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         CustomButton.text(
                           label: 'Sign Up',
                           onTap: () {
-                            context.goNamed(Routes.signup.name);
+                            context.pushNamed(Routes.signup.name);
                           },
                           textColor: context.customTheme.primary,
                         ),

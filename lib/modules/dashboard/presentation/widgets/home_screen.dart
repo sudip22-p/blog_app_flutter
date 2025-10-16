@@ -20,7 +20,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // Load user profile when screen initializes
     context.read<AuthBloc>().add(AuthLoadProfileRequested());
   }
 
@@ -63,7 +62,6 @@ class _HomeScreenState extends State<HomeScreen> {
               centerTitle: false,
             ),
             body: const BlogsHome(),
-            // bottomNavigationBar: const BottomNavBar(selection: 0),
           );
         },
       ),

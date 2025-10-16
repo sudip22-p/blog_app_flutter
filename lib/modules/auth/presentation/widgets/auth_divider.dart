@@ -9,8 +9,9 @@ class AuthDivider extends StatelessWidget {
     return Row(
       children: [
         const Expanded(child: Divider()),
+
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
           child: Text(
             'OR',
             style: context.textTheme.bodySmall?.copyWith(
@@ -18,6 +19,7 @@ class AuthDivider extends StatelessWidget {
             ),
           ),
         ),
+
         const Expanded(child: Divider()),
       ],
     );

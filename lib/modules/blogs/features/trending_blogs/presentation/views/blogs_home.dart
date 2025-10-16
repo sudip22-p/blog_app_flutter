@@ -1,4 +1,3 @@
-
 import 'package:blog_app/core/core.dart';
 import 'package:blog_app/modules/blogs/data/models/blog.dart';
 import 'package:blog_app/modules/blogs/presentation/bloc/blog/blog_bloc.dart';
@@ -29,14 +28,16 @@ class _BlogsHomeState extends State<BlogsHome> {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AppSpacing.lg),
           child: Row(
             children: [
               const Icon(Icons.trending_up),
-              const SizedBox(width: 8),
+              AppGaps.gapW12,
               Text(
                 'Trending Blogs',
-                style: context.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                style: context.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),

@@ -11,7 +11,7 @@ class ProfileHeader extends StatelessWidget {
     required this.isEditing,
   });
 
-  final UserProfile userProfile;
+  final UserProfile? userProfile;
   final bool isEditing;
 
   @override
@@ -28,13 +28,13 @@ class ProfileHeader extends StatelessWidget {
             context.customTheme.surface,
           ],
         ),
-        borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(16),
-          bottomRight: Radius.circular(16),
+        borderRadius: BorderRadius.only(
+          bottomLeft: AppBorderRadius.largeRadius,
+          bottomRight: AppBorderRadius.largeRadius,
         ),
       ),
       child: Padding(
-        padding: const EdgeInsets.only(bottom: 20, top: 10),
+        padding: EdgeInsets.only(bottom: AppSpacing.xlg, top: AppSpacing.md),
         child: Column(
           children: [
             Stack(
@@ -42,16 +42,17 @@ class ProfileHeader extends StatelessWidget {
                 Container(
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: context.customTheme.surface,
+                    color: context.customTheme.primary,
                   ),
-                  padding: EdgeInsetsGeometry.all(3),
+                  padding: EdgeInsetsGeometry.all(AppSpacing.xxs),
                   child: CustomImageAvatar(
                     size: 200,
-                    imageUrl: userProfile.photoURL ?? '',
+                    imageUrl: userProfile?.photoURL ?? '',
                     fit: BoxFit.cover,
                     placeHolderImage: AssetRoutes.defaultAvatarImagePath,
                   ),
                 ),
+
                 if (isEditing)
                   Positioned(
                     bottom: 8,
@@ -65,30 +66,32 @@ class ProfileHeader extends StatelessWidget {
                       child: Container(
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: context.customTheme.contentPrimary,
+                          color: context.customTheme.contentSurface,
                         ),
-                        padding: EdgeInsetsGeometry.all(7),
+                        padding: EdgeInsetsGeometry.all(AppSpacing.sm),
                         child: Icon(
                           Icons.camera_alt,
                           size: 32,
-                          color: context.customTheme.background,
+                          color: context.customTheme.surface,
                         ),
                       ),
                     ),
                   ),
               ],
             ),
-            const SizedBox(height: 16),
-            // User Name Display
+
+            AppGaps.gapH16,
+
             Text(
-              userProfile.displayName ??
-                  (userProfile.email?.split('@')[0] ?? 'N/A'),
+              userProfile?.displayName ??
+                  (userProfile?.email?.split('@')[0] ?? 'N/A'),
               style: context.textTheme.bodyLarge?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
             ),
-            const SizedBox(height: 8),
-            // Email with verification status
+
+            AppGaps.gapH8,
+
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -97,25 +100,29 @@ class ProfileHeader extends StatelessWidget {
                   size: 20,
                   color: context.customTheme.contentPrimary,
                 ),
-                const SizedBox(width: 8),
+
+                AppGaps.gapW8,
+
                 Text(
-                  userProfile.email ?? 'N/A',
+                  userProfile?.email ?? 'N/A',
                   style: context.textTheme.bodyMedium,
                 ),
-                const SizedBox(width: 8),
+
+                AppGaps.gapW8,
+
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 8,
-                    vertical: 2,
+                    vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: userProfile.emailVerified == true
+                    color: userProfile?.emailVerified == true
                         ? context.customTheme.success
                         : context.customTheme.error,
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: AppBorderRadius.mediumBorderRadius,
                   ),
                   child: Text(
-                    userProfile.emailVerified == true
+                    userProfile?.emailVerified == true
                         ? 'Verified'
                         : 'Not Verified',
                     style: context.textTheme.bodySmall?.copyWith(
@@ -126,7 +133,8 @@ class ProfileHeader extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+
+            AppGaps.gapH8,
           ],
         ),
       ),

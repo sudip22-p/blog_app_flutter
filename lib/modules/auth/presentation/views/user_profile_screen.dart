@@ -22,7 +22,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   @override
   void initState() {
     super.initState();
-    //loading profile when screen initializes
     loadUserProfile();
   }
 
@@ -49,7 +48,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   void cancelEdit() {
     setState(() {
       _isEditing = false;
-      // _nameController.text = _userProfile?['displayName'] ?? '';
       _nameController.text = _userProfile?.displayName ?? '';
     });
   }
@@ -102,7 +100,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         centerTitle: true,
         backgroundColor: context.customTheme.surface,
         showBackButton: true,
-        
+
         actions: [
           if (!_isEditing)
             IconButton(
@@ -114,6 +112,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             ),
         ],
       ),
+
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthProfileLoaded) {
@@ -154,34 +153,28 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               type: ToastType.error,
               message: state.message,
             );
+            context.goNamed(Routes.authWrapper.name);
           } else if (state is AuthInitial) {
             context.goNamed(Routes.authWrapper.name);
           }
         },
         child: BlocBuilder<AuthBloc, AuthState>(
           builder: (context, state) {
-            if (state is AuthLoading || _userProfile == null) {
-              return const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(50.0),
-                  child: CircularProgressIndicator(),
-                ),
-              );
+            if (state is AuthLoading) {
+              return const Center(child: CircularProgressIndicator());
             }
             return SingleChildScrollView(
               child: Column(
                 children: [
-                  // Profile Header Section
                   ProfileHeader(
-                    userProfile: _userProfile!,
+                    userProfile: _userProfile,
                     isEditing: _isEditing,
                   ),
 
-                  const SizedBox(height: 24),
+                  AppGaps.gapH12,
 
-                  // Profile Form Section
                   ProfileFormSection(
-                    userProfile: _userProfile!,
+                    userProfile: _userProfile,
                     isEditing: _isEditing,
                     nameController: _nameController,
                     emailController: _emailController,
@@ -192,7 +185,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                     saveChanges: saveChanges,
                   ),
 
-                  const SizedBox(height: 40),
+                  AppGaps.gapH24,
                 ],
               ),
             );

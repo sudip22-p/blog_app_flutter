@@ -12,6 +12,7 @@ class ConfirmationDialog extends StatelessWidget {
     required this.title,
     required this.message,
     required this.confirmText,
+    this.cancelText,
     this.showCancelButton,
     super.key,
   });
@@ -19,6 +20,7 @@ class ConfirmationDialog extends StatelessWidget {
   final String title;
   final String message;
   final String confirmText;
+  final String? cancelText;
   final bool? showCancelButton;
 
   @override
@@ -28,12 +30,14 @@ class ConfirmationDialog extends StatelessWidget {
             title: title,
             message: message,
             confirmText: confirmText,
+            cancelText: cancelText,
             showCancelButton: showCancelButton ?? true,
           )
         : _AndroidConfirmationDialog(
             title: title,
             message: message,
             confirmText: confirmText,
+            cancelText: cancelText,
             showCancelButton: showCancelButton ?? true,
           );
   }
@@ -44,12 +48,14 @@ class _AndroidConfirmationDialog extends StatelessWidget {
     required this.title,
     required this.message,
     required this.confirmText,
+    this.cancelText,
     required this.showCancelButton,
   });
 
   final String title;
   final String message;
   final String confirmText;
+  final String? cancelText;
   final bool showCancelButton;
 
   @override
@@ -59,6 +65,7 @@ class _AndroidConfirmationDialog extends StatelessWidget {
         title,
         style: context.textTheme.bodyLarge?.copyWith(
           fontWeight: AppFontWeight.bold,
+          color: context.customTheme.primary,
         ),
       ),
       content: Text(
@@ -72,25 +79,28 @@ class _AndroidConfirmationDialog extends StatelessWidget {
         if (showCancelButton)
           TextButton(
             style: TextButton.styleFrom(
-              foregroundColor: context.colorScheme.onSurface,
+              foregroundColor: context.customTheme.error,
             ),
             onPressed: () => context.pop(),
             child: Text(
-              'Cancel',
+              cancelText ?? 'Cancel',
               style: context.textTheme.bodySmall?.copyWith(
                 fontWeight: AppFontWeight.semiBold,
+                color: context.customTheme.error,
               ),
             ),
           ),
-        TextButton(
+        FilledButton(
           style: TextButton.styleFrom(
-            foregroundColor: context.colorScheme.onSurface,
+            backgroundColor: context.customTheme.primary,
           ),
           onPressed: () => context.pop(true),
           child: Text(
             confirmText,
             style: context.textTheme.bodySmall?.copyWith(
               fontWeight: AppFontWeight.semiBold,
+
+              color: Colors.white,
             ),
           ),
         ),
@@ -104,12 +114,14 @@ class _IosConfirmationDialog extends StatelessWidget {
     required this.title,
     required this.message,
     required this.confirmText,
+    this.cancelText,
     required this.showCancelButton,
   });
 
   final String title;
   final String message;
   final String confirmText;
+  final String? cancelText;
   final bool showCancelButton;
 
   @override
@@ -136,27 +148,28 @@ class _IosConfirmationDialog extends StatelessWidget {
         if (showCancelButton)
           TextButton(
             style: TextButton.styleFrom(
-              foregroundColor: context.colorScheme.onSurface,
-              shape: buttonShape,
+              foregroundColor: context.customTheme.error,
             ),
             onPressed: () => context.pop(),
             child: Text(
-              'Cancel',
+              cancelText ?? 'Cancel',
               style: context.textTheme.bodySmall?.copyWith(
                 fontWeight: AppFontWeight.semiBold,
+                color: context.customTheme.error,
               ),
             ),
           ),
-        TextButton(
+        FilledButton(
           style: TextButton.styleFrom(
-            foregroundColor: context.colorScheme.onSurface,
-            shape: buttonShape,
+            backgroundColor: context.customTheme.primary,
           ),
           onPressed: () => context.pop(true),
           child: Text(
             confirmText,
             style: context.textTheme.bodySmall?.copyWith(
               fontWeight: AppFontWeight.semiBold,
+
+              color: Colors.white,
             ),
           ),
         ),

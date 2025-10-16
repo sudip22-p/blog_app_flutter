@@ -1,8 +1,7 @@
 import 'package:blog_app/common/common.dart';
-import 'package:blog_app/modules/auth/presentation/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:blog_app/modules/auth/presentation/bloc/auth_bloc.dart';
+import 'package:blog_app/modules/auth/auth.dart';
 import 'package:blog_app/core/core.dart';
 import 'package:go_router/go_router.dart';
 
@@ -43,12 +42,24 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
-  void showEmailVerificationDialog(BuildContext context, String message) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => EmailVerificationDialog(message: message),
+  void showEmailVerificationDialog(String message) async {
+    bool
+    sendEmailVerificationConfirmation = await DialogUtils.showConfirmationDialog(
+      context,
+      title: "Account Created!",
+      message:
+          "$message\n\n\n Would you like to send a verification email to your account?",
+
+      confirmText: "Send Verification",
+      cancelText: "Skip",
     );
+    if (sendEmailVerificationConfirmation && mounted) {
+      context.read<AuthBloc>().add(AuthSendEmailVerificationRequested());
+    }
+
+    if (!sendEmailVerificationConfirmation && mounted) {
+      context.goNamed(Routes.authWrapper.name);
+    }
   }
 
   @override
@@ -69,32 +80,31 @@ class _SignUpScreenState extends State<SignUpScreen> {
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthSignUpSuccess) {
-            // Show success message and ask about email verification
-            showEmailVerificationDialog(context, state.message);
+            showEmailVerificationDialog(state.message);
           } else if (state is AuthAuthenticated) {
-            // Handle successful Google sign-in - navigate back to let AuthWrapper handle it
-            Navigator.of(context).pop();
+            context.goNamed(Routes.authWrapper.name);
           } else if (state is AuthEmailVerificationSent) {
             CustomSnackbar.showToastMessage(
               type: ToastType.success,
               message: state.message,
             );
+            context.goNamed(Routes.authWrapper.name);
           } else if (state is AuthError) {
             CustomSnackbar.showToastMessage(
               type: ToastType.error,
               message: state.message,
             );
+            context.goNamed(Routes.authWrapper.name);
           }
         },
         child: SafeArea(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
+            padding: const EdgeInsets.all(AppSpacing.lg),
             child: Form(
               key: _formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const SizedBox(height: 32),
                   Text(
                     'Create Account',
                     style: context.textTheme.titleMedium?.copyWith(
@@ -102,7 +112,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 48),
+
+                  AppGaps.gapH40,
 
                   TextFormField(
                     style: context.textTheme.bodyMedium,
@@ -117,7 +128,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       prefixIcon: Icon(Icons.person_outlined),
                     ),
                   ),
-                  const SizedBox(height: 16),
+
+                  AppGaps.gapH16,
 
                   TextFormField(
                     style: context.textTheme.bodyMedium,
@@ -131,7 +143,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       prefixIcon: Icon(Icons.email_outlined),
                     ),
                   ),
-                  const SizedBox(height: 16),
+
+                  AppGaps.gapH16,
 
                   TextFormField(
                     style: context.textTheme.bodyMedium,
@@ -157,7 +170,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16),
+
+                  AppGaps.gapH16,
 
                   TextFormField(
                     style: context.textTheme.bodyMedium,
@@ -187,18 +201,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 24),
 
-                  //sign up button
+                  AppGaps.gapH16,
+
                   EmailAuthButton(isLogin: false, authentication: signUp),
-                  const SizedBox(height: 16),
-                  //divider
-                  AuthDivider(),
-                  const SizedBox(height: 16),
 
-                  // Google Sign In Button
+                  AppGaps.gapH24,
+
+                  AuthDivider(),
+
+                  AppGaps.gapH24,
+
                   GoogleAuthentication(),
-                  const SizedBox(height: 24),
+
+                  AppGaps.gapH24,
 
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,

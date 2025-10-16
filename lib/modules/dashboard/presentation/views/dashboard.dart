@@ -1,6 +1,6 @@
 import 'package:blog_app/core/core.dart';
 import 'package:flutter/material.dart';
-import 'package:blog_app/modules/auth/presentation/screens/home_screen.dart';
+import 'package:blog_app/modules/dashboard/presentation/widgets/home_screen.dart';
 import 'package:blog_app/modules/blogs/features/explore_all_blogs/presentation/views/explore_blogs_screen.dart';
 import 'package:blog_app/modules/blogs/features/favourite_blogs/presentation/views/favourites_screen.dart';
 import 'package:blog_app/modules/blogs/features/my_blogs_overview/presentation/views/my_blogs_screen.dart';

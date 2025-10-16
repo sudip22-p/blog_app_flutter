@@ -1,6 +1,6 @@
 import 'package:blog_app/common/common.dart';
 import 'package:blog_app/core/core.dart';
-import 'package:blog_app/modules/auth/presentation/bloc/auth_bloc.dart';
+import 'package:blog_app/modules/auth/auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -23,21 +23,27 @@ class GoogleAuthentication extends StatelessWidget {
                 },
           label: isLoading ? '' : 'Continue with Google',
           textColor: context.customTheme.primary,
-          border: Border.all(color: context.customTheme.primary, width: 1.5),
+          border: Border.all(
+            color: context.customTheme.primary,
+            width: AppSpacing.xxs,
+          ),
           borderRadius: AppBorderRadius.mediumBorderRadius,
-          padding: const EdgeInsets.symmetric(vertical: 12),
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
           icon: isLoading
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+              ? SizedBox(
+                  width: AppSpacing.lg,
+                  height: AppSpacing.lg,
+                  child: CircularProgressIndicator(
+                    strokeWidth: AppSpacing.xxs,
+                    color: context.customTheme.primary,
+                  ),
                 )
               : Icon(
                   Icons.g_mobiledata,
                   size: 28,
                   color: context.customTheme.primary,
                 ),
-          gap: const SizedBox(width: 8),
+          gap: AppGaps.gapW8,
           iconPosition: IconAlignment.start,
         );
       },

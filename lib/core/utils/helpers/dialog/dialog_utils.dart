@@ -10,6 +10,7 @@ class DialogUtils {
     required String title,
     required String message,
     required String confirmText,
+    String? cancelText,
     bool barrierDismissible = true,
     Color? barrierColor,
     String? barrierLabel,
@@ -33,6 +34,7 @@ class DialogUtils {
             title: title,
             message: message,
             confirmText: confirmText,
+            cancelText: cancelText,
           ),
         ) ??
         false;
@@ -43,6 +45,7 @@ class DialogUtils {
     required String title,
     required String message,
     required String confirmText,
+    String? cancelText,
     bool barrierDismissible = true,
     Color? barrierColor,
     String? barrierLabel,
@@ -66,6 +69,7 @@ class DialogUtils {
             title: title,
             message: message,
             confirmText: confirmText,
+            cancelText: cancelText,
             showCancelButton: false,
           ),
         ) ??

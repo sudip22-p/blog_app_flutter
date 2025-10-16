@@ -1,6 +1,6 @@
 import 'package:blog_app/common/common.dart';
 import 'package:blog_app/core/core.dart';
-import 'package:blog_app/modules/auth/presentation/bloc/auth_bloc.dart';
+import 'package:blog_app/modules/auth/auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -13,7 +13,12 @@ class ForgotPassword extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Reset Password', style: context.textTheme.titleMedium),
+        title: Text(
+          'Reset Password',
+          style: context.textTheme.titleMedium?.copyWith(
+            color: context.customTheme.primary,
+          ),
+        ),
         content: Form(
           key: dialogFormKey,
           child: Column(
@@ -23,7 +28,9 @@ class ForgotPassword extends StatelessWidget {
                 'Enter your email to receive reset instructions.',
                 style: context.textTheme.bodySmall,
               ),
-              const SizedBox(height: 16),
+
+              AppGaps.gapH16,
+
               TextFormField(
                 style: context.textTheme.bodyMedium,
                 controller: emailController,
@@ -38,6 +45,7 @@ class ForgotPassword extends StatelessWidget {
             ],
           ),
         ),
+
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -48,6 +56,7 @@ class ForgotPassword extends StatelessWidget {
               ),
             ),
           ),
+
           BlocConsumer<AuthBloc, AuthState>(
             listener: (context, state) {
               if (state is AuthPasswordResetSent) {
@@ -64,7 +73,10 @@ class ForgotPassword extends StatelessWidget {
               }
             },
             builder: (context, state) {
-              return TextButton(
+              return FilledButton(
+                style: TextButton.styleFrom(
+                  backgroundColor: context.customTheme.primary,
+                ),
                 onPressed: state is AuthLoading
                     ? null
                     : () {
@@ -77,14 +89,19 @@ class ForgotPassword extends StatelessWidget {
                         }
                       },
                 child: state is AuthLoading
-                    ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                    ? SizedBox(
+                        width: AppSpacing.lg,
+                        height: AppSpacing.lg,
+                        child: CircularProgressIndicator(
+                          strokeWidth: AppSpacing.xxs,
+                          color: context.customTheme.background,
+                        ),
                       )
                     : Text(
                         'Send Reset Email',
-                        style: context.textTheme.bodySmall,
+                        style: context.textTheme.bodySmall?.copyWith(
+                          color: Colors.white,
+                        ),
                       ),
               );
             },

@@ -1,6 +1,6 @@
 import 'package:blog_app/common/common.dart';
 import 'package:blog_app/core/core.dart';
-import 'package:blog_app/modules/auth/presentation/bloc/auth_bloc.dart';
+import 'package:blog_app/modules/auth/auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -28,14 +28,14 @@ class EmailAuthButton extends StatelessWidget {
           bgColor: context.customTheme.primary,
           textColor: context.customTheme.background,
           borderRadius: AppBorderRadius.mediumBorderRadius,
-          padding: const EdgeInsets.symmetric(vertical: 12),
+          padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
           icon: isLoading
               ? SizedBox(
-                  width: 20,
-                  height: 20,
+                  width: AppSpacing.lg,
+                  height: AppSpacing.lg,
                   child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: context.customTheme.contentPrimary,
+                    strokeWidth: AppSpacing.xxs,
+                    color: context.customTheme.background,
                   ),
                 )
               : null,
