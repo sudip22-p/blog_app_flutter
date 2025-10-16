@@ -1,44 +1,50 @@
-import 'package:blog_app/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:blog_app/features/blogs/presentation/bloc/blog/blog_bloc.dart';
-import 'package:blog_app/features/blogs/presentation/bloc/engagement/engagement_bloc.dart';
-import 'package:blog_app/features/blogs/presentation/bloc/favorites/favorites_bloc.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'firebase_options.dart';
+import 'package:blog_app/common/observers/bloc_observer.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'core/core.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
+import 'package:path_provider/path_provider.dart';
+
+import 'apps/apps.dart';
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(const MyApp());
+
+  //set hydrated bloc storage
+  await _setUpHydratedStorage();
+
+  //firebase releated setup
+  await firebaseSetup();
+
+  // initiating bloc observer
+  Bloc.observer = AppBlocObserver();
+
+  //locking device orientation to potrait view
+  setDeviceOrientationToPortrait();
+
+  //awaiting di
+  // configureDependencyInjection();
+
+  runApp(const BlogApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void setDeviceOrientationToPortrait() {
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+}
 
-  @override
-  Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(create: (context) => AuthBloc()),
-        BlocProvider(create: (context) => ThemeBloc()),
-        BlocProvider(create: (context) => BlogBloc()),
-        BlocProvider(create: (context) => EngagementBloc()),
-        BlocProvider(create: (context) => FavoritesBloc()),
-      ],
-      child: BlocBuilder<ThemeBloc, ThemeState>(
-        builder: (context, themeState) {
-          return MaterialApp(
-            title: 'Blog App',
-            debugShowCheckedModeBanner: false,
-            theme: AppTheme.lightTheme,
-            darkTheme: AppTheme.darkTheme,
-            themeMode: themeState.themeMode,
-            home: const AuthWrapper(),
-          );
-        },
-      ),
-    );
-  }
+Future<void> firebaseSetup() async {
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+}
+
+Future<void> _setUpHydratedStorage() async {
+  HydratedBloc.storage = await HydratedStorage.build(
+    storageDirectory: kIsWeb
+        ? HydratedStorageDirectory.web
+        : HydratedStorageDirectory((await getTemporaryDirectory()).path),
+  );
 }

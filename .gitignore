@@ -48,4 +48,4 @@ app.*.map.json
 /lib/firebase_options.dart
 
 #cloudinary secrets 
-/lib/core/services/cloudinary_secrets.dart
+/lib/common/services/cloudinary_secrets.dart

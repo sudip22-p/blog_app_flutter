@@ -1,5 +1,4 @@
-// Core exports for easy importing
-export 'theme/app_theme.dart';
-export 'theme/widgets/theme_switcher.dart';
-export 'theme/bloc/theme_bloc.dart';
-export 'widgets/auth_wrapper.dart';
+export 'config/config.dart';
+export 'di/di.dart';
+export 'errors/errors.dart';
+export 'utils/utils.dart';
