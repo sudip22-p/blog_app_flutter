@@ -2,7 +2,7 @@ import 'package:blog_app/modules/auth/presentation/screens/dashboard.dart';
 import 'package:blog_app/modules/auth/presentation/screens/login_screen.dart';
 import 'package:blog_app/modules/auth/presentation/screens/signup_screen.dart';
 import 'package:blog_app/modules/auth/presentation/screens/user_profile_screen.dart';
-import 'package:blog_app/modules/blogs/presentation/screens/add_blog.dart';
+import 'package:blog_app/modules/blogs/features/add_update_blog/presentation/views/add_blog.dart';
 // import 'package:blog_app/modules/blogs/presentation/screens/blog_preview_screen.dart';
 // import 'package:blog_app/modules/blogs/presentation/screens/update_blog.dart';
 import 'package:blog_app/modules/splash/auth_wrapper.dart';

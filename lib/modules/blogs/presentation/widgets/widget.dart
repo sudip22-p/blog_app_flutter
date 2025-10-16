@@ -1,6 +1,6 @@
-export 'app_search_bar.dart';
+export '../../features/explore_all_blogs/presentation/widgets/app_search_bar.dart';
 export 'blog_app_wrapper.dart';
-export 'blog_card.dart';
-export 'blogs_home.dart';
+export '../../features/blog_card/presentation/view/blog_card.dart';
+export '../../features/trending_blogs/presentation/views/blogs_home.dart';
 export 'empty_state.dart';
-export 'explore_empty_state.dart';
+export '../../features/explore_all_blogs/presentation/widgets/explore_empty_state.dart';

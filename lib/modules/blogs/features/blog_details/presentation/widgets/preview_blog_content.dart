@@ -1,6 +1,6 @@
 import 'package:blog_app/modules/blogs/data/models/blog.dart';
 import 'package:blog_app/modules/blogs/presentation/bloc/engagement/engagement_bloc.dart';
-import 'package:blog_app/modules/blogs/presentation/widgets/like_button.dart';
+import 'package:blog_app/modules/blogs/features/blog_details/presentation/widgets/like_button.dart';
 import 'package:flutter/material.dart';
 import 'package:blog_app/core/core.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

@@ -39,12 +39,13 @@ class _ProfileFormSectionState extends State<ProfileFormSection> {
       title: "Logout Confirmation",
       message: "Are you sure you want to logout?",
       confirmText: "LOGOUT",
-      barrierColor: context.customTheme.primary.withAlpha(150),
     );
     if (logoutConfirmation && mounted) {
       context.read<AuthBloc>().add(AuthSignOutRequested());
     }
   }
+
+  bool isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -116,75 +117,76 @@ class _ProfileFormSectionState extends State<ProfileFormSection> {
                   fillColor: context.customTheme.surface,
                 ),
               ),
-              const SizedBox(height: 8),
-
-              // Email Verification Status
-              Row(
-                children: [
-                  Icon(
-                    userProfile.emailVerified == true
-                        ? Icons.check_circle_outline
-                        : Icons.warning_outlined,
-                    size: 16,
-                    color: userProfile.emailVerified == true
-                        ? context.customTheme.success
-                        : context.customTheme.error,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    userProfile.emailVerified == true
-                        ? 'Email verified'
-                        : 'Email not verified',
-                    style: TextStyle(
-                      color: userProfile.emailVerified == true
-                          ? context.customTheme.success
-                          : context.customTheme.error,
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 24),
 
               // Action Buttons
               if (!isEditing) ...[
                 // Email Verification Button
                 if (userProfile.emailVerified == false)
-                  CustomButton(
-                    label: 'Verify Email',
-                    onTap: widget.sendEmailVerification,
-                    bgColor: context.customTheme.primary,
-                    textColor: context.customTheme.background,
+                  CustomButton.outlined(
+                    onTap: isLoading ? null : widget.sendEmailVerification,
+                    label: isLoading ? '' : 'Verify Email',
+                    textColor: context.customTheme.primary,
+                    border: Border.all(
+                      color: context.customTheme.primary,
+                      width: 1.5,
+                    ),
                     borderRadius: AppBorderRadius.mediumBorderRadius,
                     padding: const EdgeInsets.symmetric(vertical: 12),
+                    icon: isLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : null,
+                    gap: const SizedBox(width: 8),
+                    iconPosition: IconAlignment.start,
                   ),
                 if (userProfile.emailVerified == false)
                   const SizedBox(height: 12),
 
                 // Password Reset Button
-                CustomButton(
-                  label: 'Reset Password',
-                  onTap: widget.sendPasswordReset,
-                  bgColor: context.customTheme.primary,
-                  textColor: context.customTheme.background,
+                CustomButton.outlined(
+                  onTap: isLoading ? null : widget.sendPasswordReset,
+                  label: isLoading ? '' : 'Reset Password',
+                  textColor: context.customTheme.primary,
+                  border: Border.all(
+                    color: context.customTheme.primary,
+                    width: 1.5,
+                  ),
                   borderRadius: AppBorderRadius.mediumBorderRadius,
                   padding: const EdgeInsets.symmetric(vertical: 12),
+                  icon: isLoading
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : null,
+                  gap: const SizedBox(width: 8),
+                  iconPosition: IconAlignment.start,
                 ),
 
                 const SizedBox(height: 12),
 
                 // Logout Button
-                CustomButton.icon(
-                  icon: Icon(
-                    Icons.logout,
-                    color: context.customTheme.background,
-                  ),
-                  label: 'Logout',
+                CustomButton.outlined(
                   onTap: showLogoutDialog,
-                  bgColor: context.customTheme.info,
-                  textColor: context.customTheme.background,
+                  label: 'Logout',
+                  textColor: context.customTheme.error,
+                  border: Border.all(
+                    color: context.customTheme.error,
+                    width: 1.5,
+                  ),
                   borderRadius: AppBorderRadius.mediumBorderRadius,
                   padding: const EdgeInsets.symmetric(vertical: 12),
+                  icon: Icon(
+                    Icons.logout_outlined,
+                    color: context.customTheme.error,
+                  ),
+                  gap: const SizedBox(width: 8),
+                  iconPosition: IconAlignment.start,
                 ),
 
                 const SizedBox(height: 40),
@@ -196,32 +198,42 @@ class _ProfileFormSectionState extends State<ProfileFormSection> {
                 Row(
                   children: [
                     Expanded(
-                      child: CustomButton.icon(
-                        icon: Icon(
-                          Icons.close_outlined,
-                          color: context.customTheme.background,
-                        ),
-                        label: 'Cancel',
+                      child: CustomButton.outlined(
                         onTap: widget.cancelEdit,
-                        bgColor: context.customTheme.contentBackground,
-                        textColor: context.customTheme.background,
+                        label: 'Cancel',
+                        textColor: context.customTheme.info,
+                        border: Border.all(
+                          color: context.customTheme.info,
+                          width: 1.5,
+                        ),
                         borderRadius: AppBorderRadius.mediumBorderRadius,
                         padding: const EdgeInsets.symmetric(vertical: 12),
+                        icon: Icon(
+                          Icons.close_outlined,
+                          color: context.customTheme.info,
+                        ),
+                        gap: const SizedBox(width: 8),
+                        iconPosition: IconAlignment.start,
                       ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
-                      child: CustomButton.icon(
-                        icon: Icon(
-                          Icons.save_outlined,
-                          color: context.customTheme.background,
-                        ),
-                        label: 'Save',
+                      child: CustomButton.outlined(
                         onTap: widget.saveChanges,
-                        bgColor: context.customTheme.success,
-                        textColor: context.customTheme.background,
+                        label: 'Save',
+                        textColor: context.customTheme.success,
+                        border: Border.all(
+                          color: context.customTheme.success,
+                          width: 1.5,
+                        ),
                         borderRadius: AppBorderRadius.mediumBorderRadius,
                         padding: const EdgeInsets.symmetric(vertical: 12),
+                        icon: Icon(
+                          Icons.save_outlined,
+                          color: context.customTheme.success,
+                        ),
+                        gap: const SizedBox(width: 8),
+                        iconPosition: IconAlignment.start,
                       ),
                     ),
                   ],

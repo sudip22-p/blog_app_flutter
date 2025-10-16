@@ -1,63 +1,46 @@
 import 'dart:io';
 import 'package:blog_app/common/services/cloudinary_services.dart';
 import 'package:blog_app/core/core.dart';
-import 'package:blog_app/modules/blogs/data/models/blog.dart';
 import 'package:blog_app/modules/blogs/presentation/bloc/blog/blog_bloc.dart';
-import 'package:blog_app/modules/blogs/presentation/widgets/form_widgets.dart';
-import 'package:blog_app/modules/blogs/presentation/widgets/image_picker_widget.dart';
+import 'package:blog_app/modules/blogs/features/add_update_blog/presentation/widgets/form_widgets.dart';
+import 'package:blog_app/modules/blogs/features/add_update_blog/presentation/widgets/image_picker_widget.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class UpdateBlog extends StatefulWidget {
-  const UpdateBlog({super.key, required this.blogId, required this.blogs});
-  final String blogId;
-  final List<Blog> blogs;
+class AddBlog extends StatefulWidget {
+  const AddBlog({super.key});
   @override
-  State<UpdateBlog> createState() => _UpdateBlogState();
+  State<AddBlog> createState() => _AddBlogState();
 }
 
-class _UpdateBlogState extends State<UpdateBlog> {
-  late final Blog currentBlog;
+class _AddBlogState extends State<AddBlog> {
   File? selectedImage;
-  String? currentImageUrl;
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
   final _tagsController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool isLoading = false;
 
-  @override
-  void initState() {
-    super.initState();
-    currentBlog = widget.blogs.firstWhere((blog) => blog.id == widget.blogId);
-    _titleController.text = currentBlog.title;
-    _contentController.text = currentBlog.content;
-    _tagsController.text = currentBlog.tags.join(", ");
-    currentImageUrl = currentBlog.coverImageUrl;
-  }
-
   void submitBlog() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
         isLoading = true;
       });
-
       try {
         final currentUser = FirebaseAuth.instance.currentUser;
         if (currentUser == null) return;
         final currentUserId = currentUser.uid;
         final currentUserName = currentUser.displayName ?? 'Anonymous';
         final cloudinaryService = CloudinaryService();
-        String imageUrl = currentImageUrl ?? '';
-        // Upload new image to Cloudinary if image was changed
+        String imageUrl = '';
+        // Uploading to Cloudinary if image selected
         if (selectedImage != null) {
           imageUrl = await cloudinaryService.uploadImage(selectedImage!);
         }
         if (mounted) {
           context.read<BlogBloc>().add(
-            BlogUpdated(
-              currentBlog.id,
+            NewBlogAdded(
               _titleController.text.trim(),
               _contentController.text.trim(),
               currentUserId,
@@ -71,10 +54,11 @@ class _UpdateBlogState extends State<UpdateBlog> {
             ),
           );
         }
+        clearForm();
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Blog updated successfully!'),
+             SnackBar(
+              content: Text('Blog published successfully!'),
               backgroundColor: context.customTheme.success,
             ),
           );
@@ -84,7 +68,7 @@ class _UpdateBlogState extends State<UpdateBlog> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Error updating blog: $e'),
+              content: Text('Error publishing blog: $e'),
               backgroundColor: context.customTheme.error,
             ),
           );
@@ -99,13 +83,11 @@ class _UpdateBlogState extends State<UpdateBlog> {
     }
   }
 
-  void resetForm() {
-    _titleController.text = currentBlog.title;
-    _contentController.text = currentBlog.content;
-    _tagsController.text = currentBlog.tags.join(", ");
+  void clearForm() {
+    _titleController.clear();
+    _contentController.clear();
+    _tagsController.clear();
     selectedImage = null;
-    currentImageUrl = currentBlog.coverImageUrl;
-    setState(() {});
   }
 
   @override
@@ -120,7 +102,7 @@ class _UpdateBlogState extends State<UpdateBlog> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Update Blog'),
+        title: const Text('Create New Blog'),
         centerTitle: true,
         elevation: 0,
       ),
@@ -153,56 +135,9 @@ class _UpdateBlogState extends State<UpdateBlog> {
                     const SizedBox(height: 16),
                     ImagePickerWidget(
                       onImageSelected: (file) {
-                        setState(() {
-                          selectedImage = file;
-                        });
+                        selectedImage = file;
                       },
                     ),
-                    // Show current image if exists and no new image selected
-                    if (currentImageUrl != null && selectedImage == null)
-                      Column(
-                        children: [
-                          const SizedBox(height: 8),
-                          Container(
-                            height: 200,
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: context.customTheme.outline.withValues(
-                                  alpha: 0.3,
-                                ),
-                              ),
-                            ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
-                              child: Image.network(
-                                currentImageUrl!,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Container(
-                                    color: context.customTheme.surface,
-                                    child: Center(
-                                      child: Icon(
-                                        Icons.broken_image,
-                                        size: 64,
-                                        color: context.customTheme.secondary,
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Current image (select new image to replace)',
-                            style: context.textTheme.bodySmall?.copyWith(
-                              color: context.customTheme.surface,
-                            ),
-                          ),
-                        ],
-                      ),
                     const SizedBox(height: 16),
                     CustomTextFormField(
                       controller: _tagsController,
@@ -247,18 +182,15 @@ class _UpdateBlogState extends State<UpdateBlog> {
                 decoration: BoxDecoration(
                   color: context.customTheme.surface,
                   border: Border(
-                    top: BorderSide(
-                      color: context.customTheme.outline,
-                      width: 0.5,
-                    ),
+                    top: BorderSide(color: context.customTheme.outline, width: 0.5),
                   ),
                 ),
                 child: Row(
                   children: [
                     Expanded(
                       child: OutlinedButton(
-                        onPressed: isLoading ? null : resetForm,
-                        child: const Text('Reset Changes'),
+                        onPressed: isLoading ? null : clearForm,
+                        child: const Text('Clear All'),
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -281,13 +213,12 @@ class _UpdateBlogState extends State<UpdateBlog> {
                                   Text('...'),
                                 ],
                               )
-                            : const Text('Update Blog'),
+                            : const Text('Publish Blog'),
                       ),
                     ),
                   ],
                 ),
               ),
-
               const SizedBox(height: 100),
             ],
           ),

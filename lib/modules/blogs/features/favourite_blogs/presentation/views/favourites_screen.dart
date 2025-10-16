@@ -1,7 +1,7 @@
 import 'package:blog_app/core/core.dart';
 import 'package:blog_app/modules/blogs/presentation/bloc/favorites/favorites_bloc.dart';
-import 'package:blog_app/modules/blogs/presentation/screens/explore_blogs_screen.dart';
-import 'package:blog_app/modules/blogs/presentation/widgets/blog_card.dart';
+import 'package:blog_app/modules/blogs/features/explore_all_blogs/presentation/views/explore_blogs_screen.dart';
+import 'package:blog_app/modules/blogs/features/blog_card/presentation/view/blog_card.dart';
 import 'package:blog_app/modules/blogs/presentation/widgets/empty_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

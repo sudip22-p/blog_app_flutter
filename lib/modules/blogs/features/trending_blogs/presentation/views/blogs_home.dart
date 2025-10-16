@@ -2,9 +2,9 @@
 import 'package:blog_app/core/core.dart';
 import 'package:blog_app/modules/blogs/data/models/blog.dart';
 import 'package:blog_app/modules/blogs/presentation/bloc/blog/blog_bloc.dart';
-import 'package:blog_app/modules/blogs/presentation/screens/add_blog.dart';
-import 'package:blog_app/modules/blogs/presentation/screens/blog_preview_screen.dart';
-import 'package:blog_app/modules/blogs/presentation/widgets/blog_card.dart';
+import 'package:blog_app/modules/blogs/features/add_update_blog/presentation/views/add_blog.dart';
+import 'package:blog_app/modules/blogs/features/blog_details/presentation/views/blog_preview_screen.dart';
+import 'package:blog_app/modules/blogs/features/blog_card/presentation/view/blog_card.dart';
 import 'package:blog_app/modules/blogs/presentation/widgets/empty_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
