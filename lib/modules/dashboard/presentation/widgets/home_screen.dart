@@ -4,8 +4,8 @@ import 'package:blog_app/core/core.dart';
 import 'package:go_router/go_router.dart';
 import 'package:blog_app/modules/theme/theme.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:blog_app/modules/auth/auth.dart';
-import 'package:blog_app/modules/blogs/blog.dart';
+import 'package:blog_app/modules/auth/auths.dart';
+import 'package:blog_app/modules/blogs/blogs.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -37,20 +37,30 @@ class _HomeScreenState extends State<HomeScreen> {
         builder: (context, state) {
           return Scaffold(
             backgroundColor: context.customTheme.background,
-            appBar: AppBar(
+            appBar: CustomAppBarWidget(
+              title: Text(
+                "Blog App",
+                style: context.textTheme.titleLarge?.copyWith(
+                  color: context.customTheme.primary,
+                ),
+              ),
+              // centerTitle: true,
               backgroundColor: context.customTheme.surface,
-              title: Text('Blog App', style: context.textTheme.titleMedium),
+              // showBackButton: true,
               actions: [
                 const ThemeSwitcher(),
-                // Profile Avatar Button
+
                 GestureDetector(
                   onTap: () {
                     context.pushNamed(Routes.userProfile.name);
                   },
                   child: Container(
-                    margin: const EdgeInsets.only(right: 16, left: 8),
+                    margin: const EdgeInsets.only(
+                      right: AppSpacing.lg,
+                      left: AppSpacing.sm,
+                    ),
                     child: CustomImageAvatar(
-                      size: 40,
+                      size: AppSpacing.xxlg,
                       imageUrl: userProfile?.photoURL ?? '',
                       fit: BoxFit.cover,
                       placeHolderImage: AssetRoutes.defaultAvatarImagePath,
@@ -58,9 +68,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
               ],
-              automaticallyImplyLeading: false,
-              centerTitle: false,
             ),
+
             body: const BlogsHome(),
           );
         },

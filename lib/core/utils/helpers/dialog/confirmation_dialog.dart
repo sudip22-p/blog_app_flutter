@@ -126,9 +126,10 @@ class _IosConfirmationDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const OutlinedBorder buttonShape = RoundedRectangleBorder(
-      borderRadius: BorderRadius.zero,
-    );
+    // const OutlinedBorder buttonShape =
+    //  RoundedRectangleBorder(
+    //   borderRadius: BorderRadius.zero,
+    // );
 
     return CupertinoAlertDialog(
       title: Text(

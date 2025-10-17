@@ -1,5 +1,4 @@
 export '../../features/explore_all_blogs/presentation/widgets/app_search_bar.dart';
-export 'blog_app_wrapper.dart';
 export '../../features/blog_card/presentation/view/blog_card.dart';
 export '../../features/trending_blogs/presentation/views/blogs_home.dart';
 export 'empty_state.dart';
