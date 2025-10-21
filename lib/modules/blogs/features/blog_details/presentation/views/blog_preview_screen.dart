@@ -1,7 +1,9 @@
+import 'package:blog_app/common/widgets/custom_app_bar.dart';
 import 'package:blog_app/core/core.dart';
 import 'package:blog_app/modules/blogs/data/models/blog.dart';
-import 'package:blog_app/modules/blogs/presentation/bloc/engagement/engagement_bloc.dart';
-import 'package:blog_app/modules/blogs/presentation/bloc/favorites/favorites_bloc.dart';
+import 'package:blog_app/modules/blogs/features/favourites/presentation/views/favourtite_toggle_box.dart';
+import 'package:blog_app/modules/blogs/features/blog_card/presentation/bloc/engagement_bloc.dart';
+import 'package:blog_app/modules/blogs/features/favourites/presentation/bloc/favorites_bloc.dart';
 import 'package:blog_app/modules/blogs/features/blog_details/presentation/widgets/preview_blog_content.dart';
 import 'package:blog_app/modules/blogs/features/blog_details/presentation/widgets/preview_comment_list.dart';
 import 'package:blog_app/modules/blogs/features/blog_details/presentation/widgets/preview_comment_top_section.dart';
@@ -26,7 +28,6 @@ class _BlogPreviewScreenState extends State<BlogPreviewScreen> {
   @override
   void initState() {
     super.initState();
-
     // Load engagement data and add view in one call
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<EngagementBloc>().add(
@@ -58,68 +59,46 @@ class _BlogPreviewScreenState extends State<BlogPreviewScreen> {
     super.dispose();
   }
 
-  void _toggleFavourite() {
-    final userId = FirebaseAuth.instance.currentUser?.uid;
-    if (userId != null) {
-      context.read<FavoritesBloc>().add(ToggleFavorite(userId, widget.blog.id));
-    }
-  }
-
   void _shareContent() {
     final shareText =
         'Check out this amazing blog post: "${widget.blog.title}" by ${widget.blog.authorName}. \n ${widget.blog.content}';
-
     Clipboard.setData(ClipboardData(text: shareText));
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Content copied to clipboard!'),
-        duration: Duration(seconds: 2),
-      ),
+    CustomSnackbar.showToastMessage(
+      type: ToastType.success,
+      message: "Content copied to clipboard!",
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Blog'),
-        actions: [
-          BlocBuilder<FavoritesBloc, FavoritesState>(
-            builder: (context, state) {
-              bool isFavourite = false;
-              if (state is FavoritesLoaded) {
-                isFavourite = state.isFavorited(widget.blog.id);
-              }
-
-              return IconButton(
-                onPressed: _toggleFavourite,
-                icon: Icon(
-                  isFavourite ? Icons.favorite : Icons.favorite_border,
-                  color: isFavourite ? context.customTheme.primary : null,
-                ),
-              );
-            },
+      appBar: CustomAppBarWidget(
+        title: Text(
+          "Blog Details",
+          style: context.textTheme.titleLarge?.copyWith(
+            color: context.customTheme.primary,
           ),
+        ),
+        backgroundColor: context.customTheme.surface,
+        showBackButton: true,
+        actions: [
+          FavouriteToggle(blog: widget.blog),
+
           IconButton(onPressed: _shareContent, icon: const Icon(Icons.share)),
         ],
       ),
       body: CustomScrollView(
         slivers: [
-          // Blog content
           PreviewBlogContent(blog: widget.blog),
 
-          // Comments section
           PreviewCommentTopSection(
             blog: widget.blog,
             commentController: _commentController,
           ),
 
-          // Comments list
           PreviewCommentList(),
 
-          // Bottom padding
-          const SliverToBoxAdapter(child: SizedBox(height: 16)),
+          SliverToBoxAdapter(child: AppGaps.gapH16),
         ],
       ),
     );

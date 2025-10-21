@@ -10,11 +10,7 @@ class BlogTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       title,
-      style: context.textTheme.titleLarge?.copyWith(
-        fontWeight: FontWeight.w700,
-        height: 1.3,
-        letterSpacing: -0.3,
-      ),
+      style: context.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
       maxLines: 2,
       overflow: TextOverflow.ellipsis,
     );

@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:blog_app/common/services/cloudinary_services.dart';
 import 'package:blog_app/core/core.dart';
 import 'package:blog_app/modules/blogs/data/models/blog.dart';
-import 'package:blog_app/modules/blogs/presentation/bloc/blog/blog_bloc.dart';
+import 'package:blog_app/modules/blogs/presentation/bloc/blog_bloc.dart';
 import 'package:blog_app/modules/blogs/features/add_update_blog/presentation/widgets/form_widgets.dart';
 import 'package:blog_app/modules/blogs/features/add_update_blog/presentation/widgets/image_picker_widget.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -10,9 +10,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class UpdateBlog extends StatefulWidget {
-  const UpdateBlog({super.key, required this.blogId, required this.blogs});
-  final String blogId;
-  final List<Blog> blogs;
+  const UpdateBlog({super.key, required this.blog});
+  // final String blogId;
+  // final List<Blog> blogs;
+  final Blog blog;
   @override
   State<UpdateBlog> createState() => _UpdateBlogState();
 }
@@ -30,7 +31,8 @@ class _UpdateBlogState extends State<UpdateBlog> {
   @override
   void initState() {
     super.initState();
-    currentBlog = widget.blogs.firstWhere((blog) => blog.id == widget.blogId);
+    currentBlog = widget.blog;
+    // currentBlog = widget.blogs.firstWhere((blog) => blog.id == widget.blogId);
     _titleController.text = currentBlog.title;
     _contentController.text = currentBlog.content;
     _tagsController.text = currentBlog.tags.join(", ");

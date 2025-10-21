@@ -1,3 +1,4 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 class BlogEngagement {
   final String blogId;
   final int likesCount;
@@ -90,6 +91,11 @@ class BlogEngagement {
       comments: comments ?? this.comments,
       views: views ?? this.views,
     );
+  }
+
+  @override
+  String toString() {
+    return 'BlogEngagement(blogId: $blogId, likesCount: $likesCount, commentsCount: $commentsCount, viewsCount: $viewsCount, likes: $likes, comments: $comments, views: $views)';
   }
 }
 

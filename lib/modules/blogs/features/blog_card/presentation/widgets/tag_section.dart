@@ -11,21 +11,23 @@ class TagsSection extends StatelessWidget {
     if (tags.isEmpty) return const SizedBox.shrink();
 
     return Wrap(
-      spacing: 6,
-      runSpacing: 4,
+      spacing: AppSpacing.sm,
+      runSpacing: AppSpacing.xs,
       children: tags.take(3).map((tag) {
         return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.sm,
+            vertical: AppSpacing.xs,
+          ),
           decoration: BoxDecoration(
-            color: context.customTheme.surface.withValues(alpha: 0.7),
-            borderRadius: BorderRadius.circular(6),
+            color: context.customTheme.outline.withValues(alpha: 0.15),
+            borderRadius: AppBorderRadius.mediumBorderRadius,
           ),
           child: Text(
             tag,
-            style: context.textTheme.labelSmall?.copyWith(
-              color: context.customTheme.surface,
-              fontWeight: FontWeight.w600,
-              fontSize: 10,
+            style: context.textTheme.labelMedium?.copyWith(
+              color: context.customTheme.contentBackground,
+              fontWeight: FontWeight.w500,
             ),
           ),
         );

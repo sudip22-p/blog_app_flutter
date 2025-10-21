@@ -1,6 +1,6 @@
 import 'package:blog_app/core/core.dart';
 import 'package:blog_app/modules/blogs/data/models/blog.dart';
-import 'package:blog_app/modules/blogs/presentation/bloc/blog/blog_bloc.dart';
+import 'package:blog_app/modules/blogs/presentation/bloc/blog_bloc.dart';
 import 'package:blog_app/modules/blogs/features/blog_details/presentation/views/blog_preview_screen.dart';
 import 'package:blog_app/modules/blogs/features/explore_all_blogs/presentation/widgets/app_search_bar.dart';
 import 'package:blog_app/modules/blogs/features/blog_card/presentation/view/blog_card.dart';

@@ -1,5 +1,6 @@
 import 'package:blog_app/core/core.dart';
 import 'package:flutter/material.dart';
+
 class StatItem extends StatelessWidget {
   final IconData icon;
   final int count;
@@ -16,50 +17,39 @@ class StatItem extends StatelessWidget {
     this.isLoading = false,
   });
 
-  @override
-  Widget build(BuildContext context) {
-    Widget content = Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        isLoading
-            ? SizedBox(
-                width: 16,
-                height: 16,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(color),
-                ),
-              )
-            : Icon(icon, size: 16, color: color),
-        const SizedBox(width: 4),
-        Text(
-          formatCount(count),
-          style: context.textTheme.bodySmall?.copyWith(
-            color: context.customTheme.contentSurface,
-            fontWeight: FontWeight.w600,
-            fontSize: 12,
-          ),
-        ),
-      ],
-    );
-
-    if (onTap != null) {
-      return Material(
-        child: InkWell(
-          onTap: isLoading ? null : onTap,
-          borderRadius: BorderRadius.circular(8),
-          child: Padding(padding: const EdgeInsets.all(4), child: content),
-        ),
-      );
-    }
-
-    return content;
-  }
-
   String formatCount(int count) {
     if (count >= 1000) {
       return '${(count / 1000).toStringAsFixed(1)}k';
     }
     return count.toString();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: isLoading ? null : onTap,
+      borderRadius: BorderRadius.circular(AppSpacing.sm),
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.xs),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            isLoading
+                ? SizedBox(
+                    width: AppSpacing.lg,
+                    height: AppSpacing.lg,
+                    child: CircularProgressIndicator(
+                      strokeWidth: AppSpacing.xxs,
+                    ),
+                  )
+                : Icon(icon, size: AppSpacing.lg, color: color),
+
+            AppGaps.gapW4,
+
+            Text(formatCount(count), style: context.textTheme.labelMedium),
+          ],
+        ),
+      ),
+    );
   }
 }

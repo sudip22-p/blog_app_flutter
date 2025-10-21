@@ -1,5 +1,7 @@
+import 'package:blog_app/common/widgets/buttons/app_button.dart';
 import 'package:blog_app/core/core.dart';
 import 'package:flutter/material.dart';
+
 class ActionButtons extends StatelessWidget {
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
@@ -16,35 +18,45 @@ class ActionButtons extends StatelessWidget {
       children: [
         if (onEdit != null)
           Expanded(
-            child: OutlinedButton.icon(
-              onPressed: onEdit,
-              icon: const Icon(Icons.edit_rounded, size: 16),
-              label: const Text('Edit'),
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-                minimumSize: Size.zero,
+            child: CustomButton.outlined(
+              onTap: onEdit,
+              label: 'Edit',
+              textColor: context.customTheme.primary,
+              border: Border.all(
+                color: context.customTheme.primary,
+                width: AppSpacing.xxs,
               ),
+              borderRadius: AppBorderRadius.mediumBorderRadius,
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+              icon: Icon(
+                Icons.edit_rounded,
+                color: context.customTheme.primary,
+              ),
+              gap: AppGaps.gapW8,
+              iconPosition: IconAlignment.start,
             ),
           ),
-        if (onEdit != null && onDelete != null) const SizedBox(width: 8),
+
+        if (onEdit != null && onDelete != null) AppGaps.gapW16,
+
         if (onDelete != null)
           Expanded(
-            child: OutlinedButton.icon(
-              onPressed: onDelete,
-              icon: const Icon(Icons.delete_outline_rounded, size: 16),
-              label: const Text('Delete'),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: context.customTheme.error,
-                side: BorderSide(color: context.customTheme.error),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
-                ),
-                minimumSize: Size.zero,
+            child: CustomButton.outlined(
+              onTap: onDelete,
+              label: 'Delete',
+              textColor: context.customTheme.error,
+              border: Border.all(
+                color: context.customTheme.error,
+                width: AppSpacing.xxs,
               ),
+              borderRadius: AppBorderRadius.mediumBorderRadius,
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+              icon: Icon(
+                Icons.delete_outline_rounded,
+                color: context.customTheme.error,
+              ),
+              gap: AppGaps.gapW8,
+              iconPosition: IconAlignment.start,
             ),
           ),
       ],

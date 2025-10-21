@@ -1,3 +1,6 @@
+import 'package:blog_app/modules/blogs/data/models/blog.dart';
+import 'package:blog_app/modules/blogs/features/add_update_blog/presentation/views/update_blog.dart';
+import 'package:blog_app/modules/blogs/features/blog_details/presentation/views/blog_preview_screen.dart';
 import 'package:blog_app/modules/dashboard/presentation/views/dashboard.dart';
 import 'package:blog_app/modules/auth/presentation/views/login_screen.dart';
 import 'package:blog_app/modules/auth/presentation/views/signup_screen.dart';
@@ -47,7 +50,7 @@ final router = GoRouter(
       path: Routes.signup.path,
       builder: (context, state) => const SignUpScreen(),
     ),
-    //dashboard 
+    //dashboard
     GoRoute(
       name: Routes.dashboard.name,
       path: Routes.dashboard.path,
@@ -60,11 +63,14 @@ final router = GoRouter(
       builder: (context, state) => const UserProfileScreen(),
     ),
     //blog details screen
-    // GoRoute(
-    //   name: Routes.blogDetails.name,
-    //   path: Routes.blogDetails.path,
-    //   builder: (context, state) => const BlogPreviewScreen(),
-    // ),
+    GoRoute(
+      name: Routes.blogDetails.name,
+      path: Routes.blogDetails.path,
+      builder: (context, state) {
+        final blog = state.extra as Blog;
+        return BlogPreviewScreen(blog: blog);
+      },
+    ),
     //add blog screen
     GoRoute(
       name: Routes.addBlog.name,
@@ -72,11 +78,14 @@ final router = GoRouter(
       builder: (context, state) => const AddBlog(),
     ),
     //edit blog screen
-    // GoRoute(
-    //   name: Routes.editBlog.name,
-    //   path: Routes.editBlog.path,
-    //   builder: (context, state) => const UpdateBlog(),
-    // ),
+     GoRoute(
+      name: Routes.editBlog.name,
+      path: Routes.editBlog.path,
+      builder: (context, state) {
+        final blog = state.extra as Blog;
+        return UpdateBlog(blog: blog);
+      },
+    ),
   ],
   errorBuilder: (context, state) {
     return ErrorScreen(

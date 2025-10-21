@@ -1,22 +1,28 @@
+import 'package:blog_app/common/common.dart';
 import 'package:blog_app/core/core.dart';
 import 'package:blog_app/modules/blogs/data/models/blog.dart';
-import 'package:blog_app/modules/blogs/presentation/bloc/blog/blog_bloc.dart';
-import 'package:blog_app/modules/blogs/features/add_update_blog/presentation/views/add_blog.dart';
+import 'package:blog_app/modules/blogs/presentation/bloc/blog_bloc.dart';
+//TODO: update path accordingly ....
 import 'package:blog_app/modules/blogs/features/blog_details/presentation/views/blog_preview_screen.dart';
 import 'package:blog_app/modules/blogs/features/blog_card/presentation/view/blog_card.dart';
 import 'package:blog_app/modules/blogs/presentation/widgets/empty_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+// import 'package:go_router/go_router.dart';
 
-class BlogsHome extends StatefulWidget {
-  const BlogsHome({super.key});
+class TrendingBlogs extends StatefulWidget {
+  const TrendingBlogs({super.key});
 
   @override
-  State<BlogsHome> createState() => _BlogsHomeState();
+  State<TrendingBlogs> createState() => _TrendingBlogsState();
 }
 
-class _BlogsHomeState extends State<BlogsHome> {
+//TODO: filter the trending ones 1st
+class _TrendingBlogsState extends State<TrendingBlogs> {
   void _openBlog(Blog blog) {
+    //TODO: change the route after setup
+    // context.goNamed(Routes.blog_details.name);
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => BlogPreviewScreen(blog: blog)),
@@ -31,18 +37,23 @@ class _BlogsHomeState extends State<BlogsHome> {
           padding: const EdgeInsets.all(AppSpacing.lg),
           child: Row(
             children: [
-              const Icon(Icons.trending_up),
+              Icon(
+                Icons.trending_up,
+                color: context.customTheme.contentPrimary,
+              ),
+
               AppGaps.gapW12,
+
               Text(
                 'Trending Blogs',
-                style: context.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
+                style: context.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ],
           ),
         ),
-        // Blog list
+
         BlocBuilder<BlogBloc, BlogState>(
           builder: (context, state) {
             dynamic blogs;
@@ -52,51 +63,50 @@ class _BlogsHomeState extends State<BlogsHome> {
             } else if (state is BlogLoading) {
               return const Center(child: CircularProgressIndicator());
             } else if (state is BlogOperationFailure) {
-              return Center(child: Text('Error: ${state.errorMessage}'));
+              CustomSnackbar.showToastMessage(
+                type: ToastType.error,
+                message: state.errorMessage,
+              );
+              return EmptyState(
+                icon: Icons.error,
+                title: 'Failed to Fetch the Blogs!',
+                message: 'Reload the Blogs Again.',
+                buttonText: 'Reload',
+                onButtonPressed: () {
+                  context.goNamed(Routes.dashboard.name);
+                },
+              );
             } else if (state is BlogOperationSuccess) {
               blogs = state.blogs;
               if (blogs.isEmpty) {
-                // return const Center(child: Text('No blogs available.'));
                 return EmptyState(
                   icon: Icons.article_outlined,
-                  title: 'Welcome to Blog App !',
-                  message:
-                      'Start creating amazing content and share your thoughts with the world.',
-                  buttonText: 'Create Your First Post',
+                  title: 'No Blogs Available !',
+                  message: 'An Unknown Error Occurred While Loading Blogs.',
+                  buttonText: 'Reload',
                   onButtonPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute<void>(
-                        builder: (BuildContext context) => const AddBlog(),
-                      ),
-                    );
+                    context.pushNamed(Routes.dashboard.name);
                   },
                 );
               }
             } else if (state is BlogLoadSuccess) {
               blogs = state.blogs;
               if (blogs.isEmpty) {
-                // return const Center(child: Text('No blogs available.'));
                 return EmptyState(
                   icon: Icons.article_outlined,
-                  title: 'Welcome to Blog App !',
+                  title: 'No Blogs Available !',
                   message:
                       'Start creating amazing content and share your thoughts with the world.',
-                  buttonText: 'Create Your First Post',
+                  buttonText: 'Create Blog',
                   onButtonPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute<void>(
-                        builder: (BuildContext context) => const AddBlog(),
-                      ),
-                    );
+                    context.pushNamed(Routes.addBlog.name);
                   },
                 );
               }
             }
             return Expanded(
               child: ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
                 itemCount: blogs.length,
                 itemBuilder: (context, index) {
                   final blog = blogs[index];

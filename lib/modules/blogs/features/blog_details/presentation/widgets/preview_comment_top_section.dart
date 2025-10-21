@@ -1,7 +1,7 @@
 import 'package:blog_app/core/core.dart';
 import 'package:blog_app/modules/blogs/data/models/blog.dart';
 import 'package:blog_app/modules/blogs/data/models/blog_engagement.dart';
-import 'package:blog_app/modules/blogs/presentation/bloc/engagement/engagement_bloc.dart';
+import 'package:blog_app/modules/blogs/features/blog_card/presentation/bloc/engagement_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

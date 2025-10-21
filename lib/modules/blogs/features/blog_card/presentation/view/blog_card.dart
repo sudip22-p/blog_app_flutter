@@ -1,6 +1,7 @@
 import 'package:blog_app/common/common.dart';
 import 'package:blog_app/core/core.dart';
 import 'package:blog_app/modules/blogs/data/models/blog.dart';
+//TODO: update path accordingly ....
 import 'package:blog_app/modules/blogs/features/blog_card/presentation/widgets/author_section.dart';
 import 'package:blog_app/modules/blogs/features/blog_card/presentation/widgets/blog_content.dart';
 import 'package:blog_app/modules/blogs/features/blog_card/presentation/widgets/blog_stats.dart';
@@ -30,45 +31,50 @@ class BlogCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
+      margin: const EdgeInsets.only(bottom: AppSpacing.lg),
       decoration: BoxDecoration(
         color: context.customTheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: context.customTheme.outline.withValues(alpha: 0.1),
-          width: 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: context.customTheme.outline.withValues(alpha: 0.08),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        borderRadius: AppBorderRadius.chipBorderRadius,
+        boxShadow: AppShadow.shadow02,
       ),
+
       child: InkWell(
-        borderRadius: BorderRadius.circular(8),
-        onTap: onTap ?? () => {context.pushNamed(Routes.blogDetails.name)},
+        borderRadius: AppBorderRadius.chipBorderRadius,
+        onTap:
+            onTap ??
+            () => {context.pushNamed(Routes.blogDetails.name, extra: blog)},
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             CoverImageSection(blog: blog),
+
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(AppSpacing.lg),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   TagsSection(tags: blog.tags),
-                  if (blog.tags.isNotEmpty) const SizedBox(height: 8),
+
+                  if (blog.tags.isNotEmpty) AppGaps.gapH8,
+
                   BlogTitle(title: blog.title),
-                  const SizedBox(height: 6),
+
+                  AppGaps.gapH8,
+
                   BlogContent(content: blog.content),
-                  const SizedBox(height: 12),
+
+                  AppGaps.gapH12,
+
                   AuthorSection(blog: blog),
-                  const SizedBox(height: 12),
+
+                  AppGaps.gapH12,
+
                   BlogStats(blog: blog),
+
+                  //for MyBlogs Page
                   if (showActions) ...[
-                    const SizedBox(height: 12),
+                    AppGaps.gapH12,
+
                     ActionButtons(onEdit: onEdit, onDelete: onDelete),
                   ],
                 ],

@@ -1,6 +1,6 @@
 import 'package:blog_app/core/core.dart';
 import 'package:blog_app/modules/blogs/data/models/blog.dart';
-import 'package:blog_app/modules/blogs/presentation/bloc/blog/blog_bloc.dart';
+import 'package:blog_app/modules/blogs/presentation/bloc/blog_bloc.dart';
 import 'package:blog_app/modules/blogs/features/add_update_blog/presentation/views/add_blog.dart';
 import 'package:blog_app/modules/blogs/features/blog_details/presentation/views/blog_preview_screen.dart';
 import 'package:blog_app/modules/blogs/features/add_update_blog/presentation/views/update_blog.dart';
@@ -57,9 +57,7 @@ class _MyBlogsScreenState extends State<MyBlogsScreen> {
   void editBlog(Blog blog, List<Blog> allBlogs) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => UpdateBlog(blogId: blog.id, blogs: allBlogs),
-      ),
+      MaterialPageRoute(builder: (context) => UpdateBlog(blog: blog)),
     );
   }
 

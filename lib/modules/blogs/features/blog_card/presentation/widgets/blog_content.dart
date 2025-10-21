@@ -11,7 +11,7 @@ class BlogContent extends StatelessWidget {
     return Text(
       content,
       style: context.textTheme.bodySmall?.copyWith(
-        color: context.customTheme.contentSurface,
+        color: context.customTheme.contentPrimary,
       ),
       maxLines: 3,
       overflow: TextOverflow.ellipsis,

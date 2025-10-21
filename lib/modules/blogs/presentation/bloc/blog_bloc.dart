@@ -1,4 +1,3 @@
-
 import 'package:blog_app/modules/blogs/data/models/blog.dart';
 import 'package:blog_app/modules/blogs/data/services/firebase_firestore_services.dart';
 import 'package:equatable/equatable.dart';
@@ -16,24 +15,6 @@ class BlogBloc extends Bloc<BlogEvent, BlogState> {
     on<BlogUpdated>(onBlogUpdated);
     on<BlogDeleted>(onBlogDeleted);
   }
-  // @override
-  // void onChange(Change<BlogState> change) {
-  //   super.onChange(change);
-  //   print('auth bloc change - $change');
-  // }
-
-  // @override
-  // void onTransition(Transition<BlogEvent, BlogState> transition) {
-  //   super.onTransition(transition);
-  //   print("sud transition- $transition");
-  // }
-
-  // @override
-  // void onError(Object error, StackTrace stackTrace) {
-  //   super.onError(error, stackTrace);
-  //   print("sud error- $error");
-  //   print("sud stack trace- $stackTrace");
-  // }
 
   void onBlogsLoaded(BlogsLoaded event, Emitter<BlogState> emit) async {
     emit(BlogLoading());

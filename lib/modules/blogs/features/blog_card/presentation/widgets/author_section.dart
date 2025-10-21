@@ -12,15 +12,16 @@ class AuthorSection extends StatelessWidget {
     return Row(
       children: [
         Container(
-          width: 32,
-          height: 32,
+          width: AppSpacing.xxlg,
+          height: AppSpacing.xxlg,
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
+                context.customTheme.primary,
                 context.customTheme.surface,
-                context.customTheme.surface.withValues(alpha: 0.7),
+                context.customTheme.primary,
               ],
             ),
             shape: BoxShape.circle,
@@ -30,51 +31,31 @@ class AuthorSection extends StatelessWidget {
               blog.authorName.isNotEmpty
                   ? blog.authorName[0].toUpperCase()
                   : 'A',
-              style: context.textTheme.labelMedium?.copyWith(
-                color: context.customTheme.contentPrimary,
-                fontWeight: FontWeight.w700,
-                fontSize: 12,
-              ),
+              style: context.textTheme.bodyMedium,
             ),
           ),
         ),
-        const SizedBox(width: 8),
+
+        AppGaps.gapW8,
+
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 blog.authorName == "" ? "Anonymous" : blog.authorName,
-                style: context.textTheme.labelMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
+                style: context.textTheme.labelLarge?.copyWith(
+                  fontWeight: FontWeight.w500,
                 ),
               ),
               Text(
-                formatTimeAgo(blog.createdAt),
-                style: context.textTheme.bodySmall?.copyWith(
-                  color: context.customTheme.contentSurface,
-                  fontSize: 11,
-                ),
+                DatetimeUtils.formatTimeAgo(blog.createdAt),
+                style: context.textTheme.labelMedium,
               ),
             ],
           ),
         ),
       ],
     );
-  }
-
-  String formatTimeAgo(DateTime dateTime) {
-    final now = DateTime.now();
-    final difference = now.difference(dateTime);
-
-    if (difference.inDays > 0) {
-      return '${difference.inDays}d ago';
-    } else if (difference.inHours > 0) {
-      return '${difference.inHours}h ago';
-    } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes}m ago';
-    } else {
-      return 'Just now';
-    }
   }
 }
