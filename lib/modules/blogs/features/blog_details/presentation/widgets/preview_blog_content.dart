@@ -48,15 +48,15 @@ class PreviewBlogContent extends StatelessWidget {
 
                 AppGaps.gapH8,
 
-                // Content
-                Text(blog.content, style: context.textTheme.bodyMedium),
-
-                AppGaps.gapH24,
-
                 // Author and date
                 AuthorSection(blog: blog),
 
                 AppGaps.gapH8,
+
+                // Content
+                Text(blog.content, style: context.textTheme.bodyMedium),
+
+                AppGaps.gapH24,
 
                 BlogStats(blog: blog),
 

@@ -5,32 +5,36 @@ class RealtimeDatabaseEngagementService {
   final DatabaseReference _database = FirebaseDatabase.instance.ref();
 
   // Get real-time engagement stream (preferred for real-time updates)
-  Stream<BlogEngagement> getBlogEngagementStream(String blogId) {
-    return _database.child('blog_engagement').child(blogId).onValue.map((
-      event,
-    ) {
+  Stream<List<BlogEngagement>> getBlogEngagementStream() {
+    return _database.child('blog_engagement').onValue.map((event) {
       if (event.snapshot.exists && event.snapshot.value != null) {
         final data = Map<String, dynamic>.from(event.snapshot.value as Map);
-        return BlogEngagement.fromMap(data, blogId);
+        // Return the list of BlogEngagement objects
+        return data.entries.map((entry) {
+          final blogId = entry.key;
+          final blogData = Map<String, dynamic>.from(entry.value as Map);
+          return BlogEngagement.fromMap(blogData, blogId);
+        }).toList();
       } else {
-        return BlogEngagement(blogId: blogId);
+        return <BlogEngagement>[];
       }
     });
   }
 
   // Get current engagement data (fallback method)
-  Future<BlogEngagement> getBlogEngagement(String blogId) async {
-    final snapshot = await _database
-        .child('blog_engagement')
-        .child(blogId)
-        .get();
+  Future<List<BlogEngagement>> getBlogEngagement(String blogId) async {
+    final snapshot = await _database.child('blog_engagement').get();
 
     if (snapshot.exists && snapshot.value != null) {
       final data = Map<String, dynamic>.from(snapshot.value as Map);
-      return BlogEngagement.fromMap(data, blogId);
+      return data.entries.map((entry) {
+        final blogId = entry.key;
+        final blogData = Map<String, dynamic>.from(entry.value as Map);
+        return BlogEngagement.fromMap(blogData, blogId);
+      }).toList();
     } else {
       // Return empty engagement if doesn't exist
-      return BlogEngagement(blogId: blogId);
+      return <BlogEngagement>[];
     }
   }
 

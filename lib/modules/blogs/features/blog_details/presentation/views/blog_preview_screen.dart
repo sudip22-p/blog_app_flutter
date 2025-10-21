@@ -28,13 +28,8 @@ class _BlogPreviewScreenState extends State<BlogPreviewScreen> {
   @override
   void initState() {
     super.initState();
-    // Load engagement data and add view in one call
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<EngagementBloc>().add(
-        StartBlogEngagementStream(widget.blog.id),
-      );
-      _addViewIfNeeded();
-    });
+    // add view in one call
+    _addViewIfNeeded();
 
     // Load user favorites data
     final userId = FirebaseAuth.instance.currentUser?.uid;
@@ -96,7 +91,7 @@ class _BlogPreviewScreenState extends State<BlogPreviewScreen> {
             commentController: _commentController,
           ),
 
-          PreviewCommentList(),
+          PreviewCommentList(blog: widget.blog),
 
           SliverToBoxAdapter(child: AppGaps.gapH16),
         ],

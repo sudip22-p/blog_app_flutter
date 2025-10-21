@@ -14,11 +14,10 @@ class GlobalBlocConfig extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        
-        BlocProvider(create: (context) => AuthBloc()),
-        BlocProvider(create: (context) => BlogBloc()),
-        BlocProvider(create: (context) => EngagementBloc()),
-        BlocProvider(create: (context) => FavoritesBloc()),
+        BlocProvider(create: (_) => AuthBloc()),
+        BlocProvider(create: (_) => BlogBloc()),
+        BlocProvider(create: (_) => EngagementBloc()),
+        BlocProvider(create: (_) => FavoritesBloc()),
         BlocProvider(lazy: false, create: (_) => ThemeCubit()),
       ],
       child: child,

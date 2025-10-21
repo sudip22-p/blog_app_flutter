@@ -10,12 +10,12 @@ class EngagementInitial extends EngagementState {}
 class EngagementLoading extends EngagementState {}
 
 class EngagementLoaded extends EngagementState {
-  final BlogEngagement engagement;
+  final List<BlogEngagement> engagements;
 
-  EngagementLoaded(this.engagement);
+  EngagementLoaded(this.engagements);
 
   @override
-  List<Object?> get props => [engagement];
+  List<Object?> get props => [engagements];
 }
 
 class EngagementError extends EngagementState {

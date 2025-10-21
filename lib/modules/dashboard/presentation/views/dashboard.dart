@@ -1,4 +1,5 @@
 import 'package:blog_app/core/core.dart';
+import 'package:blog_app/modules/dashboard/presentation/widgets/blog_engagement_initializer.dart';
 import 'package:flutter/material.dart';
 import 'package:blog_app/modules/dashboard/presentation/widgets/home_screen.dart';
 import 'package:blog_app/modules/blogs/blogs.dart';
@@ -60,7 +61,9 @@ class _DashboardState extends State<Dashboard> {
       ),
     ];
     return Scaffold(
-      body: IndexedStack(index: _currentIndex, children: _pages),
+      body: BlogEngagementInitializer(
+        child: IndexedStack(index: _currentIndex, children: _pages),
+      ),
 
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,

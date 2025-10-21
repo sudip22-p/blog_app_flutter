@@ -1,25 +1,15 @@
+import 'package:blog_app/common/router/asset_routes.dart';
+import 'package:blog_app/common/widgets/custom_image_avatar.dart';
 import 'package:blog_app/core/core.dart';
+import 'package:blog_app/modules/blogs/data/models/blog.dart';
 import 'package:blog_app/modules/blogs/data/models/blog_engagement.dart';
 import 'package:blog_app/modules/blogs/features/blog_card/presentation/bloc/engagement_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class PreviewCommentList extends StatelessWidget {
-  const PreviewCommentList({super.key});
-  String formatTimeAgo(DateTime dateTime) {
-    final now = DateTime.now();
-    final difference = now.difference(dateTime);
-
-    if (difference.inDays > 0) {
-      return '${difference.inDays} day${difference.inDays == 1 ? '' : 's'} ago';
-    } else if (difference.inHours > 0) {
-      return '${difference.inHours} hour${difference.inHours == 1 ? '' : 's'} ago';
-    } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes} minute${difference.inMinutes == 1 ? '' : 's'} ago';
-    } else {
-      return 'Just now';
-    }
-  }
+  final Blog blog;
+  const PreviewCommentList({super.key, required this.blog});
 
   @override
   Widget build(BuildContext context) {
@@ -27,48 +17,40 @@ class PreviewCommentList extends StatelessWidget {
       builder: (context, state) {
         List<BlogComment> comments = [];
         if (state is EngagementLoaded) {
-          comments = state.engagement.commentsList;
+          final blogEngagement = state.engagements.firstWhere(
+            (eng) => eng.blogId == blog.id,
+            orElse: () => BlogEngagement(
+              blogId: blog.id,
+              likesCount: 0,
+              viewsCount: 0,
+              commentsCount: 0,
+            ),
+          );
+          comments = blogEngagement.commentsList;
         }
 
         return SliverList(
           delegate: SliverChildBuilderDelegate((context, index) {
             final comment = comments[index];
             return Container(
-              color: context.customTheme.surface,
+              color: context.customTheme.background,
               child: Padding(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
+                  horizontal: AppSpacing.lg,
+                  vertical: AppSpacing.sm,
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Builder(
-                      builder: (context) {
-                        final hasValidAvatar =
-                            comment.userAvatar.isNotEmpty &&
-                            Uri.tryParse(comment.userAvatar)?.hasScheme == true;
-
-                        return CircleAvatar(
-                          radius: 16,
-                          backgroundImage: hasValidAvatar
-                              ? NetworkImage(comment.userAvatar)
-                              : null,
-                          onBackgroundImageError: hasValidAvatar
-                              ? (exception, stackTrace) {
-                                  // Handle image loading errors gracefully
-                                }
-                              : null,
-                          child: Text(
-                            comment.userName.isNotEmpty
-                                ? comment.userName[0].toUpperCase()
-                                : '?',
-                            style: const TextStyle(fontSize: 12),
-                          ),
-                        );
-                      },
+                    CustomImageAvatar(
+                      size: AppSpacing.xxlg,
+                      imageUrl: comment.userAvatar,
+                      fit: BoxFit.cover,
+                      placeHolderImage: AssetRoutes.defaultAvatarImagePath,
                     ),
-                    const SizedBox(width: 12),
+
+                    AppGaps.gapW12,
+
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -81,16 +63,18 @@ class PreviewCommentList extends StatelessWidget {
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
-                              const SizedBox(width: 8),
+
+                              AppGaps.gapW8,
+
                               Text(
-                                formatTimeAgo(comment.createdAt),
-                                style: context.textTheme.bodySmall?.copyWith(
-                                  color: context.customTheme.contentSurface,
-                                ),
+                                DatetimeUtils.formatTimeAgo(comment.createdAt),
+                                style: context.textTheme.bodySmall,
                               ),
                             ],
                           ),
-                          const SizedBox(height: 4),
+
+                          AppGaps.gapH2,
+
                           Text(
                             comment.content,
                             style: context.textTheme.bodyMedium,

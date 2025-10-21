@@ -50,10 +50,7 @@ class _PreviewCommentTopSectionState extends State<PreviewCommentTopSection> {
   Widget build(BuildContext context) {
     return SliverToBoxAdapter(
       child: Container(
-        decoration: BoxDecoration(
-          color: context.customTheme.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-        ),
+        color: context.customTheme.background,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -63,66 +60,78 @@ class _PreviewCommentTopSectionState extends State<PreviewCommentTopSection> {
                 builder: (context, state) {
                   int commentCount = 0;
                   if (state is EngagementLoaded) {
-                    commentCount = state.engagement.commentsCount;
+                    final blogEngagement = state.engagements.firstWhere(
+                      (eng) => eng.blogId == widget.blog.id,
+                      orElse: () => BlogEngagement(
+                        blogId: widget.blog.id,
+                        likesCount: 0,
+                        viewsCount: 0,
+                        commentsCount: 0,
+                      ),
+                    );
+                    commentCount = blogEngagement.commentsCount;
                   }
 
                   return Text(
                     'Comments ($commentCount)',
-                    style: context.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: context.textTheme.titleSmall,
                   );
                 },
               ),
             ),
 
-            // Add comment field
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
               child: Row(
                 children: [
                   CircleAvatar(
-                    radius: 16,
-                    backgroundColor: context.customTheme.surface,
+                    radius: AppSpacing.xlg,
+                    backgroundColor: context.customTheme.secondary,
                     child: Icon(
                       Icons.person,
-                      size: 16,
-                      color: context.customTheme.secondary,
+                      size: AppSpacing.xlg,
+                      color: context.customTheme.surface,
                     ),
                   ),
-                  const SizedBox(width: 12),
+
+                  AppGaps.gapW4,
+
                   Expanded(
                     child: TextField(
+                      style: context.textTheme.bodyMedium,
                       controller: widget._commentController,
                       decoration: InputDecoration(
-                        hintText: 'Write a comment...',
+                        hintText: 'Add your comment',
+                        hintStyle: context.textTheme.bodyMedium,
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(24),
+                          borderRadius: AppBorderRadius.defaultBorderRadius,
                         ),
                         contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
+                          horizontal: AppSpacing.lg,
+                          vertical: AppSpacing.md,
                         ),
                       ),
                       maxLines: null,
                     ),
                   ),
-                  const SizedBox(width: 8),
+
+                  AppGaps.gapW4,
+
                   IconButton(
                     onPressed: () {
                       addComment(widget.blog.id);
                     },
                     icon: const Icon(Icons.send),
                     style: IconButton.styleFrom(
-                      backgroundColor: context.customTheme.primary,
-                      foregroundColor: context.customTheme.contentPrimary,
+                      backgroundColor: context.customTheme.secondary,
+                      foregroundColor: context.customTheme.surface,
                     ),
                   ),
                 ],
               ),
             ),
 
-            const SizedBox(height: 16),
+            AppGaps.gapH16,
           ],
         ),
       ),

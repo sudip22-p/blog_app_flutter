@@ -1,4 +1,3 @@
-
 import 'package:blog_app/modules/blogs/data/models/blog_engagement.dart';
 import 'package:blog_app/modules/blogs/data/services/realtime_database_engagement_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -13,7 +12,7 @@ class EngagementBloc extends Bloc<EngagementEvent, EngagementState> {
   final RealtimeDatabaseEngagementService _engagementService =
       RealtimeDatabaseEngagementService();
 
-  StreamSubscription<BlogEngagement>? _engagementSubscription;
+  StreamSubscription<List<BlogEngagement>>? _engagementSubscription;
 
   EngagementBloc() : super(EngagementInitial()) {
     on<LoadBlogEngagement>(onLoadBlogEngagement);
@@ -37,11 +36,11 @@ class EngagementBloc extends Bloc<EngagementEvent, EngagementState> {
     emit(EngagementLoading());
 
     try {
-      final engagement = await _engagementService.getBlogEngagement(
+      final engagements = await _engagementService.getBlogEngagement(
         event.blogId,
       );
       if (!isClosed) {
-        emit(EngagementLoaded(engagement));
+        emit(EngagementLoaded(engagements));
       }
     } catch (e) {
       if (!isClosed) {
@@ -61,11 +60,11 @@ class EngagementBloc extends Bloc<EngagementEvent, EngagementState> {
 
     // Start new stream subscription
     _engagementSubscription = _engagementService
-        .getBlogEngagementStream(event.blogId)
+        .getBlogEngagementStream()
         .listen(
-          (engagement) {
+          (engagements) {
             if (!isClosed) {
-              add(EngagementStreamUpdate(engagement));
+              add(EngagementStreamUpdate(engagements));
             }
           },
           onError: (error) {
@@ -81,7 +80,7 @@ class EngagementBloc extends Bloc<EngagementEvent, EngagementState> {
     Emitter<EngagementState> emit,
   ) {
     if (!isClosed) {
-      emit(EngagementLoaded(event.engagement));
+      emit(EngagementLoaded(event.engagements));
     }
   }
 

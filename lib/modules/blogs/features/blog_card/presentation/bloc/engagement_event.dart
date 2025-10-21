@@ -8,13 +8,12 @@ class LoadBlogEngagement extends EngagementEvent {
 }
 
 class StartBlogEngagementStream extends EngagementEvent {
-  final String blogId;
-  StartBlogEngagementStream(this.blogId);
+  StartBlogEngagementStream();
 }
 
 class EngagementStreamUpdate extends EngagementEvent {
-  final BlogEngagement engagement;
-  EngagementStreamUpdate(this.engagement);
+  final List<BlogEngagement> engagements;
+  EngagementStreamUpdate(this.engagements);
 }
 
 class ToggleLike extends EngagementEvent {

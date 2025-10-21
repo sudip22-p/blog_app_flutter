@@ -6,7 +6,6 @@ class StatItem extends StatelessWidget {
   final int count;
   final Color color;
   final VoidCallback? onTap;
-  final bool isLoading;
 
   const StatItem({
     super.key,
@@ -14,7 +13,6 @@ class StatItem extends StatelessWidget {
     required this.count,
     required this.color,
     this.onTap,
-    this.isLoading = false,
   });
 
   String formatCount(int count) {
@@ -27,22 +25,14 @@ class StatItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: isLoading ? null : onTap,
+      onTap: onTap,
       borderRadius: BorderRadius.circular(AppSpacing.sm),
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.xs),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            isLoading
-                ? SizedBox(
-                    width: AppSpacing.lg,
-                    height: AppSpacing.lg,
-                    child: CircularProgressIndicator(
-                      strokeWidth: AppSpacing.xxs,
-                    ),
-                  )
-                : Icon(icon, size: AppSpacing.lg, color: color),
+            Icon(icon, size: 21, color: color),
 
             AppGaps.gapW4,
 
