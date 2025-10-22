@@ -4,7 +4,6 @@ import 'package:blog_app/modules/blogs/data/models/blog.dart';
 import 'package:blog_app/modules/blogs/presentation/bloc/blog_bloc.dart';
 import 'package:blog_app/modules/blogs/features/explore_all_blogs/presentation/widgets/app_search_bar.dart';
 import 'package:blog_app/modules/blogs/features/blog_card/presentation/view/blog_card.dart';
-import 'package:blog_app/modules/blogs/features/explore_all_blogs/presentation/widgets/explore_empty_state.dart';
 import 'package:blog_app/modules/blogs/features/explore_all_blogs/presentation/widgets/filter_chip_bar.dart';
 import 'package:blog_app/modules/blogs/features/explore_all_blogs/presentation/widgets/pagination_controls.dart';
 import 'package:blog_app/modules/blogs/features/explore_all_blogs/presentation/widgets/results_info.dart';
@@ -193,9 +192,15 @@ class _ExploreBlogsScreenState extends State<ExploreBlogsScreen> {
 
               Expanded(
                 child: visibleBlogs.isEmpty
-                    ? ExploreEmptyState(
-                        searchQuery: _searchQuery,
-                        selectedTag: _selectedTag,
+                    ? EmptyState(
+                        icon: Icons.error,
+                        title: 'Blogs Not Found',
+                        message:
+                            "Blogs are not available for '$_searchQuery'.Search sth different or clear filter for blogs.",
+                        buttonText: 'Clear Filter',
+                        onButtonPressed: () {
+                          _searchController.clear();
+                        },
                       )
                     : ListView.builder(
                         controller: _scrollController,
