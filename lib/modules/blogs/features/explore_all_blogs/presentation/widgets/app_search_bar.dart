@@ -18,67 +18,39 @@ class AppSearchBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 0),
-      height: 48,
+      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
       decoration: BoxDecoration(
         color: context.customTheme.surface,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: AppBorderRadius.largeBorderRadius,
         border: Border.all(
-          color: context.customTheme.outline.withValues(alpha: 0.8),
-          width: 2,
+          color: context.customTheme.outline,
+          width: AppSpacing.xxxs,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: context.customTheme.outline.withValues(alpha: 0.08),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        boxShadow: AppShadow.shadow01,
       ),
+
       child: TextField(
+        style: context.textTheme.bodyMedium,
+
         controller: controller,
         onChanged: onChanged,
-        style: context.textTheme.bodyMedium?.copyWith(
-          fontSize: 15,
-          fontWeight: FontWeight.w400,
-        ),
         decoration: InputDecoration(
           hintText: 'Search blogs, authors, topics...',
-          hintStyle: context.textTheme.bodyMedium?.copyWith(
-            color: context.customTheme.contentSurface.withValues(alpha: 0.6),
-            fontSize: 15,
-          ),
-          prefixIcon: Container(
-            width: 48,
-            height: 48,
-            alignment: Alignment.center,
-            child: Icon(
-              Icons.search_rounded,
-              color: context.customTheme.contentSurface.withValues(alpha: 0.7),
-              size: 22,
-            ),
+          hintStyle: context.textTheme.bodySmall,
+          isCollapsed: true,
+
+          prefixIcon: Icon(
+            Icons.search_rounded,
+            color: context.customTheme.contentPrimary.withValues(alpha: 0.7),
+            size: AppSpacing.xlg,
           ),
           suffixIcon: searchQuery.isNotEmpty
-              ? Container(
-                  width: 48,
-                  height: 48,
-                  alignment: Alignment.center,
-                  child: InkWell(
-                    onTap: onClear,
-                    borderRadius: BorderRadius.circular(16),
-                    child: Container(
-                      width: 28,
-                      height: 28,
-                      decoration: BoxDecoration(
-                        color: context.customTheme.surface,
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: Icon(
-                        Icons.close_rounded,
-                        color: context.customTheme.secondary,
-                        size: 16,
-                      ),
-                    ),
+              ? InkWell(
+                  onTap: onClear,
+                  child: Icon(
+                    Icons.close_rounded,
+                    color: context.customTheme.error,
+                    size: AppSpacing.xlg,
                   ),
                 )
               : null,
@@ -86,8 +58,8 @@ class AppSearchBar extends StatelessWidget {
           enabledBorder: InputBorder.none,
           focusedBorder: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 12,
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.sm,
           ),
         ),
       ),
