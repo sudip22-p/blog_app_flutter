@@ -14,34 +14,16 @@ class FavouriteToggle extends StatefulWidget {
 }
 
 class _FavouriteToggleState extends State<FavouriteToggle> {
-  bool? isFavouriteBlog;
   bool isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    loadFavourite();
-  }
-
-  void loadFavourite() {
-    final userId = FirebaseAuth.instance.currentUser?.uid;
-    if (userId != null) {
-      // Use addPostFrameCallback to ensure context is ready
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          final favoritesBloc = context.read<FavoritesBloc>();
-          if (favoritesBloc.state is FavoritesInitial) {
-            favoritesBloc.add(LoadUserFavorites(userId));
-          }
-        }
-      });
-    }
   }
 
   void handleFavoriteTap(String? userId, bool currentlyFavorite) async {
     if (userId == null || isLoading) return;
     setState(() {
-      isFavouriteBlog = !currentlyFavorite;
       isLoading = true;
     });
     try {
@@ -49,7 +31,6 @@ class _FavouriteToggleState extends State<FavouriteToggle> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          isFavouriteBlog = currentlyFavorite;
           isLoading = false;
         });
       }
@@ -59,25 +40,31 @@ class _FavouriteToggleState extends State<FavouriteToggle> {
   @override
   Widget build(BuildContext context) {
     final userId = FirebaseAuth.instance.currentUser?.uid;
-    return BlocBuilder<FavoritesBloc, FavoritesState>(
-      builder: (context, state) {
-        bool isFavorite =
-            isFavouriteBlog ??
-            (state is FavoritesLoaded
-                ? state.isFavorited(widget.blog.id)
-                : false);
-        if (state is FavoritesLoaded) {
-          isLoading = false;
-        } else if (state is FavoritesError) {
+    return BlocConsumer<FavoritesBloc, FavoritesState>(
+      listener: (context, state) {
+        if (state is FavoritesError) {
           CustomSnackbar.showToastMessage(
             message: state.error,
             type: ToastType.error,
           );
           setState(() {
             isLoading = false;
-            isFavouriteBlog = !isFavorite;
           });
+        } else if (state is FavoritesLoaded) {
+          setState(() {
+            isLoading = false;
+          });
+        } else if (state is FavoritesInitial) {
+          final userId = FirebaseAuth.instance.currentUser?.uid;
+          if (userId != null) {
+            context.read<FavoritesBloc>().add(LoadUserFavorites(userId));
+          }
         }
+      },
+      builder: (context, state) {
+        bool isFavorite = (state is FavoritesLoaded
+            ? state.isFavorited(widget.blog.id)
+            : false);
         return InkWell(
           onTap: () => handleFavoriteTap(userId, isFavorite),
           child: Container(

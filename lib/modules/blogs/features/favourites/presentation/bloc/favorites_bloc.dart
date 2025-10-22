@@ -54,6 +54,7 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
     ToggleFavorite event,
     Emitter<FavoritesState> emit,
   ) async {
+    emit(FavoritesLoading());
     try {
       await _favoritesService.toggleFavorite(event.userId, event.blogId);
 

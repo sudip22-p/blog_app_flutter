@@ -1,11 +1,13 @@
+import 'package:blog_app/common/router/routes.dart';
+import 'package:blog_app/common/widgets/custom_app_bar.dart';
 import 'package:blog_app/core/core.dart';
 import 'package:blog_app/modules/blogs/features/favourites/presentation/bloc/favorites_bloc.dart';
-import 'package:blog_app/modules/blogs/features/explore_all_blogs/presentation/views/explore_blogs_screen.dart';
 import 'package:blog_app/modules/blogs/features/blog_card/presentation/view/blog_card.dart';
 import 'package:blog_app/modules/blogs/presentation/widgets/empty_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:go_router/go_router.dart';
 
 class FavouritesScreen extends StatefulWidget {
   const FavouritesScreen({super.key});
@@ -31,44 +33,57 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: false,
-        title: const Text('Favorites'),
-        titleTextStyle: context.textTheme.titleLarge?.copyWith(
-          color: context.customTheme.primary,
-          fontWeight: FontWeight.w600,
+      appBar: CustomAppBarWidget(
+        title: Text(
+          "Favorites",
+          style: context.textTheme.titleLarge?.copyWith(
+            color: context.customTheme.primary,
+          ),
         ),
+
+        backgroundColor: context.customTheme.surface,
+
         actions: [
           BlocBuilder<FavoritesBloc, FavoritesState>(
             builder: (context, state) {
               final count = state is FavoritesLoaded
                   ? state.favoriteBlogs.length
-                  : 0;
+                  : '-';
               return Container(
-                margin: const EdgeInsets.only(right: 16),
-                constraints: const BoxConstraints(
-                  maxWidth: 80,
-                ), // Prevent overflow
-                child: Chip(
-                  avatar: const Icon(Icons.favorite, size: 14),
-                  label: Text(
-                    '$count',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
+                margin: EdgeInsets.only(right: AppSpacing.lg),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: AppSpacing.sm,
+                ),
+                decoration: BoxDecoration(
+                  color: context.customTheme.primary.withValues(alpha: 0.12),
+                  borderRadius: AppBorderRadius.chipBorderRadius,
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.favorite_rounded,
+                      size: AppSpacing.lg,
+                      color: context.customTheme.error,
                     ),
-                  ),
-                  backgroundColor: context.customTheme.secondary.withValues(
-                    alpha: 0.1,
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+
+                    AppGaps.gapW4,
+
+                    Text(
+                      '$count',
+                      style: context.textTheme.labelMedium?.copyWith(
+                        color: context.customTheme.error,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
               );
             },
           ),
         ],
       ),
+
       body: BlocBuilder<FavoritesBloc, FavoritesState>(
         builder: (context, state) {
           if (state is FavoritesLoading) {
@@ -77,31 +92,12 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
 
           if (state is FavoritesError) {
             return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.error_outline,
-                    size: 64,
-                    color: context.customTheme.error,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Failed to load favorites',
-                    style: context.textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    state.error,
-                    style: context.textTheme.bodyMedium,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: _loadFavorites,
-                    child: const Text('Retry'),
-                  ),
-                ],
+              child: EmptyState(
+                icon: Icons.error,
+                title: 'Failed to Load Favorites',
+                message: state.error,
+                buttonText: 'Retry',
+                onButtonPressed: _loadFavorites,
               ),
             );
           }
@@ -116,18 +112,12 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
                 message:
                     'Start exploring amazing blogs and tap the heart icon to add them to your favorites collection.',
                 buttonText: 'Explore Blogs',
-                onButtonPressed: () => Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute<void>(
-                    builder: (BuildContext context) =>
-                        const ExploreBlogsScreen(),
-                  ),
-                ),
+                onButtonPressed: () => {context.goNamed(Routes.dashboard.name)},
               );
             }
 
             return ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
               itemCount: favoriteBlogs.length,
               itemBuilder: (context, index) {
                 final blog = favoriteBlogs[index];
