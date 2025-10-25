@@ -1,5 +1,5 @@
 import 'package:blog_app/core/core.dart';
-import 'package:blog_app/modules/blogs/data/models/blog.dart';
+import 'package:blog_app/modules/blogs/blogs.dart';
 import 'package:flutter/material.dart';
 
 class AuthorSection extends StatelessWidget {

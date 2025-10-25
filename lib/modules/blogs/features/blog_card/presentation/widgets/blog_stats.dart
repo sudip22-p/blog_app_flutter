@@ -1,10 +1,6 @@
-import 'package:blog_app/common/router/routes.dart';
+import 'package:blog_app/common/common.dart';
 import 'package:blog_app/core/core.dart';
-import 'package:blog_app/modules/blogs/data/models/blog.dart';
-import 'package:blog_app/modules/blogs/data/models/blog_engagement.dart';
-import 'package:blog_app/modules/blogs/features/blog_card/presentation/bloc/engagement_bloc.dart';
-import 'package:blog_app/modules/blogs/features/blog_card/presentation/widgets/blog_stat_item.dart';
-import 'package:blog_app/modules/blogs/presentation/widgets/empty_state.dart';
+import 'package:blog_app/modules/blogs/blogs.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

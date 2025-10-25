@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:blog_app/common/services/cloudinary_services.dart';
+import 'package:blog_app/common/common.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:image_picker/image_picker.dart';

@@ -1,7 +1,6 @@
 import 'package:blog_app/core/core.dart';
-import 'package:blog_app/modules/dashboard/presentation/widgets/blog_engagement_initializer.dart';
+import 'package:blog_app/modules/dashboard/dashboard.dart';
 import 'package:flutter/material.dart';
-import 'package:blog_app/modules/dashboard/presentation/widgets/home_screen.dart';
 import 'package:blog_app/modules/blogs/blogs.dart';
 
 class Dashboard extends StatefulWidget {

@@ -1,4 +1,4 @@
-import 'package:blog_app/modules/blogs/data/models/blog_engagement.dart';
+import 'package:blog_app/modules/blogs/blogs.dart';
 import 'package:firebase_database/firebase_database.dart';
 
 class RealtimeDatabaseEngagementService {

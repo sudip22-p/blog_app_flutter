@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:blog_app/common/services/cloudinary_secrets.dart';
+import './cloudinary_secrets.dart';
 import 'package:cloudinary_public/cloudinary_public.dart';
 
 class CloudinaryService {

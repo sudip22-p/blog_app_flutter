@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:blog_app/common/themes/typography/font_weight.dart';
+import 'package:blog_app/common/common.dart';
 import 'package:blog_app/core/core.dart';
 
 //for showing the alert dialog in the app for confirmation. Will return true if confirmed, false if cancelled

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../core/utils/helpers/logger_helper.dart';
+import 'package:blog_app/core/core.dart';
 
 class AppNavigatorObserver extends NavigatorObserver {
   AppNavigatorObserver();

@@ -1,11 +1,6 @@
-import 'package:blog_app/common/widgets/custom_app_bar.dart';
+import 'package:blog_app/common/common.dart';
 import 'package:blog_app/core/core.dart';
-import 'package:blog_app/modules/blogs/data/models/blog.dart';
-import 'package:blog_app/modules/blogs/features/favourites/presentation/views/favourtite_toggle_box.dart';
-import 'package:blog_app/modules/blogs/features/blog_card/presentation/bloc/engagement_bloc.dart';
-import 'package:blog_app/modules/blogs/features/blog_details/presentation/widgets/preview_blog_content.dart';
-import 'package:blog_app/modules/blogs/features/blog_details/presentation/widgets/preview_comment_list.dart';
-import 'package:blog_app/modules/blogs/features/blog_details/presentation/widgets/preview_comment_top_section.dart';
+import 'package:blog_app/modules/blogs/blogs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

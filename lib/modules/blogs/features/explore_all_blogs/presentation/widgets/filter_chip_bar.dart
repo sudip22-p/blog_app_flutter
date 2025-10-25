@@ -1,5 +1,5 @@
 import 'package:blog_app/core/core.dart';
-import 'package:blog_app/modules/blogs/features/explore_all_blogs/presentation/widgets/chip_bar_item.dart';
+import 'package:blog_app/modules/blogs/blogs.dart';
 import 'package:flutter/material.dart';
 
 class FilterChipBar extends StatelessWidget {

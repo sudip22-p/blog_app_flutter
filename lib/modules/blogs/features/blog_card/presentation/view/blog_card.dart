@@ -1,14 +1,6 @@
 import 'package:blog_app/common/common.dart';
 import 'package:blog_app/core/core.dart';
-import 'package:blog_app/modules/blogs/data/models/blog.dart';
-//TODO: update path accordingly ....
-import 'package:blog_app/modules/blogs/features/blog_card/presentation/widgets/author_section.dart';
-import 'package:blog_app/modules/blogs/features/blog_card/presentation/widgets/blog_content.dart';
-import 'package:blog_app/modules/blogs/features/blog_card/presentation/widgets/blog_stats.dart';
-import 'package:blog_app/modules/blogs/features/blog_card/presentation/widgets/blog_title.dart';
-import 'package:blog_app/modules/blogs/features/blog_card/presentation/widgets/cover_image_section.dart';
-import 'package:blog_app/modules/blogs/features/blog_card/presentation/widgets/tag_section.dart';
-import 'package:blog_app/modules/blogs/features/blog_card/presentation/widgets/user_action_buttons.dart';
+import 'package:blog_app/modules/blogs/blogs.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 

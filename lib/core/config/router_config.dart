@@ -1,20 +1,10 @@
-import 'package:blog_app/modules/blogs/data/models/blog.dart';
-import 'package:blog_app/modules/blogs/features/add_update_blog/presentation/views/update_blog.dart';
-import 'package:blog_app/modules/blogs/features/blog_details/presentation/views/blog_preview_screen.dart';
-import 'package:blog_app/modules/dashboard/presentation/views/dashboard.dart';
-import 'package:blog_app/modules/auth/presentation/views/login_screen.dart';
-import 'package:blog_app/modules/auth/presentation/views/signup_screen.dart';
-import 'package:blog_app/modules/auth/presentation/views/user_profile_screen.dart';
-import 'package:blog_app/modules/blogs/features/add_update_blog/presentation/views/add_blog.dart';
-// import 'package:blog_app/modules/blogs/presentation/screens/blog_preview_screen.dart';
-// import 'package:blog_app/modules/blogs/presentation/screens/update_blog.dart';
-import 'package:blog_app/modules/splash/auth_wrapper.dart';
-import 'package:blog_app/modules/splash/splash_screen.dart';
+import 'package:blog_app/modules/blogs/blogs.dart';
+import 'package:blog_app/modules/auth/auths.dart';
+import 'package:blog_app/modules/dashboard/dashboard.dart';
+import 'package:blog_app/modules/splash/splash.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:blog_app/common/observers/navigation_observer.dart';
-import 'package:blog_app/common/router/routes.dart';
-import 'package:blog_app/common/widgets/error/error_screen.dart';
+import 'package:blog_app/common/common.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -78,7 +68,7 @@ final router = GoRouter(
       builder: (context, state) => const AddBlog(),
     ),
     //edit blog screen
-     GoRoute(
+    GoRoute(
       name: Routes.editBlog.name,
       path: Routes.editBlog.path,
       builder: (context, state) {

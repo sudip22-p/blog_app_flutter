@@ -1,5 +1,4 @@
-import 'package:blog_app/modules/blogs/data/models/blog.dart';
-import 'package:blog_app/modules/blogs/data/services/firebase_firestore_services.dart';
+import 'package:blog_app/modules/blogs/blogs.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

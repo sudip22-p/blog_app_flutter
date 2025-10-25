@@ -1,4 +1,4 @@
-import 'package:blog_app/core/utils/helpers/logger_helper.dart';
+import 'package:blog_app/core/core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

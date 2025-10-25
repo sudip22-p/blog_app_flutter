@@ -1,6 +1,4 @@
-
-import 'package:blog_app/modules/blogs/data/models/blog.dart';
-import 'package:blog_app/modules/blogs/features/favourites/data/models/favorite.dart';
+import 'package:blog_app/modules/blogs/blogs.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FirestoreFavoritesService {

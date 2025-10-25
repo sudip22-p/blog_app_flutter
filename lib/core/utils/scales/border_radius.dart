@@ -1,4 +1,4 @@
-import 'package:blog_app/core/utils/utils.dart';
+import 'package:blog_app/core/core.dart';
 import 'package:flutter/material.dart';
 
 ///[border radius]

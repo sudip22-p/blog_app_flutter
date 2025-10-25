@@ -1,7 +1,5 @@
 import 'dart:async';
-import 'package:blog_app/modules/blogs/data/models/blog.dart';
-import 'package:blog_app/modules/blogs/features/favourites/data/models/favorite.dart';
-import 'package:blog_app/modules/blogs/data/services/firestore_favorites_service.dart';
+import 'package:blog_app/modules/blogs/blogs.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:equatable/equatable.dart';

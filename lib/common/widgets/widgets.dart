@@ -7,4 +7,3 @@ export 'error/error.dart';
 export 'parent_pading_widget.dart';
 export 'parent_text_widget.dart';
 export 'svg_viewer.dart';
-export 'upgrader_alert_widget.dart';

@@ -1,7 +1,5 @@
 import "package:blog_app/core/core.dart";
-//TODO: edit.
-import "package:blog_app/modules/blogs/data/models/blog.dart";
-import "package:blog_app/modules/blogs/features/favourites/presentation/bloc/favorites_bloc.dart";
+import "package:blog_app/modules/blogs/blogs.dart";
 import "package:firebase_auth/firebase_auth.dart";
 import "package:flutter/material.dart";
 import "package:flutter_bloc/flutter_bloc.dart";

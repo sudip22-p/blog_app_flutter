@@ -1,13 +1,6 @@
 import 'package:blog_app/common/common.dart';
 import 'package:blog_app/core/core.dart';
-import 'package:blog_app/modules/blogs/data/models/blog.dart';
-import 'package:blog_app/modules/blogs/presentation/bloc/blog_bloc.dart';
-import 'package:blog_app/modules/blogs/features/explore_all_blogs/presentation/widgets/app_search_bar.dart';
-import 'package:blog_app/modules/blogs/features/blog_card/presentation/view/blog_card.dart';
-import 'package:blog_app/modules/blogs/features/explore_all_blogs/presentation/widgets/filter_chip_bar.dart';
-import 'package:blog_app/modules/blogs/features/explore_all_blogs/presentation/widgets/pagination_controls.dart';
-import 'package:blog_app/modules/blogs/features/explore_all_blogs/presentation/widgets/results_info.dart';
-import 'package:blog_app/modules/blogs/presentation/widgets/empty_state.dart';
+import 'package:blog_app/modules/blogs/blogs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';

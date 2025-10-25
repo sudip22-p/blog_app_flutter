@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:blog_app/modules/auth/data/services/auth_service.dart';
+import 'package:blog_app/modules/auth/auths.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';

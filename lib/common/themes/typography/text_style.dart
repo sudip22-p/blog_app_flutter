@@ -1,4 +1,4 @@
-import 'package:blog_app/common/themes/typography/font_weight.dart';
+import 'package:blog_app/common/common.dart';
 import 'package:blog_app/core/core.dart';
 import 'package:flutter/material.dart';
 

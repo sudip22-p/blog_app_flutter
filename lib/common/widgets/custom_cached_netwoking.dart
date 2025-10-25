@@ -1,5 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:blog_app/common/router/asset_routes.dart';
+import 'package:blog_app/common/common.dart';
 import 'package:flutter/material.dart';
 
 //for caching images

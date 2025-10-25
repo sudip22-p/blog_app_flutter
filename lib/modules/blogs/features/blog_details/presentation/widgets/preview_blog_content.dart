@@ -1,10 +1,5 @@
-import 'package:blog_app/common/router/asset_routes.dart';
-import 'package:blog_app/common/widgets/custom_image_avatar.dart';
-import 'package:blog_app/modules/blogs/data/models/blog.dart';
-import 'package:blog_app/modules/blogs/features/blog_card/presentation/widgets/author_section.dart';
-import 'package:blog_app/modules/blogs/features/blog_card/presentation/widgets/blog_stats.dart';
-import 'package:blog_app/modules/blogs/features/blog_card/presentation/widgets/blog_title.dart';
-import 'package:blog_app/modules/blogs/features/blog_card/presentation/widgets/tag_section.dart';
+import 'package:blog_app/common/common.dart';
+import 'package:blog_app/modules/blogs/blogs.dart';
 import 'package:flutter/material.dart';
 import 'package:blog_app/core/core.dart';
 

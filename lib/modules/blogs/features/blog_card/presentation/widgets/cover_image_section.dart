@@ -1,8 +1,6 @@
-import 'package:blog_app/common/router/asset_routes.dart';
-import 'package:blog_app/common/widgets/custom_image_avatar.dart';
+import 'package:blog_app/common/common.dart';
 import 'package:blog_app/core/core.dart';
-import 'package:blog_app/modules/blogs/data/models/blog.dart';
-import 'package:blog_app/modules/blogs/features/favourites/presentation/views/favourtite_toggle_box.dart';
+import 'package:blog_app/modules/blogs/blogs.dart';
 import 'package:flutter/material.dart';
 
 class CoverImageSection extends StatefulWidget {

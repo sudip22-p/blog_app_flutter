@@ -3,3 +3,4 @@ export 'router/router.dart';
 export 'themes/themes.dart';
 export 'usecases/usecases.dart';
 export 'widgets/widgets.dart';
+export 'services/cloudinary_services.dart';
