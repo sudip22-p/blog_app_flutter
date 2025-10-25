@@ -1,3 +1,4 @@
+import 'package:blog_app/common/common.dart';
 import 'package:blog_app/core/core.dart';
 import 'package:flutter/material.dart';
 
@@ -20,53 +21,68 @@ class EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: context.customTheme.surface,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                icon,
-                size: 64,
-                color: context.customTheme.contentSurface,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            decoration: BoxDecoration(
+              color: context.customTheme.background,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              icon,
+              size: AppSpacing.xxxlg,
+              color: context.customTheme.contentSurface,
+            ),
+          ),
+
+          AppGaps.gapH16,
+
+          Text(
+            title,
+            style: context.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.center,
+          ),
+
+          AppGaps.gapH12,
+
+          Text(
+            message,
+            style: context.textTheme.bodyMedium?.copyWith(
+              color: context.customTheme.contentPrimary,
+              fontWeight: FontWeight.w400,
+            ),
+            textAlign: TextAlign.center,
+          ),
+
+          if (buttonText != null && onButtonPressed != null) ...[
+            AppGaps.gapH16,
+
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 120),
+              child: CustomButton.outlined(
+                onTap: onButtonPressed,
+                label: buttonText!,
+                textColor: context.customTheme.secondary,
+                border: Border.all(
+                  color: context.customTheme.secondary,
+                  width: AppSpacing.xxs,
+                ),
+                borderRadius: AppBorderRadius.mediumBorderRadius,
+                padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+                icon: Icon(
+                  Icons.arrow_forward_rounded,
+                  color: context.customTheme.secondary,
+                ),
+                gap: AppGaps.gapW8,
+                iconPosition: IconAlignment.start,
               ),
             ),
-
-            const SizedBox(height: 24),
-
-            Text(
-              title,
-              style: context.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-              textAlign: TextAlign.center,
-            ),
-
-            const SizedBox(height: 12),
-
-            Text(
-              message,
-              style: context.textTheme.bodyLarge?.copyWith(
-                color: context.customTheme.contentSurface,
-              ),
-              textAlign: TextAlign.center,
-            ),
-
-            if (buttonText != null && onButtonPressed != null) ...[
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: onButtonPressed,
-                child: Text(buttonText!),
-              ),
-            ],
           ],
-        ),
+        ],
       ),
     );
   }
