@@ -2,8 +2,6 @@ import 'package:blog_app/common/common.dart';
 import 'package:blog_app/core/core.dart';
 import 'package:blog_app/modules/blogs/data/models/blog.dart';
 import 'package:blog_app/modules/blogs/presentation/bloc/blog_bloc.dart';
-//TODO: update path accordingly ....
-import 'package:blog_app/modules/blogs/features/blog_details/presentation/views/blog_preview_screen.dart';
 import 'package:blog_app/modules/blogs/features/blog_card/presentation/view/blog_card.dart';
 import 'package:blog_app/modules/blogs/presentation/widgets/empty_state.dart';
 import 'package:flutter/material.dart';
@@ -11,24 +9,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 // import 'package:go_router/go_router.dart';
 
-class TrendingBlogs extends StatefulWidget {
-  const TrendingBlogs({super.key});
+class LatestBlogs extends StatefulWidget {
+  const LatestBlogs({super.key});
 
   @override
-  State<TrendingBlogs> createState() => _TrendingBlogsState();
+  State<LatestBlogs> createState() => _LatestBlogsState();
 }
 
-//TODO: filter the trending ones 1st
-class _TrendingBlogsState extends State<TrendingBlogs> {
-  void _openBlog(Blog blog) {
-    //TODO: change the route after setup
-    // context.goNamed(Routes.blog_details.name);
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => BlogPreviewScreen(blog: blog)),
-    );
-  }
-
+class _LatestBlogsState extends State<LatestBlogs> {
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -45,7 +33,7 @@ class _TrendingBlogsState extends State<TrendingBlogs> {
               AppGaps.gapW12,
 
               Text(
-                'Trending Blogs',
+                'Latest Blogs',
                 style: context.textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
@@ -56,7 +44,7 @@ class _TrendingBlogsState extends State<TrendingBlogs> {
 
         BlocBuilder<BlogBloc, BlogState>(
           builder: (context, state) {
-            dynamic blogs;
+            List<Blog> blogs = [];
             if (state is BlogInitial) {
               context.read<BlogBloc>().add(BlogsLoaded());
               return const Center(child: CircularProgressIndicator());
@@ -78,6 +66,7 @@ class _TrendingBlogsState extends State<TrendingBlogs> {
               );
             } else if (state is BlogOperationSuccess) {
               blogs = state.blogs;
+              blogs = blogs.take(12).toList();
               if (blogs.isEmpty) {
                 return EmptyState(
                   icon: Icons.article_outlined,
@@ -91,6 +80,7 @@ class _TrendingBlogsState extends State<TrendingBlogs> {
               }
             } else if (state is BlogLoadSuccess) {
               blogs = state.blogs;
+              blogs = blogs.take(12).toList();
               if (blogs.isEmpty) {
                 return EmptyState(
                   icon: Icons.article_outlined,
@@ -110,7 +100,7 @@ class _TrendingBlogsState extends State<TrendingBlogs> {
                 itemCount: blogs.length,
                 itemBuilder: (context, index) {
                   final blog = blogs[index];
-                  return BlogCard(blog: blog, onTap: () => _openBlog(blog));
+                  return BlogCard(blog: blog);
                 },
               ),
             );
