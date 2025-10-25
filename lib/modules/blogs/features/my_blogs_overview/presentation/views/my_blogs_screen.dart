@@ -1,14 +1,14 @@
+import 'package:blog_app/common/router/routes.dart';
+import 'package:blog_app/common/widgets/custom_app_bar.dart';
 import 'package:blog_app/core/core.dart';
 import 'package:blog_app/modules/blogs/data/models/blog.dart';
 import 'package:blog_app/modules/blogs/presentation/bloc/blog_bloc.dart';
-import 'package:blog_app/modules/blogs/features/add_update_blog/presentation/views/add_blog.dart';
-import 'package:blog_app/modules/blogs/features/blog_details/presentation/views/blog_preview_screen.dart';
-import 'package:blog_app/modules/blogs/features/add_update_blog/presentation/views/update_blog.dart';
 import 'package:blog_app/modules/blogs/features/blog_card/presentation/view/blog_card.dart';
 import 'package:blog_app/modules/blogs/presentation/widgets/empty_state.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 class MyBlogsScreen extends StatefulWidget {
   const MyBlogsScreen({super.key});
@@ -20,52 +20,34 @@ class MyBlogsScreen extends StatefulWidget {
 class _MyBlogsScreenState extends State<MyBlogsScreen> {
   String? get currentUserId => FirebaseAuth.instance.currentUser?.uid;
 
-  void deleteBlog(Blog blog) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Blog'),
-        content: Text('Are you sure you want to delete "${blog.title}"?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              // Delete blog using BlogBloc
-              context.read<BlogBloc>().add(BlogDeleted(blog.id));
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Blog "${blog.title}" deleted'),
-                  backgroundColor: context.customTheme.error,
-                ),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: context.customTheme.error,
-              foregroundColor: context.customTheme.contentPrimary,
-            ),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
+  void deleteBlog(Blog blog) async {
+    bool deleteConfirmation = await DialogUtils.showConfirmationDialog(
+      context,
+      title: "Delete Blog Confirmation",
+      message: 'Are you sure you want to delete "${blog.title}"?',
+
+      confirmText: "Delete",
+      cancelText: "Cancel",
     );
+    if (deleteConfirmation && mounted) {
+      context.read<BlogBloc>().add(BlogDeleted(blog.id));
+      CustomSnackbar.showToastMessage(
+        type: ToastType.success,
+        message: "Blog Deleted Successfully!",
+      );
+    }
   }
 
   void editBlog(Blog blog, List<Blog> allBlogs) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => UpdateBlog(blog: blog)),
-    );
+    context.pushNamed(Routes.editBlog.name, extra: blog);
   }
 
   void previewBlog(Blog blog) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => BlogPreviewScreen(blog: blog)),
-    );
+    context.pushNamed(Routes.blogDetails.name, extra: blog);
+  }
+
+  void addBlog() {
+    context.pushNamed(Routes.addBlog.name);
   }
 
   List<Blog> getMyBlogs(List<Blog> allBlogs) {
@@ -76,69 +58,48 @@ class _MyBlogsScreenState extends State<MyBlogsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        centerTitle: false,
+      appBar: CustomAppBarWidget(
         title: Text(
-          'My Blogs',
-          style: TextStyle(color: context.customTheme.primary),
+          "My Blogs",
+          style: context.textTheme.titleLarge?.copyWith(
+            color: context.customTheme.primary,
+          ),
         ),
+        backgroundColor: context.customTheme.surface,
         actions: [
           IconButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const AddBlog()),
-              );
-            },
-            icon: const Icon(Icons.add),
+            onPressed: addBlog,
+            icon: Icon(
+              Icons.add_box_outlined,
+              size: AppSpacing.xlg,
+              color: context.customTheme.primary,
+            ),
             tooltip: 'Create New Blog',
           ),
-          const SizedBox(width: 16),
         ],
       ),
+
       body: BlocBuilder<BlogBloc, BlogState>(
         builder: (context, state) {
-          // Handle initial state and trigger blog loading
           if (state is BlogInitial) {
             context.read<BlogBloc>().add(BlogsLoaded());
             return const Center(child: CircularProgressIndicator());
           }
 
-          // Handle loading state
           if (state is BlogLoading) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          // Handle error state
           if (state is BlogOperationFailure) {
             return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.error_outline,
-                    size: 64,
-                    color: context.customTheme.error,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Error loading blogs',
-                    style: context.textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    state.errorMessage,
-                    style: context.textTheme.bodyMedium,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      context.read<BlogBloc>().add(BlogsLoaded());
-                    },
-                    child: const Text('Retry'),
-                  ),
-                ],
+              child: EmptyState(
+                icon: Icons.error,
+                title: 'Error Loading Blogs',
+                message: state.errorMessage,
+                buttonText: 'Retry',
+                onButtonPressed: () => {
+                  context.read<BlogBloc>().add(BlogsLoaded()),
+                },
               ),
             );
           }
@@ -156,21 +117,15 @@ class _MyBlogsScreenState extends State<MyBlogsScreen> {
 
           // Check if user is not logged in
           if (currentUserId == null) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.login,
-                    size: 64,
-                    color: context.customTheme.secondary,
-                  ),
-                  SizedBox(height: 16),
-                  Text(
-                    'Please log in to view your blogs',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                  ),
-                ],
+            Center(
+              child: EmptyState(
+                icon: Icons.error,
+                title: 'User Not Authenticated',
+                message: 'Please log in to view your blogs',
+                buttonText: 'Login',
+                onButtonPressed: () => {
+                  context.goNamed(Routes.authWrapper.name),
+                },
               ),
             );
           }
@@ -183,31 +138,27 @@ class _MyBlogsScreenState extends State<MyBlogsScreen> {
                       'You haven\'t created any blogs yet. Share your ideas and stories with the world.',
                   buttonText: 'Write Your First Blog',
                   onButtonPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const AddBlog()),
-                    );
+                    context.pushNamed(Routes.addBlog.name);
                   },
                 )
               : Column(
                   children: [
-                    // Header info
-                    Container(
-                      margin: const EdgeInsets.all(16),
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: context.customTheme.surface.withValues(
-                          alpha: 0.3,
-                        ),
-                        borderRadius: BorderRadius.circular(12),
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        left: AppSpacing.xlg,
+                        bottom: AppSpacing.sm,
                       ),
                       child: Row(
                         children: [
                           const Icon(Icons.auto_stories),
-                          const SizedBox(width: 12),
+
+                          AppGaps.gapW12,
+
                           Text(
                             '${myBlogsList.length} blog${myBlogsList.length == 1 ? '' : 's'} published',
-                            style: const TextStyle(fontWeight: FontWeight.w600),
+                            style: context.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                         ],
                       ),
@@ -216,7 +167,9 @@ class _MyBlogsScreenState extends State<MyBlogsScreen> {
                     // Blog list
                     Expanded(
                       child: ListView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.lg,
+                        ),
                         itemCount: myBlogsList.length,
                         itemBuilder: (context, index) {
                           final blog = myBlogsList[index];

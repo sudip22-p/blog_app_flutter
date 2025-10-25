@@ -1,48 +1,50 @@
 import 'dart:io';
+import 'package:blog_app/common/router/asset_routes.dart';
+import 'package:blog_app/common/router/routes.dart';
 import 'package:blog_app/common/services/cloudinary_services.dart';
+import 'package:blog_app/common/widgets/buttons/app_button.dart';
+import 'package:blog_app/common/widgets/custom_app_bar.dart';
+import 'package:blog_app/common/widgets/custom_image_avatar.dart';
 import 'package:blog_app/core/core.dart';
 import 'package:blog_app/modules/blogs/data/models/blog.dart';
 import 'package:blog_app/modules/blogs/presentation/bloc/blog_bloc.dart';
-import 'package:blog_app/modules/blogs/features/add_update_blog/presentation/widgets/form_widgets.dart';
 import 'package:blog_app/modules/blogs/features/add_update_blog/presentation/widgets/image_picker_widget.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 class UpdateBlog extends StatefulWidget {
   const UpdateBlog({super.key, required this.blog});
-  // final String blogId;
-  // final List<Blog> blogs;
   final Blog blog;
   @override
   State<UpdateBlog> createState() => _UpdateBlogState();
 }
 
 class _UpdateBlogState extends State<UpdateBlog> {
-  late final Blog currentBlog;
-  File? selectedImage;
-  String? currentImageUrl;
+  late final Blog _currentBlog;
+  File? _selectedImage;
+  String? _currentImageUrl;
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
   final _tagsController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  bool isLoading = false;
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    currentBlog = widget.blog;
-    // currentBlog = widget.blogs.firstWhere((blog) => blog.id == widget.blogId);
-    _titleController.text = currentBlog.title;
-    _contentController.text = currentBlog.content;
-    _tagsController.text = currentBlog.tags.join(", ");
-    currentImageUrl = currentBlog.coverImageUrl;
+    _currentBlog = widget.blog;
+    _titleController.text = _currentBlog.title;
+    _contentController.text = _currentBlog.content;
+    _tagsController.text = _currentBlog.tags.join(", ");
+    _currentImageUrl = _currentBlog.coverImageUrl;
   }
 
   void submitBlog() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
-        isLoading = true;
+        _isLoading = true;
       });
 
       try {
@@ -51,15 +53,14 @@ class _UpdateBlogState extends State<UpdateBlog> {
         final currentUserId = currentUser.uid;
         final currentUserName = currentUser.displayName ?? 'Anonymous';
         final cloudinaryService = CloudinaryService();
-        String imageUrl = currentImageUrl ?? '';
-        // Upload new image to Cloudinary if image was changed
-        if (selectedImage != null) {
-          imageUrl = await cloudinaryService.uploadImage(selectedImage!);
+        String imageUrl = _currentImageUrl ?? '';
+        if (_selectedImage != null) {
+          imageUrl = await cloudinaryService.uploadImage(_selectedImage!);
         }
         if (mounted) {
           context.read<BlogBloc>().add(
             BlogUpdated(
-              currentBlog.id,
+              _currentBlog.id,
               _titleController.text.trim(),
               _contentController.text.trim(),
               currentUserId,
@@ -73,41 +74,37 @@ class _UpdateBlogState extends State<UpdateBlog> {
             ),
           );
         }
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Blog updated successfully!'),
-              backgroundColor: context.customTheme.success,
-            ),
-          );
-          Navigator.pop(context);
-        }
+        CustomSnackbar.showToastMessage(
+          type: ToastType.success,
+          message: 'Blog updated successfully!',
+        );
       } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Error updating blog: $e'),
-              backgroundColor: context.customTheme.error,
-            ),
-          );
-        }
+        CustomSnackbar.showToastMessage(
+          type: ToastType.error,
+          message: 'Error publishing blog: $e',
+        );
       } finally {
+        setState(() {
+          _isLoading = false;
+        });
         if (mounted) {
-          setState(() {
-            isLoading = false;
-          });
+          context.goNamed(Routes.dashboard.name);
         }
       }
     }
   }
 
   void resetForm() {
-    _titleController.text = currentBlog.title;
-    _contentController.text = currentBlog.content;
-    _tagsController.text = currentBlog.tags.join(", ");
-    selectedImage = null;
-    currentImageUrl = currentBlog.coverImageUrl;
+    _titleController.text = _currentBlog.title;
+    _contentController.text = _currentBlog.content;
+    _tagsController.text = _currentBlog.tags.join(", ");
+    _selectedImage = null;
+    _currentImageUrl = _currentBlog.coverImageUrl;
     setState(() {});
+    CustomSnackbar.showToastMessage(
+      type: ToastType.success,
+      message: 'Form Reset Done!',
+    );
   }
 
   @override
@@ -121,176 +118,239 @@ class _UpdateBlogState extends State<UpdateBlog> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Update Blog'),
+      appBar: CustomAppBarWidget(
+        title: Text(
+          "Update Blog",
+          style: context.textTheme.titleLarge?.copyWith(
+            color: context.customTheme.primary,
+          ),
+        ),
         centerTitle: true,
-        elevation: 0,
+        backgroundColor: context.customTheme.surface,
+        showBackButton: true,
       ),
       body: Form(
         key: _formKey,
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AppSpacing.sm),
           child: Column(
             children: [
-              // Blog Info Section
-              FormSection(
-                title: 'Blog Information',
-                child: Column(
+              Text(
+                'Blog Information',
+                style: context.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+
+              AppGaps.gapH40,
+
+              Align(
+                alignment: Alignment.bottomLeft,
+                child: Text(
+                  'Title',
+                  style: context.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+
+              AppGaps.gapH4,
+
+              TextFormField(
+                style: context.textTheme.bodyMedium,
+                maxLines: 1,
+                controller: _titleController,
+                keyboardType: TextInputType.text,
+                textCapitalization: TextCapitalization.words,
+                validator: (value) => Validators.checkFieldEmpty(value),
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  hintText: 'Title Here ',
+                  hintStyle: context.textTheme.bodyMedium,
+                ),
+              ),
+
+              AppGaps.gapH12,
+
+              ImagePickerWidget(
+                onImageSelected: (file) {
+                  _selectedImage = file;
+                },
+              ),
+
+              AppGaps.gapH12,
+
+              // Showing current image if exists and no new image selected
+              if (_currentImageUrl != null && _selectedImage == null)
+                Column(
                   children: [
-                    CustomTextFormField(
-                      controller: _titleController,
-                      labelText: 'Title',
-                      hintText: 'Enter your blog title',
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Please enter a title';
-                        }
-                        if (value.trim().length < 3) {
-                          return 'Title must be at least 3 characters long';
-                        }
-                        return null;
-                      },
-                      maxLines: 2,
-                    ),
-                    const SizedBox(height: 16),
-                    ImagePickerWidget(
-                      onImageSelected: (file) {
-                        setState(() {
-                          selectedImage = file;
-                        });
-                      },
-                    ),
-                    // Show current image if exists and no new image selected
-                    if (currentImageUrl != null && selectedImage == null)
-                      Column(
-                        children: [
-                          const SizedBox(height: 8),
-                          Container(
-                            height: 200,
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: context.customTheme.outline.withValues(
-                                  alpha: 0.3,
-                                ),
-                              ),
-                            ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
-                              child: Image.network(
-                                currentImageUrl!,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Container(
-                                    color: context.customTheme.surface,
-                                    child: Center(
-                                      child: Icon(
-                                        Icons.broken_image,
-                                        size: 64,
-                                        color: context.customTheme.secondary,
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Current image (select new image to replace)',
-                            style: context.textTheme.bodySmall?.copyWith(
-                              color: context.customTheme.surface,
-                            ),
-                          ),
-                        ],
+                    Container(
+                      height: 240,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        borderRadius: AppBorderRadius.chipBorderRadius,
+                        border: Border.all(color: context.customTheme.outline),
                       ),
-                    const SizedBox(height: 16),
-                    CustomTextFormField(
-                      controller: _tagsController,
-                      labelText: 'Tags',
-                      hintText:
-                          'Enter tags separated by commas (e.g., technology, programming, tutorial)',
-                      validator: (value) {
-                        if (value != null && value.trim().isNotEmpty) {
-                          final tags = value.split(',').map((e) => e.trim());
-                          if (tags.length > 10) {
-                            return 'Maximum 10 tags allowed';
-                          }
-                        }
-                        return null;
-                      },
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.only(
+                          topLeft: AppBorderRadius.chipRadius,
+                          topRight: AppBorderRadius.chipRadius,
+                        ),
+
+                        child: CustomImageAvatar(
+                          imageUrl: widget.blog.coverImageUrl!,
+                          shape: AvatarShape.rectangle,
+                          width: double.infinity,
+                          height: double.infinity,
+                          placeHolderImage:
+                              AssetRoutes.defaultPlaceholderImagePath,
+                          fit: BoxFit.fill,
+                        ),
+                      ),
+                    ),
+
+                    AppGaps.gapH4,
+
+                    Text(
+                      "Current image (select new image to replace)",
+                      style: context.textTheme.bodySmall?.copyWith(
+                        color: context.customTheme.contentPrimary,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(height: 24),
-              // Content Section
-              FormSection(
-                title: 'Content',
-                child: CustomTextFormField(
-                  controller: _contentController,
-                  labelText: 'Blog Content',
-                  hintText: 'Write your blog content here...',
-                  maxLines: 15,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Please enter blog content';
-                    }
-                    if (value.trim().length < 50) {
-                      return 'Content must be at least 50 characters long';
-                    }
-                    return null;
-                  },
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: context.customTheme.surface,
-                  border: Border(
-                    top: BorderSide(
-                      color: context.customTheme.outline,
-                      width: 0.5,
-                    ),
+
+              AppGaps.gapH24,
+
+              Align(
+                alignment: Alignment.bottomLeft,
+                child: Text(
+                  'Tags Separated by Commas',
+                  style: context.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
+              ),
+
+              AppGaps.gapH4,
+
+              TextFormField(
+                style: context.textTheme.bodyMedium,
+                maxLines: 2,
+                controller: _tagsController,
+                keyboardType: TextInputType.text,
+                textCapitalization: TextCapitalization.words,
+                validator: (value) {
+                  if (value != null && value.trim().isNotEmpty) {
+                    final tags = value.split(',').map((e) => e.trim());
+                    if (tags.length > 10) {
+                      return 'Maximum 10 tags allowed';
+                    }
+                  }
+                  return null;
+                },
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  hintText: 'E.g: technology, latest, ai, etc',
+                  hintStyle: context.textTheme.bodyMedium,
+                ),
+              ),
+
+              AppGaps.gapH40,
+
+              Align(
+                alignment: Alignment.bottomLeft,
+                child: Text(
+                  'Blog Content',
+                  style: context.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+
+              AppGaps.gapH4,
+
+              TextFormField(
+                style: context.textTheme.bodyMedium,
+                maxLines: 12,
+                controller: _contentController,
+                keyboardType: TextInputType.text,
+                textCapitalization: TextCapitalization.words,
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Please enter blog content';
+                  }
+                  if (value.trim().length < 50) {
+                    return 'Content must be at least 50 characters long';
+                  }
+                  return null;
+                },
+
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  hintText: 'Your Blog Content Goes here ...',
+                  hintStyle: context.textTheme.bodyMedium,
+                ),
+              ),
+
+              AppGaps.gapH24,
+
+              Padding(
+                padding: const EdgeInsets.all(AppSpacing.lg),
                 child: Row(
                   children: [
                     Expanded(
-                      child: OutlinedButton(
-                        onPressed: isLoading ? null : resetForm,
-                        child: const Text('Reset Changes'),
+                      child: CustomButton.outlined(
+                        onTap: _isLoading ? null : resetForm,
+                        label: 'Reset Changes',
+                        textColor: context.customTheme.info,
+                        border: Border.all(
+                          color: context.customTheme.info,
+                          width: AppSpacing.xxs,
+                        ),
+                        borderRadius: AppBorderRadius.mediumBorderRadius,
+                        padding: const EdgeInsets.symmetric(
+                          vertical: AppSpacing.md,
+                        ),
+                        icon: Icon(
+                          Icons.close_outlined,
+                          color: context.customTheme.info,
+                        ),
+                        gap: AppGaps.gapW8,
+                        iconPosition: IconAlignment.start,
                       ),
                     ),
-                    const SizedBox(width: 16),
+
+                    AppGaps.gapW16,
+
                     Expanded(
-                      child: ElevatedButton(
-                        onPressed: isLoading ? null : submitBlog,
-                        child: isLoading
-                            ? const Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  SizedBox(
-                                    height: 16,
-                                    width: 16,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
-                                  ),
-                                  SizedBox(width: 8),
-                                  Text('...'),
-                                ],
-                              )
-                            : const Text('Update Blog'),
+                      child: CustomButton.outlined(
+                        onTap: _isLoading ? null : submitBlog,
+                        label: 'Update Blog',
+                        textColor: context.customTheme.success,
+                        border: Border.all(
+                          color: context.customTheme.success,
+                          width: AppSpacing.xxs,
+                        ),
+                        borderRadius: AppBorderRadius.mediumBorderRadius,
+                        padding: const EdgeInsets.symmetric(
+                          vertical: AppSpacing.md,
+                        ),
+                        icon: Icon(
+                          Icons.save_outlined,
+                          color: context.customTheme.success,
+                        ),
+                        gap: AppGaps.gapW8,
+                        iconPosition: IconAlignment.start,
                       ),
                     ),
                   ],
                 ),
               ),
 
-              const SizedBox(height: 100),
+              AppGaps.gapH64,
             ],
           ),
         ),

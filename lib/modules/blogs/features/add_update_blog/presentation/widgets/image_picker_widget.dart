@@ -31,16 +31,13 @@ class _ImagePickerWidgetState extends State<ImagePickerWidget> {
       onTap: _pickImage,
       child: Container(
         width: double.infinity,
-        height: 180,
+        height: 240,
         decoration: BoxDecoration(
-          color: context.customTheme.outline,
-          borderRadius: BorderRadius.circular(16),
+          color: context.customTheme.surface,
+          borderRadius: AppBorderRadius.chipBorderRadius,
           border: Border.all(color: context.customTheme.outline),
           image: _imageFile != null
-              ? DecorationImage(
-                  image: FileImage(_imageFile!),
-                  fit: BoxFit.cover,
-                )
+              ? DecorationImage(image: FileImage(_imageFile!), fit: BoxFit.fill)
               : null,
         ),
         child: _imageFile == null
@@ -49,21 +46,26 @@ class _ImagePickerWidgetState extends State<ImagePickerWidget> {
                 children: [
                   Icon(
                     Icons.add_photo_alternate_outlined,
-                    size: 50,
+                    size: AppSpacing.xxxlg,
                     color: context.customTheme.primary,
                   ),
-                  const SizedBox(height: 8),
+
+                  AppGaps.gapH16,
+
                   Text(
                     "Add a cover image",
                     style: context.textTheme.bodyMedium?.copyWith(
-                      color: context.customTheme.outline,
+                      color: context.customTheme.contentPrimary,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
+
+                  AppGaps.gapH4,
+
                   Text(
                     "Tap to choose from gallery",
                     style: context.textTheme.bodySmall?.copyWith(
-                      color: context.customTheme.outline,
+                      color: context.customTheme.contentPrimary,
                     ),
                   ),
                 ],
@@ -71,28 +73,31 @@ class _ImagePickerWidgetState extends State<ImagePickerWidget> {
             : Align(
                 alignment: Alignment.bottomRight,
                 child: Container(
-                  margin: const EdgeInsets.all(8),
+                  margin: const EdgeInsets.all(AppSpacing.xs),
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 6,
+                    horizontal: AppSpacing.sm,
+                    vertical: AppSpacing.xs,
                   ),
                   decoration: BoxDecoration(
-                    color: context.customTheme.outline.withAlpha(128),
-                    borderRadius: BorderRadius.circular(8),
+                    color: context.customTheme.secondary,
+                    borderRadius: AppBorderRadius.mediumBorderRadius,
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
                         Icons.edit,
-                        size: 14,
-                        color: context.customTheme.secondary,
+                        size: AppSpacing.lg,
+                        color: Colors.white,
                       ),
-                      SizedBox(width: 4),
+
+                      AppGaps.gapW8,
+
                       Text(
                         "Change",
-                        style: TextStyle(
-                          color: context.customTheme.contentSurface,
+                        style: context.textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
                         ),
                       ),
                     ],
