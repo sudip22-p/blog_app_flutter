@@ -49,7 +49,7 @@ class _LatestBlogsState extends State<LatestBlogs> {
             } else if (state is BlogOperationFailure) {
               CustomSnackbar.showToastMessage(
                 type: ToastType.error,
-                message: state.errorMessage,
+                message: state.message,
               );
               return EmptyState(
                 icon: Icons.error,

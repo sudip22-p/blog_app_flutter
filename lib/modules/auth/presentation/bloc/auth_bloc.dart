@@ -219,7 +219,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     try {
       final profile = await authService.getCurrentUserProfile();
       if (profile != null) {
-        emit(AuthProfileLoaded(profile: profile));
+        emit(AuthProfileLoaded(profile: UserProfile.fromJson(profile)));
       } else {
         emit(const AuthError(message: 'Failed to load user profile'));
       }

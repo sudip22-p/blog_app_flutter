@@ -21,12 +21,12 @@ final class BlogLoadSuccess extends BlogState {
 }
 
 final class BlogOperationFailure extends BlogState {
-  final String errorMessage;
+  final String message;
 
-  const BlogOperationFailure(this.errorMessage);
+  const BlogOperationFailure(this.message);
 
   @override
-  List<Object> get props => [errorMessage];
+  List<Object> get props => [message];
 }
 
 final class BlogOperationSuccess extends BlogState {

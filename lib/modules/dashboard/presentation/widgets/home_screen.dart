@@ -29,7 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
       listener: (context, state) {
         if (state is AuthProfileLoaded) {
           setState(() {
-            userProfile = UserProfile.fromJson(state.profile);
+            userProfile = state.profile;
           });
         }
       },

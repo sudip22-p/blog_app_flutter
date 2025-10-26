@@ -77,7 +77,7 @@ class AuthProfileUpdated extends AuthState {
 }
 
 class AuthProfileLoaded extends AuthState {
-  final Map<String, dynamic> profile;
+  final UserProfile profile;
 
   const AuthProfileLoaded({required this.profile});
 

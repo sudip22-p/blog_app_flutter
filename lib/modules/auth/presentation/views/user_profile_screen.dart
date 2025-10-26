@@ -117,7 +117,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         listener: (context, state) {
           if (state is AuthProfileLoaded) {
             setState(() {
-              _userProfile = UserProfile.fromJson(state.profile);
+              _userProfile = state.profile;
               _nameController.text = _userProfile?.displayName ?? '';
               _emailController.text = _userProfile?.email ?? '';
             });

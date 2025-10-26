@@ -1,9 +1,9 @@
 export 'presentation/bloc/blog_bloc.dart';
-export 'data/models/blog_engagement.dart';
+export 'domain/models/blog_engagement.dart';
 export 'data/services/firebase_firestore_services.dart';
 export 'data/services/firestore_favorites_service.dart';
 export 'data/services/realtime_database_engagement_service.dart';
-export 'data/models/blog.dart';
+export 'domain/models/blog.dart';
 export 'features/add_update_blog/add_update_blogs.dart';
 export 'features/blog_card/blog_cards.dart';
 export 'features/blog_details/blog_details.dart';

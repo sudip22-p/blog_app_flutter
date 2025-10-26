@@ -92,7 +92,7 @@ class _MyBlogsScreenState extends State<MyBlogsScreen> {
               child: EmptyState(
                 icon: Icons.error,
                 title: 'Error Loading Blogs',
-                message: state.errorMessage,
+                message: state.message,
                 buttonText: 'Retry',
                 onButtonPressed: () => {
                   context.read<BlogBloc>().add(BlogsLoaded()),

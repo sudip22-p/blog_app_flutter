@@ -135,7 +135,7 @@ class _ExploreBlogsScreenState extends State<ExploreBlogsScreen> {
             return EmptyState(
               icon: Icons.error,
               title: 'Failed to Fetch Blogs!',
-              message: state.errorMessage,
+              message: state.message,
               buttonText: 'Retry',
               onButtonPressed: () {
                 context.read<BlogBloc>().add(BlogsLoaded());
