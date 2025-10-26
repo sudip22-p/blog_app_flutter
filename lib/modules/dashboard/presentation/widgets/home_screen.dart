@@ -36,7 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: BlocBuilder<AuthBloc, AuthState>(
         builder: (context, state) {
           return Scaffold(
-            backgroundColor: context.customTheme.background,
+            backgroundColor: context.customTheme.surface,
             appBar: CustomAppBarWidget(
               title: Text(
                 "Blog App",
@@ -45,7 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               // centerTitle: true,
-              backgroundColor: context.customTheme.surface,
+              backgroundColor: context.customTheme.background,
               // showBackButton: true,
               actions: [
                 const ThemeSwitcher(),

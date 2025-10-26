@@ -55,6 +55,7 @@ class _BlogPreviewScreenState extends State<BlogPreviewScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: context.customTheme.surface,
       appBar: CustomAppBarWidget(
         title: Text(
           "Blog Details",
@@ -62,7 +63,7 @@ class _BlogPreviewScreenState extends State<BlogPreviewScreen> {
             color: context.customTheme.primary,
           ),
         ),
-        backgroundColor: context.customTheme.surface,
+        backgroundColor: context.customTheme.background,
         showBackButton: true,
         actions: [
           FavouriteToggle(blog: widget.blog),

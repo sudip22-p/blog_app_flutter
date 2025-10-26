@@ -61,6 +61,7 @@ class _AndroidConfirmationDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+      backgroundColor: context.customTheme.surface,
       title: Text(
         title,
         style: context.textTheme.bodyLarge?.copyWith(
@@ -132,6 +133,7 @@ class _IosConfirmationDialog extends StatelessWidget {
     // );
 
     return CupertinoAlertDialog(
+      // backgroundColor: context.customTheme.surface,
       title: Text(
         title,
         style: context.textTheme.bodyLarge?.copyWith(

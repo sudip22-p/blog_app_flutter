@@ -111,6 +111,7 @@ class _UpdateBlogState extends State<UpdateBlog> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: context.customTheme.surface,
       appBar: CustomAppBarWidget(
         title: Text(
           "Update Blog",
@@ -119,7 +120,7 @@ class _UpdateBlogState extends State<UpdateBlog> {
           ),
         ),
         centerTitle: true,
-        backgroundColor: context.customTheme.surface,
+        backgroundColor: context.customTheme.background,
         showBackButton: true,
       ),
       body: Form(

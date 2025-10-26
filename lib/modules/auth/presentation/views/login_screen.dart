@@ -38,7 +38,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: context.customTheme.background,
+      backgroundColor: context.customTheme.surface,
       appBar: CustomAppBarWidget(
         title: Text(
           "Blog App",
@@ -47,7 +47,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
         centerTitle: true,
-        backgroundColor: context.customTheme.surface,
+        backgroundColor: context.customTheme.background,
       ),
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {

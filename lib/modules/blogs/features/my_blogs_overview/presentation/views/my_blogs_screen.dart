@@ -54,6 +54,7 @@ class _MyBlogsScreenState extends State<MyBlogsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: context.customTheme.surface,
       appBar: CustomAppBarWidget(
         title: Text(
           "My Blogs",
@@ -61,7 +62,7 @@ class _MyBlogsScreenState extends State<MyBlogsScreen> {
             color: context.customTheme.primary,
           ),
         ),
-        backgroundColor: context.customTheme.surface,
+        backgroundColor: context.customTheme.background,
         actions: [
           IconButton(
             onPressed: addBlog,
@@ -143,10 +144,14 @@ class _MyBlogsScreenState extends State<MyBlogsScreen> {
                       padding: const EdgeInsets.only(
                         left: AppSpacing.xlg,
                         bottom: AppSpacing.sm,
+                        top: AppSpacing.sm,
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.auto_stories),
+                          Icon(
+                            Icons.auto_stories,
+                            color: context.customTheme.contentPrimary,
+                          ),
 
                           AppGaps.gapW12,
 
@@ -164,7 +169,7 @@ class _MyBlogsScreenState extends State<MyBlogsScreen> {
                     Expanded(
                       child: ListView.builder(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: AppSpacing.lg,
+                          horizontal: AppSpacing.sm,
                         ),
                         itemCount: myBlogsList.length,
                         itemBuilder: (context, index) {

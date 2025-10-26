@@ -13,6 +13,7 @@ class ForgotPassword extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: context.customTheme.surface,
         title: Text(
           'Reset Password',
           style: context.textTheme.titleMedium?.copyWith(

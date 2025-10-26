@@ -62,7 +62,7 @@ class EmptyState extends StatelessWidget {
             AppGaps.gapH16,
 
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 120),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxlg),
               child: CustomButton.outlined(
                 onTap: onButtonPressed,
                 label: buttonText!,

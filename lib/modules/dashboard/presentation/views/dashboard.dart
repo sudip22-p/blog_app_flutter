@@ -24,7 +24,10 @@ class _DashboardState extends State<Dashboard> {
   Widget build(BuildContext context) {
     final List<NavigationDestination> destinations = [
       NavigationDestination(
-        icon: Icon(Icons.home_outlined),
+        icon: Icon(
+          Icons.home_outlined,
+          color: context.customTheme.contentPrimary,
+        ),
         label: 'Home',
         selectedIcon: Icon(
           Icons.home_outlined,
@@ -33,7 +36,10 @@ class _DashboardState extends State<Dashboard> {
       ),
 
       NavigationDestination(
-        icon: Icon(Icons.explore_outlined),
+        icon: Icon(
+          Icons.explore_outlined,
+          color: context.customTheme.contentPrimary,
+        ),
         label: 'Explore',
         selectedIcon: Icon(
           Icons.explore_outlined,
@@ -42,7 +48,10 @@ class _DashboardState extends State<Dashboard> {
       ),
 
       NavigationDestination(
-        icon: Icon(Icons.favorite_outline),
+        icon: Icon(
+          Icons.favorite_outline,
+          color: context.customTheme.contentPrimary,
+        ),
         label: 'Favourites',
         selectedIcon: Icon(
           Icons.favorite_outline,
@@ -51,7 +60,10 @@ class _DashboardState extends State<Dashboard> {
       ),
 
       NavigationDestination(
-        icon: Icon(Icons.article_outlined),
+        icon: Icon(
+          Icons.article_outlined,
+          color: context.customTheme.contentPrimary,
+        ),
         label: 'My Blogs',
         selectedIcon: Icon(
           Icons.article_outlined,
@@ -60,14 +72,26 @@ class _DashboardState extends State<Dashboard> {
       ),
     ];
     return Scaffold(
+      backgroundColor: context.customTheme.background,
       body: BlogEngagementInitializer(
         child: IndexedStack(index: _currentIndex, children: _pages),
       ),
 
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _currentIndex,
-        onDestinationSelected: (index) => setState(() => _currentIndex = index),
-        destinations: destinations,
+      bottomNavigationBar: NavigationBarTheme(
+        data: NavigationBarThemeData(
+          labelTextStyle: WidgetStateProperty.all(
+            context.textTheme.bodySmall?.copyWith(
+              color: context.customTheme.contentPrimary,
+            ),
+          ),
+        ),
+        child: NavigationBar(
+          backgroundColor: context.customTheme.background,
+          selectedIndex: _currentIndex,
+          onDestinationSelected: (index) =>
+              setState(() => _currentIndex = index),
+          destinations: destinations,
+        ),
       ),
     );
   }

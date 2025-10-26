@@ -89,7 +89,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: context.customTheme.background,
+      backgroundColor: context.customTheme.surface,
       appBar: CustomAppBarWidget(
         title: Text(
           "User Profile",
@@ -98,7 +98,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           ),
         ),
         centerTitle: true,
-        backgroundColor: context.customTheme.surface,
+        backgroundColor: context.customTheme.background,
         showBackButton: true,
 
         actions: [

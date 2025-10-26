@@ -91,6 +91,7 @@ class _AddBlogState extends State<AddBlog> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: context.customTheme.surface,
       appBar: CustomAppBarWidget(
         title: Text(
           "Create New Blog",
@@ -99,7 +100,7 @@ class _AddBlogState extends State<AddBlog> {
           ),
         ),
         centerTitle: true,
-        backgroundColor: context.customTheme.surface,
+        backgroundColor: context.customTheme.background,
         showBackButton: true,
       ),
 

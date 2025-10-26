@@ -117,7 +117,7 @@ class _ExploreBlogsScreenState extends State<ExploreBlogsScreen> {
             color: context.customTheme.primary,
           ),
         ),
-        backgroundColor: context.customTheme.surface,
+        backgroundColor: context.customTheme.background,
       ),
       backgroundColor: context.customTheme.background,
       body: BlocBuilder<BlogBloc, BlogState>(

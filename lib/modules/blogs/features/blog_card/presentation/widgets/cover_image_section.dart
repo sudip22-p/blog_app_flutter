@@ -21,7 +21,7 @@ class CoverImageSectionState extends State<CoverImageSection> {
     if (widget.blog.coverImageUrl == null) return const SizedBox.shrink();
 
     return SizedBox(
-      height: 160,
+      height: 240,
       width: double.infinity,
       child: Stack(
         children: [

@@ -30,6 +30,7 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: context.customTheme.surface,
       appBar: CustomAppBarWidget(
         title: Text(
           "Favorites",
@@ -38,7 +39,7 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
           ),
         ),
 
-        backgroundColor: context.customTheme.surface,
+        backgroundColor: context.customTheme.background,
 
         actions: [
           BlocBuilder<FavoritesBloc, FavoritesState>(
@@ -114,7 +115,7 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
             }
 
             return ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+              padding: const EdgeInsets.all(AppSpacing.sm),
               itemCount: favoriteBlogs.length,
               itemBuilder: (context, index) {
                 final blog = favoriteBlogs[index];

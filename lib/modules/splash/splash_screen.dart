@@ -22,13 +22,33 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.customTheme;
+
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        color: context.customTheme.primary,
+      backgroundColor: theme.background,
+      body: SafeArea(
         child: Center(
-          child: Text("Blog App", style: context.textTheme.displaySmall),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.article_outlined,
+                size: AppSpacing.xxxlg,
+                color: theme.primary,
+              ),
+
+              AppGaps.gapH12,
+
+              Text("Blog App", style: context.textTheme.headlineMedium),
+
+              AppGaps.gapH4,
+
+              Text(
+                "share your thoughts freely",
+                style: context.textTheme.bodyMedium,
+              ),
+            ],
+          ),
         ),
       ),
     );
