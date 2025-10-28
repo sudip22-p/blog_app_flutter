@@ -1,5 +1,5 @@
 import 'package:blog_app/modules/blogs/blogs.dart';
-import 'package:blog_app/modules/auth/auths.dart';
+import 'package:blog_app/modules/auth/auth.dart';
 import 'package:blog_app/modules/dashboard/dashboard.dart';
 import 'package:blog_app/modules/splash/splash.dart';
 import 'package:flutter/material.dart';

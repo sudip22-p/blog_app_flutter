@@ -1,7 +1,6 @@
 import 'package:blog_app/common/common.dart';
 import 'package:blog_app/core/core.dart';
-import 'package:blog_app/modules/auth/auths.dart';
-import 'package:blog_app/modules/auth/domain/domain.dart';
+import 'package:blog_app/modules/auth/auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -33,20 +32,20 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   }
 
   Future<void> loadUserProfile() async {
-    context.read<AuthBloc>().add(AuthLoadProfileRequested());
+    context.read<ProfileBloc>().add(ProfileLoadRequested());
   }
 
   UserProfileEntity? getUserProfile() {
-    final state = context.read<AuthBloc>().state;
-    final profile = state is AuthProfileLoaded ? state.profile : null;
+    final state = context.read<ProfileBloc>().state;
+    final profile = state is ProfileLoaded ? state.profile : null;
     return profile;
   }
 
   void saveChanges() {
     if (_formKey.currentState!.validate()) {
       final newName = _nameController.text.trim();
-      context.read<AuthBloc>().add(
-        AuthUpdateDisplayNameRequested(displayName: newName),
+      context.read<ProfileBloc>().add(
+        ProfileUpdateDisplayNameRequested(displayName: newName),
       );
     }
   }
@@ -78,15 +77,15 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       );
       return;
     }
-    context.read<AuthBloc>().add(AuthSendEmailVerificationRequested());
+    context.read<AccountBloc>().add(AccountSendEmailVerificationRequested());
   }
 
   void sendPasswordReset() {
     final profile = getUserProfile();
     final email = profile?.email;
     if (email != null) {
-      context.read<AuthBloc>().add(
-        AuthSendPasswordResetRequested(email: email),
+      context.read<AccountBloc>().add(
+        AccountSendPasswordResetRequested(email: email),
       );
     } else {
       CustomSnackbar.showToastMessage(
@@ -125,77 +124,96 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
-          if (state is AuthProfileUpdated) {
-            setState(() {
-              _isEditing = false;
-            });
-            loadUserProfile();
-            CustomSnackbar.showToastMessage(
-              type: ToastType.success,
-              message: "Profile Updation Successsful!",
-            );
-          } else if (state is AuthEmailVerificationSent) {
-            CustomSnackbar.showToastMessage(
-              type: ToastType.success,
-              message: state.message,
-            );
-          } else if (state is AuthPasswordResetSent) {
-            CustomSnackbar.showToastMessage(
-              type: ToastType.success,
-              message: state.message,
-            );
-          } else if (state is AuthAccountDeleted) {
-            CustomSnackbar.showToastMessage(
-              type: ToastType.success,
-              message: state.message,
-            );
-            context.goNamed(Routes.authWrapper.name);
-          } else if (state is AuthUnauthenticated) {
+          if (state is AuthUnauthenticated) {
             context.goNamed(Routes.authWrapper.name);
           } else if (state is AuthError) {
+            context.goNamed(Routes.authWrapper.name);
             CustomSnackbar.showToastMessage(
               type: ToastType.error,
               message: state.message,
             );
-            context.goNamed(Routes.authWrapper.name);
           } else if (state is AuthInitial) {
             context.goNamed(Routes.authWrapper.name);
           }
         },
-        child: BlocBuilder<AuthBloc, AuthState>(
-          builder: (context, state) {
-            final profile = state is AuthProfileLoaded ? state.profile : null;
-            if (profile != null && !_isEditing) {
-              _nameController.text = profile.displayName;
-              _emailController.text = profile.email;
+        child: BlocListener<AccountBloc, AccountState>(
+          listener: (context, state) {
+            if (state is AccountEmailVerificationSent) {
+              CustomSnackbar.showToastMessage(
+                type: ToastType.success,
+                message: state.message,
+              );
+            } else if (state is AccountPasswordResetSent) {
+              CustomSnackbar.showToastMessage(
+                type: ToastType.success,
+                message: state.message,
+              );
+            } else if (state is AccountDeleted) {
+              context.goNamed(Routes.authWrapper.name);
+              CustomSnackbar.showToastMessage(
+                type: ToastType.success,
+                message: state.message,
+              );
+            } else if (state is AccountError) {
+              context.goNamed(Routes.authWrapper.name);
+              CustomSnackbar.showToastMessage(
+                type: ToastType.error,
+                message: state.message,
+              );
             }
-            if (state is AuthLoading) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            return SingleChildScrollView(
-              child: Column(
-                children: [
-                  ProfileHeader(userProfile: profile, isEditing: _isEditing),
-
-                  AppGaps.gapH12,
-
-                  ProfileFormSection(
-                    userProfile: profile,
-                    isEditing: _isEditing,
-                    nameController: _nameController,
-                    emailController: _emailController,
-                    formKey: _formKey,
-                    sendEmailVerification: sendEmailVerification,
-                    sendPasswordReset: sendPasswordReset,
-                    cancelEdit: cancelEdit,
-                    saveChanges: saveChanges,
-                  ),
-
-                  AppGaps.gapH24,
-                ],
-              ),
-            );
           },
+          child: BlocListener<ProfileBloc, ProfileState>(
+            listener: (context, state) {
+              if (state is ProfileUpdated) {
+                setState(() {
+                  _isEditing = false;
+                });
+                loadUserProfile();
+                CustomSnackbar.showToastMessage(
+                  type: ToastType.success,
+                  message: "Profile Updation Successsful!",
+                );
+              }
+            },
+            child: BlocBuilder<ProfileBloc, ProfileState>(
+              builder: (context, state) {
+                final profile = state is ProfileLoaded ? state.profile : null;
+                if (profile != null && !_isEditing) {
+                  _nameController.text = profile.displayName;
+                  _emailController.text = profile.email;
+                }
+                if (state is ProfileLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                return SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      ProfileHeader(
+                        userProfile: profile,
+                        isEditing: _isEditing,
+                      ),
+
+                      AppGaps.gapH12,
+
+                      ProfileFormSection(
+                        userProfile: profile,
+                        isEditing: _isEditing,
+                        nameController: _nameController,
+                        emailController: _emailController,
+                        formKey: _formKey,
+                        sendEmailVerification: sendEmailVerification,
+                        sendPasswordReset: sendPasswordReset,
+                        cancelEdit: cancelEdit,
+                        saveChanges: saveChanges,
+                      ),
+
+                      AppGaps.gapH24,
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
         ),
       ),
     );

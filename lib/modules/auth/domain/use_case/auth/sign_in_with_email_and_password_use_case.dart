@@ -1,9 +1,10 @@
 import 'package:equatable/equatable.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
-import '../repository/repository.dart';
+import 'package:injectable/injectable.dart';
+import 'package:blog_app/modules/auth/auth.dart';
 import 'package:blog_app/common/common.dart';
 
+@injectable
 class SignInWithEmailAndPasswordUseCase
     extends
         UseCase<

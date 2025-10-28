@@ -18,10 +18,10 @@ class UserProfileEntity extends Equatable {
   });
   static UserProfileEntity emptyEntity() {
     return UserProfileEntity(
-      uid: 'N/A',
-      email: 'N/A',
-      displayName: 'N/A',
-      photoURL: 'N/A',
+      uid: '',
+      email: '',
+      displayName: '',
+      photoURL: '',
       emailVerified: false,
       createdAt: DateTime.now(),
     );

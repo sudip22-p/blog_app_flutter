@@ -1,7 +1,6 @@
 import 'package:blog_app/core/core.dart';
 import 'package:blog_app/common/common.dart';
-import 'package:blog_app/modules/auth/auths.dart';
-import 'package:blog_app/modules/auth/domain/domain.dart';
+import 'package:blog_app/modules/auth/auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -60,8 +59,8 @@ class ProfileHeader extends StatelessWidget {
                     right: 4,
                     child: GestureDetector(
                       onTap: () {
-                        context.read<AuthBloc>().add(
-                          AuthUpdateProfilePictureRequested(),
+                        context.read<ProfileBloc>().add(
+                          ProfileUpdatePictureRequested(),
                         );
                       },
                       child: Container(
@@ -85,7 +84,7 @@ class ProfileHeader extends StatelessWidget {
 
             Text(
               userProfile?.displayName ??
-                  (userProfile?.email.split('@')[0] ?? 'N/A'),
+                  (userProfile?.email.split('@')[0] ?? '-'),
               style: context.textTheme.bodyLarge?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
@@ -105,7 +104,7 @@ class ProfileHeader extends StatelessWidget {
                 AppGaps.gapW8,
 
                 Text(
-                  userProfile?.email ?? 'N/A',
+                  userProfile?.email ?? '-',
                   style: context.textTheme.bodyMedium,
                 ),
 

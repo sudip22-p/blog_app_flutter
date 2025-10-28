@@ -1,6 +1,6 @@
 import 'package:blog_app/common/common.dart';
 import 'package:blog_app/core/core.dart';
-import 'package:blog_app/modules/auth/auths.dart';
+import 'package:blog_app/modules/auth/auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -58,15 +58,15 @@ class ForgotPassword extends StatelessWidget {
             ),
           ),
 
-          BlocConsumer<AuthBloc, AuthState>(
+          BlocConsumer<AccountBloc, AccountState>(
             listener: (context, state) {
-              if (state is AuthPasswordResetSent) {
+              if (state is AccountPasswordResetSent) {
                 Navigator.pop(context);
                 CustomSnackbar.showToastMessage(
                   type: ToastType.success,
                   message: state.message,
                 );
-              } else if (state is AuthError) {
+              } else if (state is AccountError) {
                 CustomSnackbar.showToastMessage(
                   type: ToastType.error,
                   message: state.message,
@@ -82,8 +82,8 @@ class ForgotPassword extends StatelessWidget {
                     ? null
                     : () {
                         if (dialogFormKey.currentState?.validate() == true) {
-                          context.read<AuthBloc>().add(
-                            AuthSendPasswordResetRequested(
+                          context.read<AccountBloc>().add(
+                            AccountSendPasswordResetRequested(
                               email: emailController.text.trim(),
                             ),
                           );

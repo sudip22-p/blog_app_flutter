@@ -1,5 +1,5 @@
 import 'package:blog_app/modules/dashboard/dashboard.dart';
-import 'package:blog_app/modules/auth/auths.dart';
+import 'package:blog_app/modules/auth/auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 

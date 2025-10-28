@@ -1,16 +1,18 @@
 import 'package:equatable/equatable.dart';
-import '../repository/repository.dart';
+import 'package:injectable/injectable.dart';
+import 'package:blog_app/modules/auth/auth.dart';
 import 'package:blog_app/common/common.dart';
 
+@injectable
 class UpdateDisplayNameUseCase
     extends UseCase<Future<void>, UpdateDisplayNameUseCaseParams> {
-  UpdateDisplayNameUseCase(this._authRepository);
+  UpdateDisplayNameUseCase(this._profileRepository);
 
-  final AuthRepository _authRepository;
+  final ProfileRepository _profileRepository;
 
   @override
   Future<void> execute(UpdateDisplayNameUseCaseParams params) async {
-    return await _authRepository.updateDisplayName(params.displayName);
+    return await _profileRepository.updateDisplayName(params.displayName);
   }
 }
 

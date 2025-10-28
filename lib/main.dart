@@ -1,4 +1,5 @@
-import 'package:blog_app/common/observers/bloc_observer.dart';
+import 'package:blog_app/common/common.dart';
+import 'package:blog_app/core/core.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +26,7 @@ void main() async {
   setDeviceOrientationToPortrait();
 
   //awaiting di
-  // configureDependencyInjection();
+  configureDependencyInjection();
 
   runApp(const BlogApp());
 }

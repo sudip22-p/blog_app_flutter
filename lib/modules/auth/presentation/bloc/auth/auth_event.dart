@@ -32,27 +32,3 @@ class AuthSignUpRequested extends AuthEvent {
 class AuthGoogleSignInRequested extends AuthEvent {}
 
 class AuthSignOutRequested extends AuthEvent {}
-
-//PROFILE EVENTS
-class AuthUpdateDisplayNameRequested extends AuthEvent {
-  final String displayName;
-  const AuthUpdateDisplayNameRequested({required this.displayName});
-  @override
-  List<Object?> get props => [displayName];
-}
-
-class AuthUpdateProfilePictureRequested extends AuthEvent {}
-
-class AuthLoadProfileRequested extends AuthEvent {}
-
-//ACCOUNT EVENTS
-class AuthSendEmailVerificationRequested extends AuthEvent {}
-
-class AuthSendPasswordResetRequested extends AuthEvent {
-  final String email;
-  const AuthSendPasswordResetRequested({required this.email});
-  @override
-  List<Object?> get props => [email];
-}
-
-class AuthDeleteAccountRequested extends AuthEvent {}

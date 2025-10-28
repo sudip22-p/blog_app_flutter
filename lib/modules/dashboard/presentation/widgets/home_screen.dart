@@ -5,7 +5,7 @@ import 'package:blog_app/core/core.dart';
 import 'package:go_router/go_router.dart';
 import 'package:blog_app/modules/theme/theme.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:blog_app/modules/auth/auths.dart';
+import 'package:blog_app/modules/auth/auth.dart';
 import 'package:blog_app/modules/blogs/blogs.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -21,7 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<AuthBloc>().add(AuthLoadProfileRequested());
+    context.read<ProfileBloc>().add(ProfileLoadRequested());
   }
 
   @override
@@ -48,9 +48,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 right: AppSpacing.lg,
                 left: AppSpacing.sm,
               ),
-              child: BlocBuilder<AuthBloc, AuthState>(
+              child: BlocBuilder<ProfileBloc, ProfileState>(
                 builder: (context, state) {
-                  final userProfile = state is AuthProfileLoaded
+                  final userProfile = state is ProfileLoaded
                       ? state.profile
                       : null;
                   return CustomImageAvatar(

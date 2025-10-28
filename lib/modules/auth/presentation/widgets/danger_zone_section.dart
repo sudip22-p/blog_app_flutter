@@ -1,6 +1,6 @@
 import 'package:blog_app/common/common.dart';
 import 'package:blog_app/core/core.dart';
-import 'package:blog_app/modules/auth/auths.dart';
+import 'package:blog_app/modules/auth/auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -18,6 +18,7 @@ class _DangerZoneSectionState extends State<DangerZoneSection> {
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setState) => AlertDialog(
+          backgroundColor: context.customTheme.surface,
           title: Row(
             children: [
               Icon(Icons.warning, color: context.customTheme.info),
@@ -122,7 +123,7 @@ class _DangerZoneSectionState extends State<DangerZoneSection> {
     );
 
     if (confirmed && mounted) {
-      context.read<AuthBloc>().add(AuthDeleteAccountRequested());
+      context.read<AccountBloc>().add(AccountDeleteRequested());
     }
   }
 

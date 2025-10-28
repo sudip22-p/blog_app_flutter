@@ -1,7 +1,7 @@
 import 'package:blog_app/common/common.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:blog_app/modules/auth/auths.dart';
+import 'package:blog_app/modules/auth/auth.dart';
 import 'package:blog_app/core/core.dart';
 import 'package:go_router/go_router.dart';
 
@@ -42,26 +42,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
-  void showEmailVerificationDialog(String message) async {
-    bool
-    sendEmailVerificationConfirmation = await DialogUtils.showConfirmationDialog(
-      context,
-      title: "Account Created!",
-      message:
-          "$message\n\n\n Would you like to send a verification email to your account?",
-
-      confirmText: "Send Verification",
-      cancelText: "Skip",
-    );
-    if (sendEmailVerificationConfirmation && mounted) {
-      context.read<AuthBloc>().add(AuthSendEmailVerificationRequested());
-    }
-
-    if (!sendEmailVerificationConfirmation && mounted) {
-      context.goNamed(Routes.authWrapper.name);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -79,22 +59,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
       ),
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
-          if (state is AuthSignUpSuccess) {
-            showEmailVerificationDialog(state.message);
-          } else if (state is AuthAuthenticated) {
+          if (state is AuthAuthenticated) {
             context.goNamed(Routes.authWrapper.name);
-          } else if (state is AuthEmailVerificationSent) {
+          } else if (state is AuthSignUpSuccess) {
+            context.goNamed(Routes.authWrapper.name);
             CustomSnackbar.showToastMessage(
               type: ToastType.success,
               message: state.message,
             );
-            context.goNamed(Routes.authWrapper.name);
           } else if (state is AuthError) {
+            context.goNamed(Routes.authWrapper.name);
             CustomSnackbar.showToastMessage(
               type: ToastType.error,
               message: state.message,
             );
-            context.goNamed(Routes.authWrapper.name);
           }
         },
         child: SafeArea(
