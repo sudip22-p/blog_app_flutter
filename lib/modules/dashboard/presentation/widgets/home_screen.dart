@@ -1,3 +1,4 @@
+import 'package:blog_app/modules/auth/domain/domain.dart';
 import 'package:flutter/material.dart';
 import 'package:blog_app/common/common.dart';
 import 'package:blog_app/core/core.dart';
@@ -15,7 +16,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  UserProfile? userProfile;
+  UserProfileEntity? userProfile;
 
   @override
   void initState() {

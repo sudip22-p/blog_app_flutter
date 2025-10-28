@@ -1,5 +1,6 @@
 import 'dart:async';
-import 'package:blog_app/modules/auth/auths.dart';
+import 'package:blog_app/common/common.dart';
+import 'package:blog_app/modules/auth/domain/domain.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
@@ -8,41 +9,45 @@ part 'auth_event.dart';
 part 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  final AuthService authService;
-
-  AuthBloc({AuthService? authService})
-    : authService = authService ?? AuthService(),
-      super(AuthInitial()) {
+  final AuthRepository _authRepository;
+  AuthBloc(this._authRepository) : super(AuthInitial()) {
+    //AUTHENTICATION EVENTS
     on<AuthSignInRequested>(onAuthSignInRequested);
     on<AuthSignUpRequested>(onAuthSignUpRequested);
     on<AuthGoogleSignInRequested>(onAuthGoogleSignInRequested);
     on<AuthSignOutRequested>(onAuthSignOutRequested);
+
+    //PROFILE EVENTS
+    on<AuthUpdateDisplayNameRequested>(onAuthUpdateDisplayNameRequested);
+    on<AuthUpdateProfilePictureRequested>(onAuthUpdateProfilePictureRequested);
+    on<AuthLoadProfileRequested>(onAuthLoadProfileRequested);
+
+    //ACCOUNT EVENTS
     on<AuthSendEmailVerificationRequested>(
       onAuthSendEmailVerificationRequested,
     );
     on<AuthSendPasswordResetRequested>(onAuthSendPasswordResetRequested);
     on<AuthDeleteAccountRequested>(onAuthDeleteAccountRequested);
-    on<AuthUpdateDisplayNameRequested>(onAuthUpdateDisplayNameRequested);
-    on<AuthUpdateProfilePictureRequested>(onAuthUpdateProfilePictureRequested);
-    on<AuthLoadProfileRequested>(onAuthLoadProfileRequested);
   }
 
+  //AUTHENTICATION HANDLERS
   Future<void> onAuthSignInRequested(
     AuthSignInRequested event,
     Emitter<AuthState> emit,
   ) async {
     emit(AuthLoading());
-
     try {
-      final userCredential = await authService.signInWithEmailAndPassword(
-        email: event.email,
-        password: event.password,
+      final signInUseCase = SignInWithEmailAndPasswordUseCase(_authRepository);
+      final userCredential = await signInUseCase.execute(
+        SignInWithEmailAndPasswordUseCaseParams(
+          email: event.email,
+          password: event.password,
+        ),
       );
-
       if (userCredential?.user != null) {
         emit(AuthAuthenticated(user: userCredential!.user!));
       } else {
-        emit(const AuthError(message: 'Sign in failed. Please try again.'));
+        emit(const AuthError(message: 'Sign in failed.'));
       }
     } catch (e) {
       emit(AuthError(message: e.toString()));
@@ -54,18 +59,24 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     emit(AuthLoading());
-
     try {
-      final userCredential = await authService.createUserWithEmailAndPassword(
-        email: event.email,
-        password: event.password,
-        name: event.name,
+      final signUpUseCase = CreateUserWithEmailAndPasswordUseCase(
+        _authRepository,
       );
-
+      final userCredential = await signUpUseCase.execute(
+        CreateUserWithEmailAndPasswordUseCaseParams(
+          email: event.email,
+          password: event.password,
+          name: event.name,
+        ),
+      );
       if (userCredential?.user != null) {
         // Send email verification after successful signup
         try {
-          await authService.sendEmailVerification();
+          final sendEmailVerificationUseCase = SendEmailVerificationUseCase(
+            _authRepository,
+          );
+          await sendEmailVerificationUseCase.execute(NoParams());
           emit(
             const AuthSignUpSuccess(
               message:
@@ -92,10 +103,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     emit(AuthLoading());
-
     try {
-      final userCredential = await authService.signInWithGoogle();
-
+      final signInWithGoogleUseCase = SignInWithGoogleUseCase(_authRepository);
+      final userCredential = await signInWithGoogleUseCase.execute(NoParams());
       if (userCredential?.user != null) {
         emit(AuthAuthenticated(user: userCredential!.user!));
       } else {
@@ -111,74 +121,27 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     try {
-      await authService.signOut();
+      final signOutUseCase = SignOutUseCase(_authRepository);
+      await signOutUseCase.execute(NoParams());
       emit(AuthUnauthenticated());
     } catch (e) {
       emit(AuthError(message: e.toString()));
     }
   }
 
-  Future<void> onAuthSendEmailVerificationRequested(
-    AuthSendEmailVerificationRequested event,
-    Emitter<AuthState> emit,
-  ) async {
-    try {
-      await authService.sendEmailVerification();
-      emit(
-        const AuthEmailVerificationSent(
-          message: 'Verification email sent successfully!',
-        ),
-      );
-    } catch (e) {
-      emit(AuthError(message: e.toString()));
-    }
-  }
-
-  Future<void> onAuthSendPasswordResetRequested(
-    AuthSendPasswordResetRequested event,
-    Emitter<AuthState> emit,
-  ) async {
-    emit(AuthLoading());
-
-    try {
-      await authService.sendPasswordResetEmail(event.email);
-      emit(
-        const AuthPasswordResetSent(
-          message: 'Password reset email sent successfully!',
-        ),
-      );
-    } catch (e) {
-      emit(AuthError(message: e.toString()));
-    }
-  }
-
-  Future<void> onAuthDeleteAccountRequested(
-    AuthDeleteAccountRequested event,
-    Emitter<AuthState> emit,
-  ) async {
-    emit(AuthLoading());
-
-    try {
-      await authService.deleteAccount();
-      // Remove the Firebase instance user too.
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        await user.delete();
-      }
-      emit(const AuthAccountDeleted(message: 'Account deleted successfully.'));
-    } catch (e) {
-      emit(AuthError(message: e.toString()));
-    }
-  }
-
+  //PROFILE HANDLERS
   Future<void> onAuthUpdateDisplayNameRequested(
     AuthUpdateDisplayNameRequested event,
     Emitter<AuthState> emit,
   ) async {
     emit(AuthLoading());
-
     try {
-      await authService.updateDisplayName(event.displayName);
+      final updateDisplayNameUseCase = UpdateDisplayNameUseCase(
+        _authRepository,
+      );
+      await updateDisplayNameUseCase.execute(
+        UpdateDisplayNameUseCaseParams(displayName: event.displayName),
+      );
       emit(const AuthProfileUpdated(message: 'Profile updated successfully!'));
     } catch (e) {
       emit(AuthError(message: e.toString()));
@@ -190,9 +153,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     emit(AuthLoading());
-
     try {
-      await authService.updateProfilePicture();
+      final updateProfilePictureUseCase = UpdateProfilePictureUseCase(
+        _authRepository,
+      );
+      await updateProfilePictureUseCase.execute(NoParams());
       emit(
         const AuthProfileUpdated(
           message: 'Profile picture updated successfully!',
@@ -208,21 +173,83 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     if (state is! AuthAuthenticated) {
-      if (authService.currentUser == null) {
+      if (FirebaseAuth.instance.currentUser == null) {
         emit(const AuthError(message: 'User not authenticated'));
         return;
       }
     }
-
     emit(AuthLoading());
-
     try {
-      final profile = await authService.getCurrentUserProfile();
-      if (profile != null) {
-        emit(AuthProfileLoaded(profile: UserProfile.fromJson(profile)));
+      final getCurrentUserProfileUseCase = GetCurrentUserProfileUseCase(
+        _authRepository,
+      );
+      final profile = await getCurrentUserProfileUseCase.execute(NoParams());
+      if (profile.uid != '') {
+        emit(AuthProfileLoaded(profile: profile));
       } else {
         emit(const AuthError(message: 'Failed to load user profile'));
       }
+    } catch (e) {
+      emit(AuthError(message: e.toString()));
+    }
+  }
+
+  //ACCOUNT HANDLERS
+  Future<void> onAuthSendEmailVerificationRequested(
+    AuthSendEmailVerificationRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    try {
+      final sendEmailVerificationUseCase = SendEmailVerificationUseCase(
+        _authRepository,
+      );
+      await sendEmailVerificationUseCase.execute(NoParams());
+      emit(
+        const AuthEmailVerificationSent(
+          message: 'Verification email sent successfully!',
+        ),
+      );
+    } catch (e) {
+      emit(AuthError(message: e.toString()));
+    }
+  }
+
+  Future<void> onAuthSendPasswordResetRequested(
+    AuthSendPasswordResetRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthLoading());
+    try {
+      final sendPasswordResetEmailUseCase = SendPasswordResetEmailUseCase(
+        _authRepository,
+      );
+      await sendPasswordResetEmailUseCase.execute(
+        SendPasswordResetEmailUseCaseParams(email: event.email),
+      );
+      emit(
+        const AuthPasswordResetSent(
+          message: 'Password reset email sent successfully!',
+        ),
+      );
+    } catch (e) {
+      emit(AuthError(message: e.toString()));
+    }
+  }
+
+  Future<void> onAuthDeleteAccountRequested(
+    AuthDeleteAccountRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthLoading());
+    try {
+      final deleteAccountUseCase = DeleteAccountUseCase(_authRepository);
+      await deleteAccountUseCase.execute(NoParams());
+      // Remove the Firebase instance user too.
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        await user.delete();
+      }
+      emit(const AuthAccountDeleted(message: 'Account deleted successfully.'));
     } catch (e) {
       emit(AuthError(message: e.toString()));
     }

@@ -1,6 +1,7 @@
 import 'package:blog_app/common/common.dart';
 import 'package:blog_app/core/core.dart';
 import 'package:blog_app/modules/auth/auths.dart';
+import 'package:blog_app/modules/auth/domain/domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -17,7 +18,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   final _emailController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isEditing = false;
-  UserProfile? _userProfile;
+  UserProfileEntity? _userProfile;
 
   @override
   void initState() {

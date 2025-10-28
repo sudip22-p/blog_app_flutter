@@ -1,7 +1,7 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'package:blog_app/modules/auth/domain/domain.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class UserProfile {
+class UserProfileModel {
   final String uid;
   final String? email;
   final String? displayName;
@@ -9,7 +9,7 @@ class UserProfile {
   final bool emailVerified;
   final DateTime? createdAt;
 
-  const UserProfile({
+  const UserProfileModel({
     required this.uid,
     this.email,
     this.displayName,
@@ -18,9 +18,9 @@ class UserProfile {
     this.createdAt,
   });
 
-  // Create UserProfile from Firebase User
-  factory UserProfile.fromFirebaseUser(User user) {
-    return UserProfile(
+  // Create UserProfileModel from Firebase User
+  factory UserProfileModel.fromFirebaseUser(User user) {
+    return UserProfileModel(
       uid: user.uid,
       email: user.email,
       displayName: user.displayName,
@@ -30,9 +30,9 @@ class UserProfile {
     );
   }
 
-  // Create UserProfile from JSON (for future database storage)
-  factory UserProfile.fromJson(Map<String, dynamic> json) {
-    return UserProfile(
+  // Create UserProfileModel from JSON (for future database storage)
+  factory UserProfileModel.fromJson(Map<String, dynamic> json) {
+    return UserProfileModel(
       uid: json['uid'] as String,
       email: json['email'] as String?,
       displayName: json['displayName'] as String?,
@@ -58,8 +58,30 @@ class UserProfile {
     };
   }
 
+  static UserProfileEntity toUserProfileEntity(UserProfileModel profile) {
+    return UserProfileEntity(
+      uid: profile.uid,
+      email: profile.email ?? '',
+      displayName: profile.displayName ?? '',
+      photoURL: profile.photoURL ?? '',
+      emailVerified: profile.emailVerified,
+      createdAt: profile.createdAt ?? DateTime.now(),
+    );
+  }
+
+  static UserProfileModel fromUserProfileEntity(UserProfileEntity profile) {
+    return UserProfileModel(
+      uid: profile.uid,
+      email: profile.email,
+      displayName: profile.displayName,
+      photoURL: profile.photoURL,
+      emailVerified: profile.emailVerified,
+      createdAt: profile.createdAt,
+    );
+  }
+
   // Copy with method for updates
-  UserProfile copyWith({
+  UserProfileModel copyWith({
     String? uid,
     String? email,
     String? displayName,
@@ -67,7 +89,7 @@ class UserProfile {
     bool? emailVerified,
     DateTime? createdAt,
   }) {
-    return UserProfile(
+    return UserProfileModel(
       uid: uid ?? this.uid,
       email: email ?? this.email,
       displayName: displayName ?? this.displayName,
@@ -93,28 +115,6 @@ class UserProfile {
 
   @override
   String toString() {
-    return 'UserProfile(uid: $uid, email: $email, displayName: $displayName, photoURL: $photoURL, emailVerified: $emailVerified, createdAt: $createdAt)';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is UserProfile &&
-        other.uid == uid &&
-        other.email == email &&
-        other.displayName == displayName &&
-        other.photoURL == photoURL &&
-        other.emailVerified == emailVerified &&
-        other.createdAt == createdAt;
-  }
-
-  @override
-  int get hashCode {
-    return uid.hashCode ^
-        email.hashCode ^
-        displayName.hashCode ^
-        photoURL.hashCode ^
-        emailVerified.hashCode ^
-        createdAt.hashCode;
+    return 'UserProfileModel(uid: $uid, email: $email, displayName: $displayName, photoURL: $photoURL, emailVerified: $emailVerified, createdAt: $createdAt)';
   }
 }

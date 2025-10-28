@@ -1,25 +1,22 @@
 import 'dart:io';
 import 'package:blog_app/common/common.dart';
+import 'package:blog_app/modules/auth/auths.dart';
+import 'package:blog_app/modules/auth/domain/domain.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:image_picker/image_picker.dart';
 
-class AuthService {
+class AuthRepositoryImpl extends AuthRepository {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   final CloudinaryService _cloudinaryService = CloudinaryService();
 
-  // Get current user
-  User? get currentUser => _auth.currentUser;
-
-  // Auth state stream
-  Stream<User?> get authStateChanges => _auth.authStateChanges();
-
   // Sign in with email and password
-  Future<UserCredential?> signInWithEmailAndPassword({
-    required String email,
-    required String password,
-  }) async {
+  @override
+  Future<UserCredential?> signInWithEmailAndPassword(
+    String email,
+    String password,
+  ) async {
     try {
       final credential = await _auth.signInWithEmailAndPassword(
         email: email,
@@ -47,11 +44,12 @@ class AuthService {
   }
 
   // Create account with email and password
-  Future<UserCredential?> createUserWithEmailAndPassword({
-    required String email,
-    required String password,
-    required String name,
-  }) async {
+  @override
+  Future<UserCredential?> createUserWithEmailAndPassword(
+    String email,
+    String password,
+    String name,
+  ) async {
     try {
       final credential = await _auth.createUserWithEmailAndPassword(
         email: email,
@@ -83,6 +81,7 @@ class AuthService {
   }
 
   // Sign in with Google
+  @override
   Future<UserCredential?> signInWithGoogle() async {
     try {
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
@@ -103,6 +102,7 @@ class AuthService {
   }
 
   // Send password reset email
+  @override
   Future<void> sendPasswordResetEmail(String email) async {
     try {
       await _auth.sendPasswordResetEmail(email: email);
@@ -119,6 +119,7 @@ class AuthService {
   }
 
   // Sign out
+  @override
   Future<void> signOut() async {
     try {
       await Future.wait([_auth.signOut(), _googleSignIn.signOut()]);
@@ -128,6 +129,7 @@ class AuthService {
   }
 
   // Send email verification
+  @override
   Future<void> sendEmailVerification() async {
     try {
       final user = _auth.currentUser;
@@ -156,6 +158,7 @@ class AuthService {
   }
 
   // Update user display name
+  @override
   Future<void> updateDisplayName(String displayName) async {
     try {
       final user = _auth.currentUser;
@@ -170,22 +173,8 @@ class AuthService {
     }
   }
 
-  // Update user photo URL
-  Future<void> updatePhotoURL(String photoURL) async {
-    try {
-      final user = _auth.currentUser;
-      if (user != null) {
-        await user.updatePhotoURL(photoURL);
-        await user.reload();
-      } else {
-        throw 'No user is currently signed in.';
-      }
-    } catch (e) {
-      throw 'Failed to update profile picture: $e';
-    }
-  }
-
   // Pick image and update photo URL
+  @override
   Future<void> updateProfilePicture() async {
     try {
       final picker = ImagePicker();
@@ -213,49 +202,44 @@ class AuthService {
       );
 
       // Update Firebase Auth photo URL
-      await updatePhotoURL(imageUrl);
+      await user.updatePhotoURL(imageUrl);
+      await user.reload();
     } catch (e) {
       throw 'Failed to update profile picture: $e';
     }
   }
 
   // Get current user profile data
-  Future<Map<String, dynamic>?> getCurrentUserProfile() async {
+  @override
+  Future<UserProfileEntity> getCurrentUserProfile() async {
     try {
-      // Ensure we have the latest user data
+      // Latest user data
       await _auth.currentUser?.reload();
 
       final user = _auth.currentUser;
-      if (user == null) return null;
-
-      return {
-        'uid': user.uid,
-        'email': user.email,
-        'displayName': user.displayName,
-        'photoURL': user.photoURL,
-        'emailVerified': user.emailVerified,
-        'createdAt': user.metadata.creationTime,
-      };
+      if (user == null) return UserProfileEntity.emptyEntity();
+      UserProfileModel userProfile = UserProfileModel.fromFirebaseUser(user);
+      return UserProfileModel.toUserProfileEntity(userProfile);
     } catch (e) {
-      return null;
+      return UserProfileEntity.emptyEntity();
     }
-  } // Check if user is signed in
+  }
 
-  bool get isSignedIn => _auth.currentUser != null;
-
-  // Get user display name with fallback
-  String getUserDisplayName() {
+  // Get user display name
+  @override
+  Future<String> getUserDisplayName() async {
     final user = _auth.currentUser;
     if (user?.displayName != null && user!.displayName!.isNotEmpty) {
       return user.displayName!;
     }
     if (user?.email != null && user!.email!.isNotEmpty) {
-      return user.email!.split('@')[0]; // Use email prefix as fallback
+      return user.email!.split('@')[0]; // email prefix
     }
     return 'User';
   }
 
   // Delete current user account
+  @override
   Future<void> deleteAccount() async {
     try {
       final user = _auth.currentUser;
