@@ -26,55 +26,47 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<AuthBloc, AuthState>(
-      listener: (context, state) {
-        if (state is AuthProfileLoaded) {
-          setState(() {
-            userProfile = state.profile;
-          });
-        }
-      },
-      child: BlocBuilder<AuthBloc, AuthState>(
-        builder: (context, state) {
-          return Scaffold(
-            backgroundColor: context.customTheme.surface,
-            appBar: CustomAppBarWidget(
-              title: Text(
-                "Blog App",
-                style: context.textTheme.titleLarge?.copyWith(
-                  color: context.customTheme.primary,
-                ),
+    return Scaffold(
+      backgroundColor: context.customTheme.surface,
+      appBar: CustomAppBarWidget(
+        title: Text(
+          "Blog App",
+          style: context.textTheme.titleLarge?.copyWith(
+            color: context.customTheme.primary,
+          ),
+        ),
+        backgroundColor: context.customTheme.background,
+        actions: [
+          const ThemeSwitcher(),
+
+          GestureDetector(
+            onTap: () {
+              context.pushNamed(Routes.userProfile.name);
+            },
+            child: Container(
+              margin: const EdgeInsets.only(
+                right: AppSpacing.lg,
+                left: AppSpacing.sm,
               ),
-              // centerTitle: true,
-              backgroundColor: context.customTheme.background,
-              // showBackButton: true,
-              actions: [
-                const ThemeSwitcher(),
-
-                GestureDetector(
-                  onTap: () {
-                    context.pushNamed(Routes.userProfile.name);
-                  },
-                  child: Container(
-                    margin: const EdgeInsets.only(
-                      right: AppSpacing.lg,
-                      left: AppSpacing.sm,
-                    ),
-                    child: CustomImageAvatar(
-                      size: AppSpacing.xxlg,
-                      imageUrl: userProfile?.photoURL ?? '',
-                      fit: BoxFit.cover,
-                      placeHolderImage: AssetRoutes.defaultAvatarImagePath,
-                    ),
-                  ),
-                ),
-              ],
+              child: BlocBuilder<AuthBloc, AuthState>(
+                builder: (context, state) {
+                  final userProfile = state is AuthProfileLoaded
+                      ? state.profile
+                      : null;
+                  return CustomImageAvatar(
+                    size: AppSpacing.xxlg,
+                    imageUrl: userProfile?.photoURL ?? '',
+                    fit: BoxFit.cover,
+                    placeHolderImage: AssetRoutes.defaultAvatarImagePath,
+                  );
+                },
+              ),
             ),
-
-            body: const LatestBlogs(),
-          );
-        },
+          ),
+        ],
       ),
+
+      body: const LatestBlogs(),
     );
   }
 }

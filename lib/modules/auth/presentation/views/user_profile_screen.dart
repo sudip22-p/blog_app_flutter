@@ -18,7 +18,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   final _emailController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isEditing = false;
-  UserProfileEntity? _userProfile;
 
   @override
   void initState() {
@@ -37,6 +36,12 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     context.read<AuthBloc>().add(AuthLoadProfileRequested());
   }
 
+  UserProfileEntity? getUserProfile() {
+    final state = context.read<AuthBloc>().state;
+    final profile = state is AuthProfileLoaded ? state.profile : null;
+    return profile;
+  }
+
   void saveChanges() {
     if (_formKey.currentState!.validate()) {
       final newName = _nameController.text.trim();
@@ -47,23 +52,26 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   }
 
   void cancelEdit() {
+    final profile = getUserProfile();
     setState(() {
       _isEditing = false;
-      _nameController.text = _userProfile?.displayName ?? '';
+      _nameController.text = profile?.displayName ?? '';
     });
   }
 
   void toggleEdit() {
+    final profile = getUserProfile();
     setState(() {
       _isEditing = !_isEditing;
       if (!_isEditing) {
-        _nameController.text = _userProfile?.displayName ?? '';
+        _nameController.text = profile?.displayName ?? '';
       }
     });
   }
 
   void sendEmailVerification() {
-    if (_userProfile?.emailVerified == true) {
+    final profile = getUserProfile();
+    if (profile?.emailVerified == true) {
       CustomSnackbar.showToastMessage(
         type: ToastType.info,
         message: "Email already Verified!",
@@ -74,7 +82,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   }
 
   void sendPasswordReset() {
-    final email = _userProfile?.email;
+    final profile = getUserProfile();
+    final email = profile?.email;
     if (email != null) {
       context.read<AuthBloc>().add(
         AuthSendPasswordResetRequested(email: email),
@@ -116,13 +125,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
-          if (state is AuthProfileLoaded) {
-            setState(() {
-              _userProfile = state.profile;
-              _nameController.text = _userProfile?.displayName ?? '';
-              _emailController.text = _userProfile?.email ?? '';
-            });
-          } else if (state is AuthProfileUpdated) {
+          if (state is AuthProfileUpdated) {
             setState(() {
               _isEditing = false;
             });
@@ -161,21 +164,23 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         },
         child: BlocBuilder<AuthBloc, AuthState>(
           builder: (context, state) {
+            final profile = state is AuthProfileLoaded ? state.profile : null;
+            if (profile != null && !_isEditing) {
+              _nameController.text = profile.displayName;
+              _emailController.text = profile.email;
+            }
             if (state is AuthLoading) {
               return const Center(child: CircularProgressIndicator());
             }
             return SingleChildScrollView(
               child: Column(
                 children: [
-                  ProfileHeader(
-                    userProfile: _userProfile,
-                    isEditing: _isEditing,
-                  ),
+                  ProfileHeader(userProfile: profile, isEditing: _isEditing),
 
                   AppGaps.gapH12,
 
                   ProfileFormSection(
-                    userProfile: _userProfile,
+                    userProfile: profile,
                     isEditing: _isEditing,
                     nameController: _nameController,
                     emailController: _emailController,
