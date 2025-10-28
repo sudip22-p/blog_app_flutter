@@ -1,5 +1,4 @@
 import 'package:blog_app/modules/auth/auth.dart';
-import 'package:blog_app/modules/auth/domain/domain.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class UserProfileMapper {
