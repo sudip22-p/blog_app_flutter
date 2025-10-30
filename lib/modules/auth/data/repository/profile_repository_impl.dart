@@ -1,6 +1,6 @@
+import 'package:blog_app/modules/auth/auth.dart';
 import 'dart:io';
 import 'package:blog_app/common/common.dart';
-import 'package:blog_app/modules/auth/auth.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:injectable/injectable.dart';

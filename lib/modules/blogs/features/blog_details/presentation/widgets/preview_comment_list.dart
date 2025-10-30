@@ -5,25 +5,28 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class PreviewCommentList extends StatelessWidget {
-  final Blog blog;
+  final BlogEntity blog;
   const PreviewCommentList({super.key, required this.blog});
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<EngagementBloc, EngagementState>(
       builder: (context, state) {
-        List<BlogComment> comments = [];
+        List<BlogCommentEntity> comments = [];
         if (state is EngagementLoaded) {
           final blogEngagement = state.engagements.firstWhere(
             (eng) => eng.blogId == blog.id,
-            orElse: () => BlogEngagement(
-              blogId: blog.id,
+            orElse: () => BlogEngagementEntity(
+              blogId: blog.id!,
               likesCount: 0,
-              viewsCount: 0,
               commentsCount: 0,
+              viewsCount: 0,
+              likes: {},
+              comments: [],
+              views: {},
             ),
           );
-          comments = blogEngagement.commentsList;
+          comments = blogEngagement.comments;
         }
 
         return SliverList(

@@ -57,7 +57,7 @@ final router = GoRouter(
       name: Routes.blogDetails.name,
       path: Routes.blogDetails.path,
       builder: (context, state) {
-        final blog = state.extra as Blog;
+        final blog = state.extra as BlogEntity;
         return BlogPreviewScreen(blog: blog);
       },
     ),
@@ -72,7 +72,7 @@ final router = GoRouter(
       name: Routes.editBlog.name,
       path: Routes.editBlog.path,
       builder: (context, state) {
-        final blog = state.extra as Blog;
+        final blog = state.extra as BlogEntity;
         return UpdateBlog(blog: blog);
       },
     ),

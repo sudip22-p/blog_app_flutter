@@ -3,7 +3,7 @@ import 'package:blog_app/modules/blogs/blogs.dart';
 import 'package:flutter/material.dart';
 
 class AuthorSection extends StatelessWidget {
-  final Blog blog;
+  final BlogEntity blog;
 
   const AuthorSection({super.key, required this.blog});
 

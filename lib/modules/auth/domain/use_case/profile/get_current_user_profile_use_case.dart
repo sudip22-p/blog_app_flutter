@@ -1,4 +1,3 @@
-import 'package:blog_app/modules/auth/domain/domain.dart';
 import 'package:blog_app/common/common.dart';
 import 'package:injectable/injectable.dart';
 import 'package:blog_app/modules/auth/auth.dart';

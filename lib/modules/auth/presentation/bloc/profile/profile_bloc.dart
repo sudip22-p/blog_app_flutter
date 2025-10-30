@@ -1,11 +1,10 @@
 import 'dart:async';
 import 'package:blog_app/common/common.dart';
 import 'package:blog_app/core/di/injection.dart';
-import 'package:blog_app/modules/auth/auth.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:injectable/injectable.dart';
+import 'package:blog_app/modules/auth/auth.dart';
 
 part 'profile_event.dart';
 part 'profile_state.dart';
@@ -62,12 +61,6 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     ProfileLoadRequested event,
     Emitter<ProfileState> emit,
   ) async {
-    if (state is! AuthAuthenticated) {
-      if (FirebaseAuth.instance.currentUser == null) {
-        emit(const ProfileError(message: 'User not authenticated'));
-        return;
-      }
-    }
     emit(ProfileLoading());
     try {
       final profile = await getCurrentUserProfileUseCase.execute(NoParams());

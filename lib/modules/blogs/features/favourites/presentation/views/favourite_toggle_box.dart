@@ -6,7 +6,7 @@ import "package:flutter_bloc/flutter_bloc.dart";
 
 class FavouriteToggle extends StatefulWidget {
   const FavouriteToggle({super.key, required this.blog});
-  final Blog blog;
+  final BlogEntity blog;
   @override
   State<FavouriteToggle> createState() => _FavouriteToggleState();
 }
@@ -25,7 +25,9 @@ class _FavouriteToggleState extends State<FavouriteToggle> {
       isLoading = true;
     });
     try {
-      context.read<FavoritesBloc>().add(ToggleFavorite(userId, widget.blog.id));
+      context.read<FavoritesBloc>().add(
+        ToggleFavorite(userId, widget.blog.id!),
+      );
     } catch (e) {
       if (mounted) {
         setState(() {
@@ -61,7 +63,7 @@ class _FavouriteToggleState extends State<FavouriteToggle> {
       },
       builder: (context, state) {
         bool isFavorite = (state is FavoritesLoaded
-            ? state.isFavorited(widget.blog.id)
+            ? state.isFavorited(widget.blog.id!)
             : false);
         return InkWell(
           onTap: () => handleFavoriteTap(userId, isFavorite),

@@ -7,7 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 class BlogStats extends StatefulWidget {
-  final Blog blog;
+  final BlogEntity blog;
 
   const BlogStats({super.key, required this.blog});
 
@@ -18,7 +18,7 @@ class BlogStats extends StatefulWidget {
 class BlogStatsState extends State<BlogStats> {
   @override
   Widget build(BuildContext context) {
-    final currentUserId = FirebaseAuth.instance.currentUser?.uid;
+    final currentUserId = FirebaseAuth.instance.currentUser?.uid ?? "";
 
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -52,14 +52,18 @@ class BlogStatsState extends State<BlogStats> {
               if (state is EngagementLoaded) {
                 final blogEngagement = state.engagements.firstWhere(
                   (eng) => eng.blogId == widget.blog.id,
-                  orElse: () => BlogEngagement(
-                    blogId: widget.blog.id,
+                  orElse: () => BlogEngagementEntity(
+                    blogId: widget.blog.id!,
                     likesCount: 0,
-                    viewsCount: 0,
                     commentsCount: 0,
+                    viewsCount: 0,
+                    likes: {},
+                    comments: [],
+                    views: {},
                   ),
                 );
-                final isLikedByUser = blogEngagement.isLikedBy(currentUserId!);
+                final isLikedByUser =
+                    blogEngagement.likes[currentUserId] == true;
                 return Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -71,7 +75,7 @@ class BlogStatsState extends State<BlogStats> {
                           : context.customTheme.contentBackground,
                       onTap: () {
                         context.read<EngagementBloc>().add(
-                          ToggleLike(widget.blog.id, currentUserId),
+                          ToggleLike(widget.blog.id!, currentUserId),
                         );
                       },
                     ),

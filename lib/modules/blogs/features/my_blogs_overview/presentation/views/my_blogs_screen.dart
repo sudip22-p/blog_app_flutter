@@ -16,7 +16,7 @@ class MyBlogsScreen extends StatefulWidget {
 class _MyBlogsScreenState extends State<MyBlogsScreen> {
   String? get currentUserId => FirebaseAuth.instance.currentUser?.uid;
 
-  void deleteBlog(Blog blog) async {
+  void deleteBlog(BlogEntity blog) async {
     bool deleteConfirmation = await DialogUtils.showConfirmationDialog(
       context,
       title: "Delete Blog Confirmation",
@@ -26,7 +26,7 @@ class _MyBlogsScreenState extends State<MyBlogsScreen> {
       cancelText: "Cancel",
     );
     if (deleteConfirmation && mounted) {
-      context.read<BlogBloc>().add(BlogDeleted(blog.id));
+      context.read<BlogBloc>().add(BlogDeleted(blog.id!));
       CustomSnackbar.showToastMessage(
         type: ToastType.success,
         message: "Blog Deleted Successfully!",
@@ -34,11 +34,11 @@ class _MyBlogsScreenState extends State<MyBlogsScreen> {
     }
   }
 
-  void editBlog(Blog blog, List<Blog> allBlogs) {
+  void editBlog(BlogEntity blog, List<BlogEntity> allBlogs) {
     context.pushNamed(Routes.editBlog.name, extra: blog);
   }
 
-  void previewBlog(Blog blog) {
+  void previewBlog(BlogEntity blog) {
     context.pushNamed(Routes.blogDetails.name, extra: blog);
   }
 
@@ -46,7 +46,7 @@ class _MyBlogsScreenState extends State<MyBlogsScreen> {
     context.pushNamed(Routes.addBlog.name);
   }
 
-  List<Blog> getMyBlogs(List<Blog> allBlogs) {
+  List<BlogEntity> getMyBlogs(List<BlogEntity> allBlogs) {
     if (currentUserId == null) return [];
     return allBlogs.where((blog) => blog.authorId == currentUserId).toList();
   }
@@ -102,7 +102,7 @@ class _MyBlogsScreenState extends State<MyBlogsScreen> {
           }
 
           // Handle success states
-          List<Blog> allBlogs = [];
+          List<BlogEntity> allBlogs = [];
           if (state is BlogLoadSuccess) {
             allBlogs = state.blogs;
           } else if (state is BlogOperationSuccess) {

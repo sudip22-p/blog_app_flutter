@@ -7,7 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class BlogPreviewScreen extends StatefulWidget {
-  final Blog blog;
+  final BlogEntity blog;
 
   const BlogPreviewScreen({super.key, required this.blog});
 
@@ -30,7 +30,7 @@ class _BlogPreviewScreenState extends State<BlogPreviewScreen> {
     if (!_hasAddedView) {
       final userId = FirebaseAuth.instance.currentUser?.uid;
       if (userId != null) {
-        context.read<EngagementBloc>().add(AddView(widget.blog.id, userId));
+        context.read<EngagementBloc>().add(AddView(widget.blog.id!, userId));
         _hasAddedView = true;
       }
     }

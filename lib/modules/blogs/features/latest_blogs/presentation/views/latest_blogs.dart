@@ -40,7 +40,7 @@ class _LatestBlogsState extends State<LatestBlogs> {
 
         BlocBuilder<BlogBloc, BlogState>(
           builder: (context, state) {
-            List<Blog> blogs = [];
+            List<BlogEntity> blogs = [];
             if (state is BlogInitial) {
               context.read<BlogBloc>().add(BlogsLoaded());
               return const Center(child: CircularProgressIndicator());

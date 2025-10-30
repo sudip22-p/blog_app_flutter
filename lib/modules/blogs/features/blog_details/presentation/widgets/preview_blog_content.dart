@@ -5,7 +5,7 @@ import 'package:blog_app/core/core.dart';
 
 class PreviewBlogContent extends StatelessWidget {
   const PreviewBlogContent({super.key, required this.blog});
-  final Blog blog;
+  final BlogEntity blog;
   @override
   Widget build(BuildContext context) {
     return SliverToBoxAdapter(
@@ -13,17 +13,16 @@ class PreviewBlogContent extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Cover image
-          if (blog.coverImageUrl != null)
-            SizedBox(
-              height: 210,
-              child: CustomImageAvatar(
-                imageUrl: blog.coverImageUrl!,
-                shape: AvatarShape.rectangle,
-                width: double.infinity,
-                height: double.infinity,
-                placeHolderImage: AssetRoutes.defaultPlaceholderImagePath,
-              ),
+          SizedBox(
+            height: 210,
+            child: CustomImageAvatar(
+              imageUrl: blog.coverImageUrl,
+              shape: AvatarShape.rectangle,
+              width: double.infinity,
+              height: double.infinity,
+              placeHolderImage: AssetRoutes.defaultPlaceholderImagePath,
             ),
+          ),
 
           // Blog content
           Padding(

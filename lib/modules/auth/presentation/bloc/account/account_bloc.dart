@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'package:blog_app/common/common.dart';
 import 'package:blog_app/core/di/injection.dart';
-import 'package:blog_app/modules/auth/auth.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:injectable/injectable.dart';
+import 'package:blog_app/modules/auth/auth.dart';
 
 part 'account_event.dart';
 part 'account_state.dart';

@@ -16,8 +16,8 @@ class _ExploreBlogsScreenState extends State<ExploreBlogsScreen> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
-  List<Blog> _allBlogs = [];
-  List<Blog> _filteredBlogs = [];
+  List<BlogEntity> _allBlogs = [];
+  List<BlogEntity> _filteredBlogs = [];
 
   String _searchQuery = '';
   String? _selectedTag;
@@ -69,7 +69,7 @@ class _ExploreBlogsScreenState extends State<ExploreBlogsScreen> {
     }).toList()..sort((a, b) => b.createdAt.compareTo(a.createdAt));
   }
 
-  List<Blog> _getCurrentPageBlogs() {
+  List<BlogEntity> _getCurrentPageBlogs() {
     final start = (_currentPage - 1) * _itemsPerPage;
     final end = start + _itemsPerPage;
     return _filteredBlogs.sublist(start, end.clamp(0, _filteredBlogs.length));

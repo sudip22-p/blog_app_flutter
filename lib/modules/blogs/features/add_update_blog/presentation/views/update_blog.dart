@@ -9,13 +9,13 @@ import 'package:go_router/go_router.dart';
 
 class UpdateBlog extends StatefulWidget {
   const UpdateBlog({super.key, required this.blog});
-  final Blog blog;
+  final BlogEntity blog;
   @override
   State<UpdateBlog> createState() => _UpdateBlogState();
 }
 
 class _UpdateBlogState extends State<UpdateBlog> {
-  late final Blog _currentBlog;
+  late final BlogEntity _currentBlog;
   File? _selectedImage;
   String? _currentImageUrl;
   final _titleController = TextEditingController();
@@ -53,7 +53,7 @@ class _UpdateBlogState extends State<UpdateBlog> {
         if (mounted) {
           context.read<BlogBloc>().add(
             BlogUpdated(
-              _currentBlog.id,
+              _currentBlog.id!,
               _titleController.text.trim(),
               _contentController.text.trim(),
               currentUserId,
@@ -64,6 +64,7 @@ class _UpdateBlogState extends State<UpdateBlog> {
                   .map((e) => e.trim())
                   .where((e) => e.isNotEmpty)
                   .toList(),
+              _currentBlog.createdAt,
             ),
           );
         }
@@ -193,7 +194,7 @@ class _UpdateBlogState extends State<UpdateBlog> {
                         ),
 
                         child: CustomImageAvatar(
-                          imageUrl: widget.blog.coverImageUrl!,
+                          imageUrl: widget.blog.coverImageUrl,
                           shape: AvatarShape.rectangle,
                           width: double.infinity,
                           height: double.infinity,

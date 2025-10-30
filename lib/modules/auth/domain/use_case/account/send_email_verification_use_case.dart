@@ -1,8 +1,8 @@
 import 'package:injectable/injectable.dart';
 import 'package:blog_app/modules/auth/auth.dart';
 import 'package:blog_app/common/common.dart';
-@injectable
 
+@injectable
 class SendEmailVerificationUseCase extends UseCase<Future<void>, NoParams> {
   SendEmailVerificationUseCase(this._accountRepository);
 

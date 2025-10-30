@@ -1,6 +1,6 @@
 import 'package:injectable/injectable.dart';
-import 'package:blog_app/modules/auth/auth.dart';
 import 'package:blog_app/common/common.dart';
+import 'package:blog_app/modules/auth/auth.dart';
 
 @injectable
 class GetUserDisplayNameUseCase extends UseCase<Future<String>, NoParams> {

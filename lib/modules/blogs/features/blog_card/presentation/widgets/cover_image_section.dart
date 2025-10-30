@@ -4,7 +4,7 @@ import 'package:blog_app/modules/blogs/blogs.dart';
 import 'package:flutter/material.dart';
 
 class CoverImageSection extends StatefulWidget {
-  final Blog blog;
+  final BlogEntity blog;
 
   const CoverImageSection({super.key, required this.blog});
 
@@ -18,8 +18,6 @@ class CoverImageSectionState extends State<CoverImageSection> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.blog.coverImageUrl == null) return const SizedBox.shrink();
-
     return SizedBox(
       height: 240,
       width: double.infinity,
@@ -32,7 +30,7 @@ class CoverImageSectionState extends State<CoverImageSection> {
             ),
 
             child: CustomImageAvatar(
-              imageUrl: widget.blog.coverImageUrl!,
+              imageUrl: widget.blog.coverImageUrl,
               shape: AvatarShape.rectangle,
               width: double.infinity,
               height: double.infinity,

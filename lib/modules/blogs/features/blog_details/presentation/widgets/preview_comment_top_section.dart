@@ -12,7 +12,7 @@ class PreviewCommentTopSection extends StatefulWidget {
   }) : _commentController = commentController;
 
   final TextEditingController _commentController;
-  final Blog blog;
+  final BlogEntity blog;
 
   @override
   State<PreviewCommentTopSection> createState() =>
@@ -28,7 +28,7 @@ class _PreviewCommentTopSectionState extends State<PreviewCommentTopSection> {
         FirebaseAuth.instance.currentUser?.displayName ?? 'Anonymous';
 
     if (userId != null) {
-      final comment = BlogComment(
+      final comment = BlogCommentEntity(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         userId: userId,
         userName: userName,
@@ -60,11 +60,14 @@ class _PreviewCommentTopSectionState extends State<PreviewCommentTopSection> {
                   if (state is EngagementLoaded) {
                     final blogEngagement = state.engagements.firstWhere(
                       (eng) => eng.blogId == widget.blog.id,
-                      orElse: () => BlogEngagement(
-                        blogId: widget.blog.id,
+                      orElse: () => BlogEngagementEntity(
+                        blogId: widget.blog.id!,
                         likesCount: 0,
                         viewsCount: 0,
                         commentsCount: 0,
+                        likes: {},
+                        comments: [],
+                        views: {},
                       ),
                     );
                     commentCount = blogEngagement.commentsCount;
@@ -117,7 +120,7 @@ class _PreviewCommentTopSectionState extends State<PreviewCommentTopSection> {
 
                   IconButton(
                     onPressed: () {
-                      addComment(widget.blog.id);
+                      addComment(widget.blog.id!);
                     },
                     icon: const Icon(Icons.send),
                     style: IconButton.styleFrom(
