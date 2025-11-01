@@ -49,3 +49,6 @@ app.*.map.json
 
 #cloudinary secrets 
 /lib/common/services/cloudinary_secrets.dart
+
+#google service credential file 
+/android/app/google-services.json
